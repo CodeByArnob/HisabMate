@@ -2,6 +2,9 @@
 
 **Offline-first personal finance and multi-currency wealth management application for Android.**
 
+> 🚀 **Latest Release: v1.0.2** (Android 7.0–16, API 24–36)  
+> 📥 **[Download Latest APK (v1.0.2)](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.2/HisabMate-v1.0.2-release.apk)** • 📦 **[Download Latest AAB Bundle](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.2/HisabMate-v1.0.2-release.aab)** • 📋 **[GitHub Release v1.0.2](https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.2)** • 🌐 **[Live Project Website](https://codebyarnob.github.io/HisabMate/)**
+
 [![Release](https://img.shields.io/badge/Release-v1.0.2-10B981?style=flat-square&logo=github)](https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.2)
 [![Android CI](https://img.shields.io/github/actions/workflow/status/CodeByArnob/HisabMate/android-ci.yml?branch=main&style=flat-square&logo=android&label=Android%20CI)](https://github.com/CodeByArnob/HisabMate/actions/workflows/android-ci.yml)
 [![Platform](https://img.shields.io/badge/Android-API%2024%E2%80%9336-3DDC84?style=flat-square&logo=android)](https://developer.android.com)

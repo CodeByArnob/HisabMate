@@ -141,6 +141,82 @@ select {
   padding-inline: clamp(16px, 4vw, 32px);
 }
 
+/* Top Direct Release Announcement Banner */
+.top-announcement-banner {
+  background: linear-gradient(90deg, #1e1b4b 0%, #312e81 50%, #0f172a 100%);
+  color: #ffffff;
+  padding: 9px 0;
+  font-size: 0.86rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  position: relative;
+  z-index: 201;
+}
+
+.announcement-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.announcement-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.announcement-pill {
+  background: #10b981;
+  color: #022c22;
+  font-weight: 800;
+  font-size: 0.68rem;
+  padding: 3px 8px;
+  border-radius: 999px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.announcement-text {
+  color: #f1f5f9;
+}
+
+.announcement-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.announcement-link {
+  background: #ffffff;
+  color: #0f172a !important;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.8rem;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+}
+
+.announcement-link:hover {
+  transform: translateY(-1px);
+  opacity: 0.95;
+}
+
+.announcement-link-subtle {
+  color: #cbd5e1;
+  text-decoration: underline;
+  font-size: 0.8rem;
+}
+
+.announcement-link-subtle:hover {
+  color: #ffffff;
+}
+
 /* Sticky Responsive Navigation */
 .navbar {
   position: sticky;
