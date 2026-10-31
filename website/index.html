@@ -15,9 +15,21 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;family=Space+Grotesk:wght@600;700;800&amp;display=swap" rel="stylesheet" />
+  
+  <!-- GSAP & Motion Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <!-- Three.js 3D WebGL Engine -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- Lottie Web Animation Engine -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <!-- Scroll Progress Indicator -->
+  <div id="scroll-progress-bar" aria-hidden="true"></div>
+
   <!-- Sticky Responsive Navigation -->
   <header class="navbar">
     <div class="container nav-inner">
@@ -28,10 +40,12 @@
       </a>
 
       <nav class="nav-links" aria-label="Primary Navigation">
-        <a href="#download">Download APK/AAB</a>
+        <a href="#download">Download Release</a>
+        <a href="#analytics">Live Analytics</a>
+        <a href="#budget-studio">Budgets &amp; Goals</a>
         <a href="#currencies">14 Currencies &amp; FX</a>
-        <a href="#screenshots">Screenshots</a>
-        <a href="#features">Features</a>
+        <a href="#screenshots">Screenshots (12)</a>
+        <a href="#features">Capabilities</a>
         <a href="#architecture">Architecture</a>
         <a href="#faq">FAQ</a>
       </nav>
@@ -54,13 +68,15 @@
       </div>
     </div>
 
-    <!-- Accessible Collapsible Mobile Navigation Drawer -->
+    <!-- Accessible Mobile Navigation Drawer -->
     <div id="mobile-nav-drawer" class="mobile-drawer" aria-label="Mobile Navigation Drawer">
       <nav class="mobile-drawer-links">
         <a href="#download" class="mobile-nav-link"><span>Download Release APK &amp; AAB</span><span>→</span></a>
-        <a href="#currencies" class="mobile-nav-link"><span>Interactive 14-Currency FX Engine</span><span>→</span></a>
+        <a href="#analytics" class="mobile-nav-link"><span>Live Financial Analytics Studio</span><span>→</span></a>
+        <a href="#budget-studio" class="mobile-nav-link"><span>Interactive Budgets &amp; Savings Pots</span><span>→</span></a>
+        <a href="#currencies" class="mobile-nav-link"><span>14-Currency Offline FX Engine</span><span>→</span></a>
         <a href="#screenshots" class="mobile-nav-link"><span>Genuine App Screenshots (12)</span><span>→</span></a>
-        <a href="#features" class="mobile-nav-link"><span>Core Financial Capabilities</span><span>→</span></a>
+        <a href="#features" class="mobile-nav-link"><span>Core Fintech Capabilities</span><span>→</span></a>
         <a href="#architecture" class="mobile-nav-link"><span>Clean MVVM &amp; Room SQLite v5</span><span>→</span></a>
         <a href="#faq" class="mobile-nav-link"><span>Privacy &amp; Engineering FAQ</span><span>→</span></a>
       </nav>
@@ -79,13 +95,15 @@
   </header>
 
   <main>
-    <!-- Hero Section -->
-    <section class="hero">
+    <!-- Hero Section with Three.js Interactive 3D Canvas -->
+    <section class="hero" id="hero">
+      <canvas id="hero-three-canvas" class="hero-three-canvas" aria-hidden="true"></canvas>
+
       <div class="container hero-grid">
         <div class="hero-content">
           <div class="eyebrow">
             <span class="pulse-dot" aria-hidden="true"></span>
-            <span>v1.0.0 Production Release • Kotlin &amp; Jetpack Compose M3 • 100% Offline</span>
+            <span>v1.0.0 Verified Release • Kotlin &amp; Jetpack Compose M3 • 100% Offline</span>
           </div>
 
           <h1>
@@ -104,7 +122,7 @@
               ⬇ Download App Bundle (.AAB)
             </a>
             <a href="https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.0" class="btn btn-outline" target="_blank" rel="noopener">
-              Release Notes &amp; SHA-256
+              Release Notes &amp; Checksums
             </a>
           </div>
 
@@ -116,15 +134,15 @@
 
           <div class="hero-metrics">
             <div class="metric-item">
-              <strong>14 ISO 4217</strong>
+              <strong data-target-count="14" data-suffix=" ISO">14 ISO</strong>
               <span>Native Currencies &amp; Offline FX</span>
             </div>
             <div class="metric-item">
-              <strong>10 Entities</strong>
+              <strong data-target-count="10" data-suffix=" Entities">10 Entities</strong>
               <span>Room SQLite v5 Local Schema</span>
             </div>
             <div class="metric-item">
-              <strong>100% Local</strong>
+              <strong data-target-count="100" data-suffix="% Local">100% Local</strong>
               <span>PIN Lock • JSON, CSV &amp; PDF</span>
             </div>
           </div>
@@ -169,17 +187,263 @@
     </section>
 
     <!-- Cinematic SVG Motion Banner Showcase -->
-    <section aria-label="Animated Fintech Telemetry Banner" style="padding-top: 12px; padding-bottom: 36px;">
-      <div class="container reveal">
+    <section aria-label="Animated Fintech Telemetry Banner" style="padding-top: 12px; padding-bottom: 32px;">
+      <div class="container gsap-section">
         <div class="motion-showcase-wrap">
           <img src="assets/screenshots/hisabmate-banner.svg" alt="HisabMate Animated Fintech Telemetry Banner" width="1280" height="540" onerror="this.src='https://raw.githubusercontent.com/CodeByArnob/HisabMate/main/docs/screenshots/hisabmate-banner.svg'" />
         </div>
       </div>
     </section>
 
+    <!-- Live Interactive Financial Telemetry Studio (GSAP + SVG Analytics) -->
+    <section id="analytics" class="gsap-section">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">Interactive Analytics Engine</span>
+          <h2>Live Cashflow Telemetry &amp; Spend Distribution</h2>
+          <p>Inspect real-time income vs. expense curves, net liquidity velocity, and multi-category expense allocations generated by HisabMate's analytics pipeline.</p>
+        </div>
+
+        <div class="analytics-studio">
+          <div class="analytics-header-row">
+            <div class="analytics-kpis">
+              <div class="kpi-block inflow">
+                <small>Total Income</small>
+                <strong id="kpi-inflow">৳14,50,000</strong>
+              </div>
+              <div class="kpi-block outflow">
+                <small>Total Expenses</small>
+                <strong id="kpi-outflow">৳8,11,000</strong>
+              </div>
+              <div class="kpi-block surplus">
+                <small>Net Cash Surplus</small>
+                <strong id="kpi-surplus">+৳6,39,000</strong>
+              </div>
+            </div>
+
+            <div class="chart-controls" role="group" aria-label="Select Analytics Time Period">
+              <button type="button" class="chart-tab-btn active" data-chart-period="6m">6 Months</button>
+              <button type="button" class="chart-tab-btn" data-chart-period="30d">30 Days</button>
+              <button type="button" class="chart-tab-btn" data-chart-period="weekly">Weekly Velocity</button>
+            </div>
+          </div>
+
+          <div class="analytics-grid">
+            <!-- Left: Interactive Cashflow Curve -->
+            <div class="chart-canvas-container">
+              <div id="chart-tooltip" class="chart-tooltip" style="opacity: 0;"></div>
+
+              <svg id="chart-svg-stage" class="chart-svg-stage" viewBox="0 0 600 220" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="inflowGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#10b981" stop-opacity="0.32" />
+                    <stop offset="100%" stop-color="#10b981" stop-opacity="0.0" />
+                  </linearGradient>
+                  <linearGradient id="outflowGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#f43f5e" stop-opacity="0.25" />
+                    <stop offset="100%" stop-color="#f43f5e" stop-opacity="0.0" />
+                  </linearGradient>
+                </defs>
+
+                <!-- Grid Guide Lines -->
+                <line x1="40" y1="50" x2="560" y2="50" stroke="rgba(148, 163, 184, 0.12)" stroke-dasharray="4" />
+                <line x1="40" y1="110" x2="560" y2="110" stroke="rgba(148, 163, 184, 0.12)" stroke-dasharray="4" />
+                <line x1="40" y1="170" x2="560" y2="170" stroke="rgba(148, 163, 184, 0.12)" stroke-dasharray="4" />
+
+                <!-- Filled Areas -->
+                <path id="chart-area-inflow" fill="url(#inflowGrad)" d="" />
+                <path id="chart-area-outflow" fill="url(#outflowGrad)" d="" />
+
+                <!-- Trend Lines -->
+                <path id="chart-inflow-path" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round" d="" />
+                <path id="chart-outflow-path" fill="none" stroke="#f43f5e" stroke-width="3" stroke-linecap="round" d="" />
+
+                <!-- Scrubber Vertical Line -->
+                <line id="chart-scrubber" x1="0" y1="20" x2="0" y2="190" stroke="var(--accent-violet)" stroke-width="2" stroke-dasharray="3" style="opacity: 0;" />
+
+                <!-- Dynamic X-axis Labels -->
+                <g id="chart-labels-group"></g>
+              </svg>
+            </div>
+
+            <!-- Right: Dynamic Donut Category Distribution -->
+            <div class="category-donut-container">
+              <h3 style="font-family: var(--font-display); font-size: 1.1rem; font-weight: 700;">
+                Category Spend Breakdown
+              </h3>
+              <div class="category-donut-layout">
+                <div class="donut-svg-wrap">
+                  <svg viewBox="0 0 100 100" width="100%" height="100%">
+                    <circle cx="50" cy="50" r="38" fill="transparent" stroke="#131c32" stroke-width="12" />
+                    <!-- Housing 34% -->
+                    <circle cx="50" cy="50" r="38" fill="transparent" stroke="#7c5cff" stroke-width="12" stroke-dasharray="81 239" stroke-dashoffset="0" />
+                    <!-- Groceries 24% -->
+                    <circle cx="50" cy="50" r="38" fill="transparent" stroke="#10b981" stroke-width="12" stroke-dasharray="57 239" stroke-dashoffset="-81" />
+                    <!-- Tech & Cloud 18% -->
+                    <circle cx="50" cy="50" r="38" fill="transparent" stroke="#0ea5e9" stroke-width="12" stroke-dasharray="43 239" stroke-dashoffset="-138" />
+                    <!-- Dining 14% -->
+                    <circle cx="50" cy="50" r="38" fill="transparent" stroke="#f59e0b" stroke-width="12" stroke-dasharray="33 239" stroke-dashoffset="-181" />
+                    <!-- Transport 10% -->
+                    <circle cx="50" cy="50" r="38" fill="transparent" stroke="#ec4899" stroke-width="12" stroke-dasharray="24 239" stroke-dashoffset="-214" />
+                  </svg>
+                  <div class="donut-center-text">
+                    <strong>100%</strong>
+                    <small>Allocated</small>
+                  </div>
+                </div>
+
+                <div class="category-legend-list">
+                  <div class="legend-item">
+                    <span><i class="legend-dot" style="background:#7c5cff;"></i> Housing &amp; Rent</span>
+                    <strong>34%</strong>
+                  </div>
+                  <div class="legend-item">
+                    <span><i class="legend-dot" style="background:#10b981;"></i> Groceries &amp; Food</span>
+                    <strong>24%</strong>
+                  </div>
+                  <div class="legend-item">
+                    <span><i class="legend-dot" style="background:#0ea5e9;"></i> Tech &amp; Subscriptions</span>
+                    <strong>18%</strong>
+                  </div>
+                  <div class="legend-item">
+                    <span><i class="legend-dot" style="background:#f59e0b;"></i> Dining &amp; Cafes</span>
+                    <strong>14%</strong>
+                  </div>
+                  <div class="legend-item">
+                    <span><i class="legend-dot" style="background:#ec4899;"></i> Transit &amp; Fuel</span>
+                    <strong>10%</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive Budget & Savings Pots Studio -->
+    <section id="budget-studio" class="gsap-section">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">Interactive Simulation</span>
+          <h2>Multi-Period Budgets &amp; Savings Milestones</h2>
+          <p>Drag the interactive budget slider or deposit to savings goals to experience how HisabMate's reactive state engine monitors fiscal health.</p>
+        </div>
+
+        <div class="interactive-fin-grid">
+          <!-- Interactive Budget Card -->
+          <article class="fin-demo-card">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <span id="budget-status-badge" class="fin-card-badge badge-emerald">On Track (Safe)</span>
+                <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">Monthly Cap: ৳50,000</span>
+              </div>
+              <h3 style="font-family: var(--font-display); font-size: 1.25rem; font-weight: 800;">
+                Dining &amp; Entertainment Budget
+              </h3>
+              <p style="font-size: 0.88rem; color: var(--text-secondary); margin-top: 6px;">
+                Simulate spending to test alert triggers at 80% and over-limit notifications.
+              </p>
+            </div>
+
+            <div class="budget-gauge-box">
+              <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 0.95rem;">
+                <span id="budget-spent-label">৳34,000 Spent</span>
+                <span id="budget-percent-label" style="color: var(--accent-violet);">68%</span>
+              </div>
+              <div class="budget-track">
+                <div id="budget-fill" class="budget-fill" style="width: 68%;"></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.8rem;">
+                <span style="color: var(--text-muted);">Threshold: 80%</span>
+                <span id="budget-remaining-label" style="font-weight: 700; color: var(--text-muted);">৳16,000 Left</span>
+              </div>
+            </div>
+
+            <div class="budget-slider-wrap">
+              <label for="budget-slider" style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">
+                Drag Spend Level (৳0 – ৳60,000):
+              </label>
+              <input type="range" id="budget-slider" class="budget-slider" min="0" max="60000" step="1000" value="34000" />
+            </div>
+          </article>
+
+          <!-- Interactive Savings Pot Card -->
+          <article class="fin-demo-card" id="coin-particle-zone">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <span class="fin-card-badge badge-violet">Goal Milestone</span>
+                <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">Target: ৳5,00,000</span>
+              </div>
+              <h3 style="font-family: var(--font-display); font-size: 1.25rem; font-weight: 800;">
+                Emergency Liquidity Vault
+              </h3>
+              <p style="font-size: 0.88rem; color: var(--text-secondary); margin-top: 6px;">
+                Tap to simulate instant savings contributions and trigger milestone animations.
+              </p>
+            </div>
+
+            <div class="savings-ring-box">
+              <div class="savings-svg-wrap">
+                <svg viewBox="0 0 100 100" width="100%" height="100%">
+                  <circle cx="50" cy="50" r="38" fill="transparent" stroke="rgba(148,163,184,0.15)" stroke-width="10" />
+                  <circle id="savings-ring-circle" cx="50" cy="50" r="38" fill="transparent" stroke="var(--accent-emerald)" stroke-width="10" stroke-dasharray="238.7" stroke-dashoffset="64" stroke-linecap="round" transform="rotate(-90 50 50)" style="transition: stroke-dashoffset 0.5s ease;" />
+                </svg>
+                <div class="savings-center-badge" id="savings-percent-badge">73%</div>
+              </div>
+
+              <div>
+                <strong id="savings-current-label" style="display: block; font-family: var(--font-display); font-size: 1.15rem; font-weight: 800;">
+                  ৳3,65,000 of ৳5,00,000
+                </strong>
+                <span style="display: block; font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">
+                  100% on-device Room SQLite v5 record
+                </span>
+              </div>
+            </div>
+
+            <button type="button" id="savings-deposit-btn" class="btn btn-emerald" style="width: 100%;">
+              ✨ + Deposit ৳25,000 (Simulate)
+            </button>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Lottie-Powered Feature Spotlight Cards -->
+    <section class="gsap-section">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">Vector Micro-Interactions</span>
+          <h2>Precision Financial Security &amp; Local Hardware Integrations</h2>
+          <p>Engineered without cloud dependencies, backed by native Android architecture components.</p>
+        </div>
+
+        <div class="lottie-grid">
+          <div class="lottie-card">
+            <div id="lottie-vault" class="lottie-animation-box" aria-hidden="true"></div>
+            <h3>Zero-Trust Local Security</h3>
+            <p>Protected by a 4-digit PIN lock and biometric AndroidX authentication. No telemetry, ads, or external server sync.</p>
+          </div>
+
+          <div class="lottie-card">
+            <div id="lottie-fx" class="lottie-animation-box" aria-hidden="true"></div>
+            <h3>14-Currency Offline Engine</h3>
+            <p>Instant cross-currency conversions using authentic ISO 4217 symbols, South Asian or international digit groupings.</p>
+          </div>
+
+          <div class="lottie-card">
+            <div id="lottie-bell" class="lottie-animation-box" aria-hidden="true"></div>
+            <h3>AlarmManager Reminders</h3>
+            <p>Four native Android notification channels for bills, debts, budgets, and savings goals—persisted across device reboots.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Direct Release Download & Verification Section -->
-    <section id="download">
-      <div class="container reveal">
+    <section id="download" class="gsap-section">
+      <div class="container">
         <div class="section-header">
           <span class="section-tag">Verified GitHub Release v1.0.0</span>
           <h2>Download Compiled Android APK &amp; App Bundle</h2>
@@ -190,7 +454,7 @@
           <article class="download-card">
             <div>
               <span class="download-badge">Direct Device Install • APK</span>
-              <h3 style="margin-top: 10px;">HisabMate-v1.0.0-release.apk</h3>
+              <h3 style="margin-top: 10px; font-family: var(--font-display); font-size: 1.25rem;">HisabMate-v1.0.0-release.apk</h3>
               <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 8px 0 14px;">
                 Universal signed Android APK ready to install directly on any Android 7.0+ (API 24–36) phone, foldable, or tablet.
               </p>
@@ -201,8 +465,9 @@
               </ul>
             </div>
             <div>
-              <div class="checksum-box" id="apk-checksum-box" style="margin-bottom: 14px;">
-                SHA-256: <code>98ce4769ec00433434db9ae0fbfc43a70cbbdc819571b929d840f6c469065d63</code>
+              <div class="checksum-box" style="margin-bottom: 14px;">
+                <span>SHA-256: <code>98ce4769ec00433...65d63</code></span>
+                <button type="button" class="copy-btn" data-copy-text="98ce4769ec00433434db9ae0fbfc43a70cbbdc819571b929d840f6c469065d63">Copy</button>
               </div>
               <a href="https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/HisabMate-v1.0.0-release.apk" class="btn btn-primary" style="width: 100%;" rel="noopener">
                 ⬇ Download HisabMate-v1.0.0-release.apk
@@ -213,7 +478,7 @@
           <article class="download-card aab-card">
             <div>
               <span class="download-badge">Play Store &amp; Bundletool • AAB</span>
-              <h3 style="margin-top: 10px;">HisabMate-v1.0.0-release.aab</h3>
+              <h3 style="margin-top: 10px; font-family: var(--font-display); font-size: 1.25rem;">HisabMate-v1.0.0-release.aab</h3>
               <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 8px 0 14px;">
                 Compiled Android App Bundle generated via <code>gradle :app:bundleRelease</code> for Play Console distribution or split APK extraction.
               </p>
@@ -225,7 +490,8 @@
             </div>
             <div>
               <div class="checksum-box" style="margin-bottom: 14px;">
-                Companion Checksums: <a href="https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/SHA256SUMS.txt" style="text-decoration: underline;" target="_blank" rel="noopener">Download SHA256SUMS.txt</a>
+                <span>Companion Checksums:</span>
+                <a href="https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/SHA256SUMS.txt" style="text-decoration: underline; font-weight: 700; color: var(--accent-emerald);" target="_blank" rel="noopener">Download SHA256SUMS.txt</a>
               </div>
               <a href="https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/HisabMate-v1.0.0-release.aab" class="btn btn-emerald" style="width: 100%;" rel="noopener">
                 ⬇ Download HisabMate-v1.0.0-release.aab
@@ -237,12 +503,12 @@
     </section>
 
     <!-- Interactive 14-Currency & Offline FX Playground -->
-    <section id="currencies">
-      <div class="container reveal">
+    <section id="currencies" class="gsap-section">
+      <div class="container">
         <div class="section-header">
           <span class="section-tag">Authentic ISO 4217 Engine</span>
           <h2>14 Currencies &amp; Interactive Offline FX Simulator</h2>
-          <p>Test HisabMate's real cross-currency math, native symbols, regional decimal precision (0 decimals for JPY, 2 for BDT/USD/EUR, 3 for KWD), and South Asian vs. International grouping.</p>
+          <p>Test HisabMate's cross-currency math, native symbols, regional decimal precision (0 decimals for JPY, 2 for BDT/USD/EUR, 3 for KWD), and South Asian vs. International grouping.</p>
         </div>
 
         <div class="motion-showcase-wrap">
@@ -274,6 +540,7 @@
                 <option value="KWD">KWD (د.ك) – Kuwaiti Dinar</option>
               </select>
             </div>
+            <button type="button" id="fx-swap-btn" class="fx-swap-btn" aria-label="Swap Currencies" title="Swap From and To">⇄</button>
             <div class="fx-field">
               <label for="fx-to">To Target Currency</label>
               <select id="fx-to" class="fx-select">
@@ -333,12 +600,12 @@
     </section>
 
     <!-- Genuine Application Screenshots Gallery -->
-    <section id="screenshots">
-      <div class="container reveal">
+    <section id="screenshots" class="gsap-section">
+      <div class="container">
         <div class="section-header">
           <span class="section-tag">100% Real Compose Screens</span>
           <h2>Genuine Application Screenshot Gallery</h2>
-          <p>Rendered directly from HisabMate's production Jetpack Compose screens via Robolectric Native Graphics. Click any screen to inspect in full detail.</p>
+          <p>Rendered directly from HisabMate's production Jetpack Compose screens via Robolectric Native Graphics. Click any screen to inspect with 3D tilt and zoom.</p>
         </div>
 
         <div class="gallery-filter" role="tablist" aria-label="Screenshot Categories">
@@ -443,15 +710,15 @@
               <img src="assets/screenshots/onboarding-overview.png" alt="Interactive 7-Step Onboarding" loading="lazy" onerror="this.src='https://raw.githubusercontent.com/CodeByArnob/HisabMate/main/docs/screenshots/onboarding-overview.png'" />
             </div>
             <h3>Interactive 7-Step Onboarding</h3>
-            <p>Interactive fintech walkthrough with live multi-currency preview, OCR receipt simulator, and localization setup.</p>
+            <p>Cinematic fintech walkthrough with live multi-currency preview, OCR receipt simulator, and localization setup.</p>
           </article>
         </div>
       </div>
     </section>
 
     <!-- Core Fintech Capabilities -->
-    <section id="features">
-      <div class="container reveal">
+    <section id="features" class="gsap-section">
+      <div class="container">
         <div class="section-header">
           <span class="section-tag">Production Capabilities</span>
           <h2>Engineered for Complete Financial Control</h2>
@@ -499,8 +766,8 @@
     </section>
 
     <!-- Architecture & Build Section -->
-    <section id="architecture">
-      <div class="container reveal">
+    <section id="architecture" class="gsap-section">
+      <div class="container">
         <div class="section-header">
           <span class="section-tag">System Architecture &amp; DevOps</span>
           <h2>Clean MVVM + Unidirectional StateFlow Pipeline</h2>
@@ -545,8 +812,8 @@ gradle :app:assembleDebug :app:assembleRelease :app:bundleRelease</code></pre>
     </section>
 
     <!-- FAQ -->
-    <section id="faq">
-      <div class="container reveal">
+    <section id="faq" class="gsap-section">
+      <div class="container">
         <div class="section-header">
           <span class="section-tag">Documentation &amp; Trust</span>
           <h2>Frequently Asked Questions</h2>

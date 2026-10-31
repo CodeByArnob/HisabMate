@@ -1,5 +1,24 @@
+/**
+ * HisabMate – World-Class Fintech Experience
+ * Powered by GSAP 3.12+, ScrollTrigger, Three.js (r128), and Lottie Web.
+ */
+
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Mobile Navigation Drawer Toggle
+  const isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ==========================================
+  // 1. Scroll Progress Indicator & Nav Handling
+  // ==========================================
+  const scrollProgressBar = document.getElementById('scroll-progress-bar');
+  window.addEventListener('scroll', () => {
+    const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+    if (totalHeight > 0 && scrollProgressBar) {
+      const progress = window.scrollY / totalHeight;
+      scrollProgressBar.style.transform = `scaleX(${progress})`;
+    }
+  }, { passive: true });
+
+  // Mobile Drawer Toggle
   const mobileMenuBtn = document.getElementById('mobile-menu-btn');
   const mobileDrawer = document.getElementById('mobile-nav-drawer');
   const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
@@ -18,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 2. Website Light / Dark Theme Switcher
+  // Light / Dark Theme Switcher
   const siteThemeToggle = document.getElementById('site-theme-toggle');
   const siteThemeIcon = document.getElementById('site-theme-icon');
   const htmlRoot = document.documentElement;
@@ -31,27 +50,831 @@ document.addEventListener('DOMContentLoaded', () => {
       if (siteThemeIcon) {
         siteThemeIcon.textContent = next === 'dark' ? '☀️' : '🌙';
       }
+      // Notify Three.js scene of theme color updates if active
+      if (window.__hisabmateThreeUpdateTheme) {
+        window.__hisabmateThreeUpdateTheme(next);
+      }
     });
   }
 
-  // 3. Interactive Hero Preview Switcher (Light / Dark / Motion Reel / FX Engine)
-  const themeButtons = document.querySelectorAll('[data-hero-theme]');
-  const heroImage = document.getElementById('hero-dashboard-img');
+  // ==========================================
+  // 2. Three.js Interactive 3D Hero Experience
+  // ==========================================
+  const heroCanvas = document.getElementById('hero-three-canvas');
+  if (heroCanvas && typeof THREE !== 'undefined' && !isReducedMotion) {
+    try {
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.z = 24;
 
-  themeButtons.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      themeButtons.forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
-      const targetSrc = btn.getAttribute('data-img-src');
-      const targetAlt = btn.getAttribute('data-img-alt');
-      if (heroImage && targetSrc) {
-        heroImage.src = targetSrc;
-        if (targetAlt) heroImage.alt = targetAlt;
+      const renderer = new THREE.WebGLRenderer({
+        canvas: heroCanvas,
+        alpha: true,
+        antialias: true,
+        powerPreference: 'high-performance'
+      });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      function resizeThree() {
+        const parent = heroCanvas.parentElement;
+        const width = parent.clientWidth || window.innerWidth;
+        const height = parent.clientHeight || 600;
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+        renderer.setSize(width, height, false);
       }
+      resizeThree();
+      window.addEventListener('resize', resizeThree, { passive: true });
+
+      // Ambient & Directional Lights
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+      scene.add(ambientLight);
+
+      const dirLight = new THREE.DirectionalLight(0x7c5cff, 1.4);
+      dirLight.position.set(10, 15, 12);
+      scene.add(dirLight);
+
+      const pointLight = new THREE.PointLight(0x10b981, 1.6, 50);
+      pointLight.position.set(-10, -5, 10);
+      scene.add(pointLight);
+
+      const cyanPointLight = new THREE.PointLight(0x0ea5e9, 1.2, 40);
+      cyanPointLight.position.set(5, -10, 8);
+      scene.add(cyanPointLight);
+
+      // Create 3D Currency Tokens
+      const tokenSymbols = ['৳', '$', '€', '£', '¥', '₹'];
+      const tokenColors = [0x7c5cff, 0x10b981, 0x0ea5e9, 0xf59e0b, 0xec4899, 0x8b5cf6];
+      const tokensGroup = new THREE.Group();
+      scene.add(tokensGroup);
+
+      const coinGeo = new THREE.CylinderGeometry(1.6, 1.6, 0.3, 32);
+
+      // Helper to generate dynamic canvas texture with crisp currency glyph
+      function createCoinTexture(symbol, colorHex) {
+        const cvs = document.createElement('canvas');
+        cvs.width = 256;
+        cvs.height = 256;
+        const ctx = cvs.getContext('2d');
+
+        // Background disc
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.arc(128, 128, 120, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Rim border
+        ctx.strokeStyle = colorHex;
+        ctx.lineWidth = 14;
+        ctx.stroke();
+
+        // Inner ring
+        ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(128, 128, 100, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Glyphs
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 96px "Space Grotesk", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(symbol, 128, 134);
+
+        const tex = new THREE.CanvasTexture(cvs);
+        tex.needsUpdate = true;
+        return tex;
+      }
+
+      const coinObjects = [];
+      const positions = [
+        { x: -14, y: 5, z: -4, speed: 0.012, rotX: 0.008, rotY: 0.015 },
+        { x: -10, y: -7, z: -2, speed: 0.010, rotX: 0.012, rotY: 0.009 },
+        { x: 13, y: 7, z: -5, speed: 0.014, rotX: 0.009, rotY: 0.014 },
+        { x: 15, y: -5, z: -3, speed: 0.011, rotX: 0.014, rotY: 0.008 },
+        { x: -5, y: 9, z: -8, speed: 0.009, rotX: 0.010, rotY: 0.011 },
+        { x: 6, y: -9, z: -6, speed: 0.013, rotX: 0.007, rotY: 0.016 }
+      ];
+
+      tokenSymbols.forEach((sym, idx) => {
+        const tex = createCoinTexture(sym, '#' + tokenColors[idx].toString(16).padStart(6, '0'));
+        const faceMat = new THREE.MeshStandardMaterial({
+          map: tex,
+          metalness: 0.85,
+          roughness: 0.25
+        });
+        const edgeMat = new THREE.MeshStandardMaterial({
+          color: tokenColors[idx],
+          metalness: 0.9,
+          roughness: 0.2
+        });
+
+        const mesh = new THREE.Mesh(coinGeo, [edgeMat, faceMat, faceMat]);
+        const pos = positions[idx];
+        mesh.position.set(pos.x, pos.y, pos.z);
+        mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
+
+        tokensGroup.add(mesh);
+        coinObjects.push({ mesh, pos, seed: idx * 1.5 });
+      });
+
+      // 3D Ambient Dust Particle Cloud
+      const particleCount = 180;
+      const particleGeo = new THREE.BufferGeometry();
+      const particlePositions = new Float32Array(particleCount * 3);
+
+      for (let i = 0; i < particleCount * 3; i += 3) {
+        particlePositions[i] = (Math.random() - 0.5) * 44;
+        particlePositions[i + 1] = (Math.random() - 0.5) * 32;
+        particlePositions[i + 2] = (Math.random() - 0.5) * 20;
+      }
+      particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+
+      const particleMat = new THREE.PointsMaterial({
+        color: 0x7c5cff,
+        size: 0.16,
+        transparent: true,
+        opacity: 0.65
+      });
+      const particleSystem = new THREE.Points(particleGeo, particleMat);
+      scene.add(particleSystem);
+
+      // Mouse & Pointer Parallax
+      let mouseX = 0;
+      let mouseY = 0;
+      let targetX = 0;
+      let targetY = 0;
+
+      window.addEventListener('mousemove', (e) => {
+        mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+        mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+      }, { passive: true });
+
+      // Render Loop with Viewport Visibility Observer (Battery & GPU Saver)
+      let animationFrameId = null;
+      let isHeroVisible = true;
+      let clock = new THREE.Clock();
+
+      function animate() {
+        if (!isHeroVisible) return;
+        animationFrameId = requestAnimationFrame(animate);
+
+        const elapsedTime = clock.getElapsedTime();
+
+        // Parallax damping
+        targetX += (mouseX - targetX) * 0.05;
+        targetY += (mouseY - targetY) * 0.05;
+
+        tokensGroup.rotation.y = targetX * 0.25;
+        tokensGroup.rotation.x = -targetY * 0.25;
+
+        particleSystem.rotation.y = elapsedTime * 0.02 + targetX * 0.1;
+        particleSystem.rotation.x = elapsedTime * 0.01;
+
+        // Floating dynamic wave physics for coins
+        coinObjects.forEach((item) => {
+          const { mesh, pos, seed } = item;
+          mesh.rotation.x += pos.rotX;
+          mesh.rotation.y += pos.rotY;
+          mesh.position.y = pos.y + Math.sin(elapsedTime * 1.2 + seed) * 0.8;
+          mesh.position.x = pos.x + Math.cos(elapsedTime * 0.8 + seed) * 0.4;
+        });
+
+        renderer.render(scene, camera);
+      }
+
+      // IntersectionObserver: auto-pause rendering when hero scrolls out of view
+      const heroSection = document.querySelector('.hero');
+      if ('IntersectionObserver' in window && heroSection) {
+        const heroObserver = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            isHeroVisible = entry.isIntersecting;
+            if (isHeroVisible) {
+              clock.start();
+              animate();
+            } else if (animationFrameId) {
+              cancelAnimationFrame(animationFrameId);
+            }
+          });
+        }, { threshold: 0.05 });
+        heroObserver.observe(heroSection);
+      } else {
+        animate();
+      }
+
+      window.__hisabmateThreeUpdateTheme = (theme) => {
+        if (theme === 'light') {
+          particleMat.color.setHex(0x5b3df5);
+          ambientLight.intensity = 0.9;
+        } else {
+          particleMat.color.setHex(0x7c5cff);
+          ambientLight.intensity = 0.7;
+        }
+      };
+    } catch (e) {
+      console.warn('Three.js initialization safely bypassed:', e);
+    }
+  }
+
+  // ==========================================
+  // 3. GSAP 3.12+ & ScrollTrigger Animations
+  // ==========================================
+  if (typeof gsap !== 'undefined') {
+    if (typeof ScrollTrigger !== 'undefined') {
+      gsap.registerPlugin(ScrollTrigger);
+    }
+
+    if (!isReducedMotion) {
+      // Hero Entrance Timeline
+      const heroTl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+      heroTl
+        .from('.eyebrow', { opacity: 0, y: -16, duration: 0.6 })
+        .from('.hero-content h1', { opacity: 0, y: 24, duration: 0.8 }, '-=0.4')
+        .from('.hero-lead', { opacity: 0, y: 18, duration: 0.7 }, '-=0.5')
+        .from('.hero-cta .btn', { opacity: 0, scale: 0.94, stagger: 0.1, duration: 0.5 }, '-=0.4')
+        .from('.release-quick-meta span', { opacity: 0, y: 10, stagger: 0.08, duration: 0.4 }, '-=0.3')
+        .from('.metric-item', { opacity: 0, y: 20, stagger: 0.12, duration: 0.6 }, '-=0.3')
+        .from('.phone-frame', { opacity: 0, scale: 0.92, rotationY: 8, duration: 0.9 }, '-=0.7')
+        .from('.float-card', { opacity: 0, y: 16, stagger: 0.15, duration: 0.6 }, '-=0.5');
+
+      // Floating Cards subtle levitation
+      gsap.to('.float-card:nth-child(1)', {
+        y: -6,
+        duration: 3,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut'
+      });
+      gsap.to('.float-card:nth-child(2)', {
+        y: 6,
+        duration: 3.4,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut',
+        delay: 0.5
+      });
+
+      // ScrollTrigger Stagger Reveals for Sections
+      if (typeof ScrollTrigger !== 'undefined') {
+        gsap.utils.toArray('.gsap-section').forEach((sec) => {
+          gsap.from(sec.querySelectorAll('.section-header, .feature-card, .download-card, .fin-demo-card, .shot-card, .arch-panel'), {
+            scrollTrigger: {
+              trigger: sec,
+              start: 'top 82%',
+              toggleActions: 'play none none none'
+            },
+            opacity: 0,
+            y: 30,
+            duration: 0.6,
+            stagger: 0.08,
+            ease: 'power2.out'
+          });
+        });
+
+        // Numeric Counter Animations on scroll
+        const countElements = document.querySelectorAll('[data-target-count]');
+        countElements.forEach((el) => {
+          const target = parseFloat(el.getAttribute('data-target-count')) || 0;
+          const prefix = el.getAttribute('data-prefix') || '';
+          const suffix = el.getAttribute('data-suffix') || '';
+          const decimals = parseInt(el.getAttribute('data-decimals') || '0', 10);
+
+          ScrollTrigger.create({
+            trigger: el,
+            start: 'top 90%',
+            once: true,
+            onEnter: () => {
+              gsap.to({ val: 0 }, {
+                val: target,
+                duration: 1.8,
+                ease: 'power2.out',
+                onUpdate: function () {
+                  el.textContent = `${prefix}${this.targets()[0].val.toFixed(decimals)}${suffix}`;
+                }
+              });
+            }
+          });
+        });
+      }
+    }
+  }
+
+  // ==========================================
+  // 4. Interactive Financial Analytics & Chart Studio
+  // ==========================================
+  const analyticsData = {
+    '6m': {
+      labels: ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
+      inflow: [210000, 230000, 245000, 220000, 260000, 285000],
+      outflow: [120000, 140000, 135000, 150000, 128000, 138000],
+      totals: { inflow: '৳14,50,000', outflow: '৳8,11,000', surplus: '+৳6,39,000' }
+    },
+    '30d': {
+      labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+      inflow: [65000, 70000, 75000, 75000],
+      outflow: [32000, 38000, 34000, 34000],
+      totals: { inflow: '৳2,85,000', outflow: '৳1,38,000', surplus: '+৳1,47,000' }
+    },
+    'weekly': {
+      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+      inflow: [12000, 15000, 8000, 18000, 25000, 9000, 14000],
+      outflow: [4500, 6200, 3800, 7100, 12000, 5400, 4800],
+      totals: { inflow: '৳1,01,000', outflow: '৳43,800', surplus: '+৳57,200' }
+    }
+  };
+
+  const chartTabButtons = document.querySelectorAll('.chart-tab-btn');
+  const chartInflowPath = document.getElementById('chart-inflow-path');
+  const chartOutflowPath = document.getElementById('chart-outflow-path');
+  const chartAreaInflow = document.getElementById('chart-area-inflow');
+  const chartAreaOutflow = document.getElementById('chart-area-outflow');
+  const chartTooltip = document.getElementById('chart-tooltip');
+  const kpiInflow = document.getElementById('kpi-inflow');
+  const kpiOutflow = document.getElementById('kpi-outflow');
+  const kpiSurplus = document.getElementById('kpi-surplus');
+  const chartLabelsGroup = document.getElementById('chart-labels-group');
+
+  function renderChart(periodKey) {
+    const data = analyticsData[periodKey] || analyticsData['6m'];
+    if (kpiInflow) kpiInflow.textContent = data.totals.inflow;
+    if (kpiOutflow) kpiOutflow.textContent = data.totals.outflow;
+    if (kpiSurplus) kpiSurplus.textContent = data.totals.surplus;
+
+    const width = 600;
+    const height = 220;
+    const padX = 40;
+    const padY = 30;
+    const maxVal = Math.max(...data.inflow, ...data.outflow) * 1.15;
+    const count = data.labels.length;
+    const stepX = (width - padX * 2) / (count - 1);
+
+    function getCoords(values) {
+      return values.map((val, idx) => {
+        const x = padX + idx * stepX;
+        const y = height - padY - (val / maxVal) * (height - padY * 2);
+        return { x, y, val };
+      });
+    }
+
+    const inflowCoords = getCoords(data.inflow);
+    const outflowCoords = getCoords(data.outflow);
+
+    function buildSmoothPath(coords) {
+      if (!coords.length) return '';
+      let path = `M ${coords[0].x} ${coords[0].y}`;
+      for (let i = 0; i < coords.length - 1; i++) {
+        const p0 = coords[i];
+        const p1 = coords[i + 1];
+        const cx1 = p0.x + (p1.x - p0.x) / 2;
+        const cy1 = p0.y;
+        const cx2 = p0.x + (p1.x - p0.x) / 2;
+        const cy2 = p1.y;
+        path += ` C ${cx1} ${cy1}, ${cx2} ${cy2}, ${p1.x} ${p1.y}`;
+      }
+      return path;
+    }
+
+    const inflowLine = buildSmoothPath(inflowCoords);
+    const outflowLine = buildSmoothPath(outflowCoords);
+    const bottomY = height - padY;
+
+    const inflowArea = `${inflowLine} L ${inflowCoords[inflowCoords.length - 1].x} ${bottomY} L ${inflowCoords[0].x} ${bottomY} Z`;
+    const outflowArea = `${outflowLine} L ${outflowCoords[outflowCoords.length - 1].x} ${bottomY} L ${outflowCoords[0].x} ${bottomY} Z`;
+
+    if (chartInflowPath) chartInflowPath.setAttribute('d', inflowLine);
+    if (chartOutflowPath) chartOutflowPath.setAttribute('d', outflowLine);
+    if (chartAreaInflow) chartAreaInflow.setAttribute('d', inflowArea);
+    if (chartAreaOutflow) chartAreaOutflow.setAttribute('d', outflowArea);
+
+    // Update X-axis labels in SVG
+    if (chartLabelsGroup) {
+      chartLabelsGroup.innerHTML = '';
+      data.labels.forEach((lbl, idx) => {
+        const x = padX + idx * stepX;
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', String(x));
+        text.setAttribute('y', String(height - 8));
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('fill', 'var(--text-muted)');
+        text.setAttribute('font-size', '11');
+        text.setAttribute('font-weight', '600');
+        text.textContent = lbl;
+        chartLabelsGroup.appendChild(text);
+      });
+    }
+
+    // GSAP path drawing transition
+    if (typeof gsap !== 'undefined' && !isReducedMotion && chartInflowPath && chartOutflowPath) {
+      gsap.fromTo([chartInflowPath, chartOutflowPath],
+        { strokeDasharray: 800, strokeDashoffset: 800 },
+        { strokeDashoffset: 0, duration: 1.2, ease: 'power2.out' }
+      );
+    }
+  }
+
+  chartTabButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      chartTabButtons.forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      const period = btn.getAttribute('data-chart-period');
+      renderChart(period);
     });
   });
+  renderChart('6m');
 
-  // 4. Interactive 14-Currency ISO 4217 Offline FX Simulator
+  // Chart Hover Scrubber Tooltip
+  const chartSvgStage = document.getElementById('chart-svg-stage');
+  const chartScrubber = document.getElementById('chart-scrubber');
+  if (chartSvgStage && chartTooltip && chartScrubber) {
+    chartSvgStage.addEventListener('mousemove', (e) => {
+      const rect = chartSvgStage.getBoundingClientRect();
+      const relX = e.clientX - rect.left;
+      const width = rect.width;
+      const activePeriod = document.querySelector('.chart-tab-btn.active')?.getAttribute('data-chart-period') || '6m';
+      const curData = analyticsData[activePeriod];
+      const count = curData.labels.length;
+      const index = Math.min(Math.max(Math.round(((relX - 40) / (width - 80)) * (count - 1)), 0), count - 1);
+
+      const label = curData.labels[index];
+      const inf = curData.inflow[index];
+      const outf = curData.outflow[index];
+      const sur = inf - outf;
+
+      chartTooltip.style.opacity = '1';
+      chartTooltip.innerHTML = `<strong>${label}</strong><br><span style="color:var(--accent-emerald);">Inflow: ৳${inf.toLocaleString()}</span><br><span style="color:var(--accent-rose);">Outflow: ৳${outf.toLocaleString()}</span><br><span style="color:var(--accent-cyan); font-weight:700;">Net: +৳${sur.toLocaleString()}</span>`;
+
+      chartScrubber.setAttribute('x1', String((index / (count - 1)) * 520 + 40));
+      chartScrubber.setAttribute('x2', String((index / (count - 1)) * 520 + 40));
+      chartScrubber.style.opacity = '0.8';
+    });
+
+    chartSvgStage.addEventListener('mouseleave', () => {
+      chartTooltip.style.opacity = '0';
+      chartScrubber.style.opacity = '0';
+    });
+  }
+
+  // ==========================================
+  // 5. Interactive Budget & Savings Pots Studio
+  // ==========================================
+  const budgetSlider = document.getElementById('budget-slider');
+  const budgetFill = document.getElementById('budget-fill');
+  const budgetPercentLabel = document.getElementById('budget-percent-label');
+  const budgetSpentLabel = document.getElementById('budget-spent-label');
+  const budgetRemainingLabel = document.getElementById('budget-remaining-label');
+  const budgetStatusBadge = document.getElementById('budget-status-badge');
+
+  const budgetTotal = 50000;
+
+  function updateBudgetMeter() {
+    if (!budgetSlider) return;
+    const currentSpent = parseFloat(budgetSlider.value) || 0;
+    const ratio = (currentSpent / budgetTotal) * 100;
+    const remaining = budgetTotal - currentSpent;
+
+    if (budgetFill) {
+      budgetFill.style.width = `${Math.min(ratio, 100)}%`;
+      if (ratio > 100) {
+        budgetFill.style.background = 'linear-gradient(90deg, #f59e0b, #f43f5e)';
+      } else if (ratio > 80) {
+        budgetFill.style.background = 'linear-gradient(90deg, #10b981, #f59e0b)';
+      } else {
+        budgetFill.style.background = 'linear-gradient(90deg, var(--accent-emerald), var(--accent-cyan))';
+      }
+    }
+
+    if (budgetPercentLabel) budgetPercentLabel.textContent = `${Math.round(ratio)}%`;
+    if (budgetSpentLabel) budgetSpentLabel.textContent = `৳${currentSpent.toLocaleString()} Spent`;
+    if (budgetRemainingLabel) {
+      if (remaining >= 0) {
+        budgetRemainingLabel.textContent = `৳${remaining.toLocaleString()} Left`;
+        budgetRemainingLabel.style.color = 'var(--text-muted)';
+      } else {
+        budgetRemainingLabel.textContent = `৳${Math.abs(remaining).toLocaleString()} Over`;
+        budgetRemainingLabel.style.color = 'var(--accent-rose)';
+      }
+    }
+
+    if (budgetStatusBadge) {
+      if (ratio > 100) {
+        budgetStatusBadge.textContent = 'Overbudget Alert';
+        budgetStatusBadge.className = 'fin-card-badge';
+        budgetStatusBadge.style.background = 'var(--accent-rose-soft)';
+        budgetStatusBadge.style.color = 'var(--accent-rose)';
+      } else if (ratio >= 80) {
+        budgetStatusBadge.textContent = '80% Warning Threshold';
+        budgetStatusBadge.className = 'fin-card-badge';
+        budgetStatusBadge.style.background = 'var(--accent-amber-soft)';
+        budgetStatusBadge.style.color = 'var(--accent-amber)';
+      } else {
+        budgetStatusBadge.textContent = 'On Track (Safe)';
+        budgetStatusBadge.className = 'fin-card-badge';
+        budgetStatusBadge.style.background = 'var(--accent-emerald-soft)';
+        budgetStatusBadge.style.color = 'var(--accent-emerald)';
+      }
+    }
+  }
+
+  if (budgetSlider) {
+    budgetSlider.addEventListener('input', updateBudgetMeter);
+    updateBudgetMeter();
+  }
+
+  // Interactive Savings Goal Pot Micro-Interaction
+  const savingsDepositBtn = document.getElementById('savings-deposit-btn');
+  const savingsRingCircle = document.getElementById('savings-ring-circle');
+  const savingsCurrentLabel = document.getElementById('savings-current-label');
+  const savingsPercentBadge = document.getElementById('savings-percent-badge');
+  const coinZone = document.getElementById('coin-particle-zone');
+
+  let currentSavings = 365000;
+  const targetSavings = 500000;
+
+  function updateSavingsRing() {
+    const ratio = Math.min(currentSavings / targetSavings, 1);
+    const circumference = 2 * Math.PI * 38; // r=38 in SVG
+    const offset = circumference - ratio * circumference;
+
+    if (savingsRingCircle) {
+      savingsRingCircle.style.strokeDashoffset = String(offset);
+    }
+    if (savingsPercentBadge) {
+      savingsPercentBadge.textContent = `${Math.round(ratio * 100)}%`;
+    }
+    if (savingsCurrentLabel) {
+      savingsCurrentLabel.textContent = `৳${currentSavings.toLocaleString()} of ৳5,00,000`;
+    }
+  }
+  updateSavingsRing();
+
+  if (savingsDepositBtn) {
+    savingsDepositBtn.addEventListener('click', () => {
+      currentSavings = Math.min(currentSavings + 25000, targetSavings);
+      updateSavingsRing();
+
+      // Trigger GSAP coin particles burst
+      if (typeof gsap !== 'undefined' && coinZone && !isReducedMotion) {
+        for (let i = 0; i < 6; i++) {
+          const coin = document.createElement('div');
+          coin.textContent = '৳';
+          coin.style.position = 'absolute';
+          coin.style.left = '50%';
+          coin.style.top = '50%';
+          coin.style.fontSize = '18px';
+          coin.style.fontWeight = 'bold';
+          coin.style.color = '#f59e0b';
+          coin.style.pointerEvents = 'none';
+          coin.style.zIndex = '100';
+          coinZone.appendChild(coin);
+
+          const angle = (Math.PI * 2 * i) / 6;
+          const dist = 40 + Math.random() * 30;
+
+          gsap.to(coin, {
+            x: Math.cos(angle) * dist,
+            y: Math.sin(angle) * dist - 20,
+            opacity: 0,
+            scale: 1.4,
+            duration: 0.8,
+            ease: 'power2.out',
+            onComplete: () => coin.remove()
+          });
+        }
+      }
+    });
+  }
+
+  // ==========================================
+  // 6. Lottie-Powered Interactive Feature Animations
+  // ==========================================
+  if (typeof lottie !== 'undefined') {
+    // 1. Vault Lock / Security Lottie
+    const vaultContainer = document.getElementById('lottie-vault');
+    if (vaultContainer) {
+      const vaultAnimationData = {
+        v: "5.7.4",
+        fr: 30,
+        ip: 0,
+        op: 60,
+        w: 100,
+        h: 100,
+        nm: "Vault",
+        ddd: 0,
+        assets: [],
+        layers: [{
+          ddd: 0,
+          ind: 1,
+          ty: 4,
+          nm: "Shackle",
+          sr: 1,
+          ks: {
+            o: { k: 100 },
+            r: { k: 0 },
+            p: { k: [50, 40, 0] },
+            a: { k: [0, 0, 0] },
+            s: {
+              k: [
+                { i: { x: [0.6], y: [1] }, o: { x: [0.4], y: [0] }, t: 0, s: [100, 100, 100] },
+                { i: { x: [0.6], y: [1] }, o: { x: [0.4], y: [0] }, t: 30, s: [100, 80, 100] },
+                { t: 60, s: [100, 100, 100] }
+              ]
+            }
+          },
+          shapes: [{
+            ty: "rc",
+            d: 1,
+            s: { k: [32, 28] },
+            p: { k: [0, -6] },
+            r: { k: 14 },
+            nm: "Arch"
+          }, {
+            ty: "st",
+            c: { k: [0.48, 0.36, 1, 1] },
+            w: { k: 6 },
+            lc: 2,
+            lj: 2,
+            nm: "Stroke"
+          }]
+        }, {
+          ddd: 0,
+          ind: 2,
+          ty: 4,
+          nm: "Body",
+          sr: 1,
+          ks: {
+            o: { k: 100 },
+            r: { k: 0 },
+            p: { k: [50, 62, 0] },
+            a: { k: [0, 0, 0] },
+            s: { k: [100, 100, 100] }
+          },
+          shapes: [{
+            ty: "rc",
+            d: 1,
+            s: { k: [46, 36] },
+            p: { k: [0, 0] },
+            r: { k: 8 },
+            nm: "BodyRect"
+          }, {
+            ty: "fl",
+            c: { k: [0.06, 0.72, 0.5, 1] },
+            nm: "Fill"
+          }]
+        }]
+      };
+
+      try {
+        lottie.loadAnimation({
+          container: vaultContainer,
+          renderer: 'svg',
+          loop: true,
+          autoplay: true,
+          animationData: vaultAnimationData
+        });
+      } catch (e) {
+        console.warn('Vault Lottie fallback:', e);
+      }
+    }
+
+    // 2. Multi-Currency FX Node Pulse Lottie
+    const fxNodeContainer = document.getElementById('lottie-fx');
+    if (fxNodeContainer) {
+      const fxAnimationData = {
+        v: "5.7.4",
+        fr: 30,
+        ip: 0,
+        op: 60,
+        w: 100,
+        h: 100,
+        nm: "FXNode",
+        ddd: 0,
+        assets: [],
+        layers: [{
+          ddd: 0,
+          ind: 1,
+          ty: 4,
+          nm: "PulseCircle",
+          sr: 1,
+          ks: {
+            o: {
+              k: [
+                { i: { x: [0.4], y: [1] }, o: { x: [0.6], y: [0] }, t: 0, s: [90] },
+                { i: { x: [0.4], y: [1] }, o: { x: [0.6], y: [0] }, t: 30, s: [30] },
+                { t: 60, s: [90] }
+              ]
+            },
+            r: {
+              k: [
+                { i: { x: [0.4], y: [1] }, o: { x: [0.6], y: [0] }, t: 0, s: [0] },
+                { t: 60, s: [360] }
+              ]
+            },
+            p: { k: [50, 50, 0] },
+            a: { k: [0, 0, 0] },
+            s: {
+              k: [
+                { i: { x: [0.4], y: [1] }, o: { x: [0.6], y: [0] }, t: 0, s: [85, 85, 100] },
+                { i: { x: [0.4], y: [1] }, o: { x: [0.6], y: [0] }, t: 30, s: [115, 115, 100] },
+                { t: 60, s: [85, 85, 100] }
+              ]
+            }
+          },
+          shapes: [{
+            ty: "el",
+            d: 1,
+            s: { k: [54, 54] },
+            p: { k: [0, 0] },
+            nm: "Circle"
+          }, {
+            ty: "st",
+            c: { k: [0.05, 0.65, 0.91, 1] },
+            w: { k: 5 },
+            nm: "Stroke"
+          }]
+        }]
+      };
+
+      try {
+        lottie.loadAnimation({
+          container: fxNodeContainer,
+          renderer: 'svg',
+          loop: true,
+          autoplay: true,
+          animationData: fxAnimationData
+        });
+      } catch (e) {
+        console.warn('FX Lottie fallback:', e);
+      }
+    }
+
+    // 3. Local Alarm Reminder Bell Lottie
+    const bellContainer = document.getElementById('lottie-bell');
+    if (bellContainer) {
+      const bellAnimationData = {
+        v: "5.7.4",
+        fr: 30,
+        ip: 0,
+        op: 60,
+        w: 100,
+        h: 100,
+        nm: "Bell",
+        ddd: 0,
+        assets: [],
+        layers: [{
+          ddd: 0,
+          ind: 1,
+          ty: 4,
+          nm: "BellBody",
+          sr: 1,
+          ks: {
+            o: { k: 100 },
+            r: {
+              k: [
+                { i: { x: [0.4], y: [1] }, o: { x: [0.6], y: [0] }, t: 0, s: [0] },
+                { i: { x: [0.4], y: [1] }, o: { x: [0.6], y: [0] }, t: 15, s: [14] },
+                { i: { x: [0.4], y: [1] }, o: { x: [0.6], y: [0] }, t: 30, s: [-14] },
+                { i: { x: [0.4], y: [1] }, o: { x: [0.6], y: [0] }, t: 45, s: [6] },
+                { t: 60, s: [0] }
+              ]
+            },
+            p: { k: [50, 48, 0] },
+            a: { k: [0, -18, 0] },
+            s: { k: [100, 100, 100] }
+          },
+          shapes: [{
+            ty: "rc",
+            d: 1,
+            s: { k: [36, 32] },
+            p: { k: [0, 8] },
+            r: { k: 12 },
+            nm: "BellCap"
+          }, {
+            ty: "fl",
+            c: { k: [0.96, 0.62, 0.07, 1] },
+            nm: "Fill"
+          }]
+        }]
+      };
+
+      try {
+        lottie.loadAnimation({
+          container: bellContainer,
+          renderer: 'svg',
+          loop: true,
+          autoplay: true,
+          animationData: bellAnimationData
+        });
+      } catch (e) {
+        console.warn('Bell Lottie fallback:', e);
+      }
+    }
+  }
+
+  // ==========================================
+  // 7. Interactive 14-Currency ISO 4217 FX Simulator
+  // ==========================================
   const fxCatalog = {
     BDT: { symbol: '৳', rateToBdt: 1.0, decimals: 2 },
     USD: { symbol: '$', rateToBdt: 120.5, decimals: 2 },
@@ -89,6 +912,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const fxFromSelect = document.getElementById('fx-from');
   const fxToSelect = document.getElementById('fx-to');
   const fxGroupingSelect = document.getElementById('fx-grouping');
+  const fxSwapBtn = document.getElementById('fx-swap-btn');
   const fxSourceFormatted = document.getElementById('fx-source-formatted');
   const fxTargetFormatted = document.getElementById('fx-target-formatted');
   const fxRateCaption = document.getElementById('fx-rate-caption');
@@ -118,6 +942,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  if (fxSwapBtn && fxFromSelect && fxToSelect) {
+    fxSwapBtn.addEventListener('click', () => {
+      const temp = fxFromSelect.value;
+      fxFromSelect.value = fxToSelect.value;
+      fxToSelect.value = temp;
+      updateFxSimulator();
+    });
+  }
+
   [fxAmountInput, fxFromSelect, fxToSelect, fxGroupingSelect].forEach((el) => {
     if (el) {
       el.addEventListener('input', updateFxSimulator);
@@ -126,7 +959,9 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   updateFxSimulator();
 
-  // 5. Screenshot Gallery Category Filter & Lightbox Modal
+  // ==========================================
+  // 8. Screenshot Gallery 3D Tilt & Lightbox
+  // ==========================================
   const filterChips = document.querySelectorAll('[data-gallery-filter]');
   const shotCards = document.querySelectorAll('[data-shot-category]');
   const lightboxModal = document.getElementById('lightbox-modal');
@@ -152,6 +987,25 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // 3D Perspective Tilt on Mouse Movement over Cards
+  if (!isReducedMotion) {
+    shotCards.forEach((card) => {
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        const rotX = -(y / (rect.height / 2)) * 6;
+        const rotY = (x / (rect.width / 2)) * 6;
+        card.style.transform = `perspective(800px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-4px)`;
+      });
+
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) translateY(0)';
+      });
+    });
+  }
+
+  // Open Lightbox
   shotCards.forEach((card) => {
     card.addEventListener('click', () => {
       const img = card.querySelector('img');
@@ -176,24 +1030,42 @@ document.addEventListener('DOMContentLoaded', () => {
         lightboxModal.classList.remove('active');
       }
     });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && lightboxModal.classList.contains('active')) {
+        lightboxModal.classList.remove('active');
+      }
+    });
   }
 
-  // 6. IntersectionObserver Scroll Reveal
-  const revealElements = document.querySelectorAll('.reveal');
-  if ('IntersectionObserver' in window) {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-            observer.unobserve(entry.target);
-          }
+  // Hero Preview Theme Switcher (Light / Dark / Motion Reel / FX Engine)
+  const themeButtons = document.querySelectorAll('[data-hero-theme]');
+  const heroImage = document.getElementById('hero-dashboard-img');
+
+  themeButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      themeButtons.forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      const targetSrc = btn.getAttribute('data-img-src');
+      const targetAlt = btn.getAttribute('data-img-alt');
+      if (heroImage && targetSrc) {
+        heroImage.src = targetSrc;
+        if (targetAlt) heroImage.alt = targetAlt;
+      }
+    });
+  });
+
+  // Checksum Copy Buttons
+  document.querySelectorAll('.copy-btn').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const textToCopy = btn.getAttribute('data-copy-text');
+      if (textToCopy && navigator.clipboard) {
+        navigator.clipboard.writeText(textToCopy).then(() => {
+          const original = btn.textContent;
+          btn.textContent = 'Copied!';
+          setTimeout(() => { btn.textContent = original; }, 2000);
         });
-      },
-      { threshold: 0.08 }
-    );
-    revealElements.forEach((el) => observer.observe(el));
-  } else {
-    revealElements.forEach((el) => el.classList.add('visible'));
-  }
+      }
+    });
+  });
 });
