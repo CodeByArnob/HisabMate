@@ -70,6 +70,7 @@ import com.example.data.local.TransactionEntity
 import com.example.ui.components.BaseCurrencyBadgeButton
 import com.example.ui.components.CircularQuickActionButton
 import com.example.ui.components.HeaderCircleIconButton
+import com.example.ui.components.HisabBalanceHeroCard
 import com.example.ui.components.HisabHeaderSurface
 import com.example.ui.components.HisabSectionCard
 import com.example.ui.components.InteractiveSpendLineChart
@@ -114,9 +115,9 @@ fun DashboardScreen(
             .background(colors.canvasBackground),
         contentPadding = PaddingValues(top = 6.dp, bottom = 28.dp)
     ) {
-        // 1. Compact, Authoritative Upper Main Balance Card (aligned on 14.dp horizontal grid with 28.dp corners)
+        // 1. Compact, Authoritative Upper Main Balance Card (prominent elevated financial panel)
         item {
-            HisabSectionCard(
+            HisabBalanceHeroCard(
                 modifier = Modifier.padding(horizontal = 14.dp),
                 shapeRadius = 28.dp,
                 contentPadding = 16.dp

@@ -161,7 +161,7 @@ fun HisabHeaderSurface(
 }
 
 /**
- * Centralized Section Card with explicit 1.dp border (`#A8B9D0` in Light, `#2A3449` in Dark)
+ * Centralized Section Card with explicit border (`#A6B7CC` in Light, `#2A3449` in Dark)
  * so cards never blend into the background canvas.
  */
 @Composable
@@ -170,6 +170,7 @@ fun HisabSectionCard(
     shapeRadius: Dp = 28.dp,
     onClick: (() -> Unit)? = null,
     contentPadding: Dp = 18.dp,
+    shadowElevation: Dp = 3.dp,
     content: @Composable ColumnScope.() -> Unit
 ) {
     val colors = HisabTheme.colors
@@ -179,8 +180,8 @@ fun HisabSectionCard(
             onClick = onClick,
             color = colors.cardSurface,
             shape = shape,
-            shadowElevation = if (colors.isDark) 3.dp else 2.5.dp,
-            border = BorderStroke(1.dp, colors.borderStrong),
+            shadowElevation = if (colors.isDark) 3.5.dp else shadowElevation,
+            border = BorderStroke(1.1.dp, colors.borderStrong),
             modifier = modifier.fillMaxWidth()
         ) {
             Column(
@@ -194,9 +195,61 @@ fun HisabSectionCard(
         Surface(
             color = colors.cardSurface,
             shape = shape,
-            shadowElevation = if (colors.isDark) 3.dp else 2.5.dp,
-            border = BorderStroke(1.dp, colors.borderStrong),
+            shadowElevation = if (colors.isDark) 3.5.dp else shadowElevation,
+            border = BorderStroke(1.1.dp, colors.borderStrong),
             modifier = modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(contentPadding),
+                content = content
+            )
+        }
+    }
+}
+
+/**
+ * Prominent Elevated Financial Panel for the Main Balance Card.
+ * Uses a subtle surface gradient (Light: #E9F0F8 to #DFE6F0, Dark: #1B2332 to #141923),
+ * refined 1.2.dp border, and calibrated elevation for distinctive dimensional depth.
+ */
+@Composable
+fun HisabBalanceHeroCard(
+    modifier: Modifier = Modifier,
+    shapeRadius: Dp = 28.dp,
+    contentPadding: Dp = 16.dp,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    val colors = HisabTheme.colors
+    val shape = RoundedCornerShape(shapeRadius)
+    val backgroundBrush = if (colors.isDark) {
+        Brush.verticalGradient(
+            colors = listOf(
+                Color(0xFF1B2332),
+                Color(0xFF141923)
+            )
+        )
+    } else {
+        Brush.verticalGradient(
+            colors = listOf(
+                Color(0xFFE9F0F8),
+                Color(0xFFDFE6F0)
+            )
+        )
+    }
+
+    Surface(
+        shape = shape,
+        color = Color.Transparent,
+        shadowElevation = if (colors.isDark) 4.5.dp else 4.dp,
+        border = BorderStroke(1.2.dp, colors.borderStrong),
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(backgroundBrush)
         ) {
             Column(
                 modifier = Modifier
@@ -1218,8 +1271,8 @@ fun FloatingFintechDock(
         Surface(
             shape = RoundedCornerShape(36.dp),
             color = colors.dockBackground,
-            shadowElevation = 14.dp,
-            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.14f)),
+            shadowElevation = 16.dp,
+            border = BorderStroke(1.2.dp, if (colors.isDark) Color(0xFF2E3A50) else Color(0xFF334155)),
             modifier = Modifier
                 .height(64.dp)
                 .fillMaxWidth()
