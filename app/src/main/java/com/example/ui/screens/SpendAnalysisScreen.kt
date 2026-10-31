@@ -474,7 +474,8 @@ fun SpendAnalysisScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                filteredTxs.take(10).forEachIndexed { idx, tx ->
+                val displayTxs = remember(filteredTxs) { filteredTxs.take(10) }
+                displayTxs.forEachIndexed { idx, tx ->
                     TransactionRowItem(
                         transaction = tx,
                         useBangladeshiFormat = useBangladeshiFormat,
@@ -483,7 +484,7 @@ fun SpendAnalysisScreen(
                         ratesToBdtMap = uiState.ratesToBdtMap,
                         onClick = { onSelectTransaction(tx) }
                     )
-                    if (idx < filteredTxs.take(10).lastIndex) {
+                    if (idx < displayTxs.lastIndex) {
                         HorizontalDivider(
                             color = colors.borderSubtle,
                             modifier = Modifier.padding(start = 58.dp)

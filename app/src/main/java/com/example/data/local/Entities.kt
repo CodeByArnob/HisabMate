@@ -1,9 +1,17 @@
 package com.example.data.local
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "accounts")
+@Entity(
+    tableName = "accounts",
+    indices = [
+        Index("isPrimary"),
+        Index("currencyCode"),
+        Index("isDemo")
+    ]
+)
 data class AccountEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val name: String,
@@ -13,10 +21,17 @@ data class AccountEntity(
     val maskedNumber: String,
     val colorHex: Long,
     val iconKey: String,
-    val isPrimary: Boolean = false
+    val isPrimary: Boolean = false,
+    val isDemo: Boolean = false
 )
 
-@Entity(tableName = "categories")
+@Entity(
+    tableName = "categories",
+    indices = [
+        Index("type"),
+        Index("isDemo")
+    ]
+)
 data class CategoryEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val name: String,
@@ -29,10 +44,21 @@ data class CategoryEntity(
     val endDateMillis: Long = 0L,
     val colorHex: Long,
     val iconKey: String,
-    val isQuickAction: Boolean = true
+    val isQuickAction: Boolean = true,
+    val isDemo: Boolean = false
 )
 
-@Entity(tableName = "transactions")
+@Entity(
+    tableName = "transactions",
+    indices = [
+        Index("timestamp"),
+        Index("accountId"),
+        Index("categoryId"),
+        Index("type"),
+        Index("isFavorite"),
+        Index("isDemo")
+    ]
+)
 data class TransactionEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val title: String,
@@ -53,10 +79,18 @@ data class TransactionEntity(
     val isRecurring: Boolean = false,
     val receiptUri: String = "",
     val splitDetails: String = "",
-    val isFavorite: Boolean = false
+    val isFavorite: Boolean = false,
+    val isDemo: Boolean = false
 )
 
-@Entity(tableName = "recurring_payments")
+@Entity(
+    tableName = "recurring_payments",
+    indices = [
+        Index("nextDueDateMillis"),
+        Index("categoryId"),
+        Index("isDemo")
+    ]
+)
 data class RecurringPaymentEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val title: String,
@@ -70,10 +104,18 @@ data class RecurringPaymentEntity(
     val categoryName: String,
     val colorHex: Long,
     val iconKey: String,
-    val autoPay: Boolean = true
+    val autoPay: Boolean = true,
+    val isDemo: Boolean = false
 )
 
-@Entity(tableName = "debt_records")
+@Entity(
+    tableName = "debt_records",
+    indices = [
+        Index("dueDateMillis"),
+        Index("type"),
+        Index("isDemo")
+    ]
+)
 data class DebtRecordEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val personName: String,
@@ -85,10 +127,17 @@ data class DebtRecordEntity(
     val dueDateMillis: Long,
     val phoneOrTag: String,
     val colorHex: Long,
-    val repaymentHistory: String = ""
+    val repaymentHistory: String = "",
+    val isDemo: Boolean = false
 )
 
-@Entity(tableName = "savings_goals")
+@Entity(
+    tableName = "savings_goals",
+    indices = [
+        Index("deadlineMillis"),
+        Index("isDemo")
+    ]
+)
 data class SavingsGoalEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val title: String,
@@ -98,10 +147,18 @@ data class SavingsGoalEntity(
     val currencyCode: String = "BDT",
     val deadlineMillis: Long,
     val colorHex: Long,
-    val iconKey: String
+    val iconKey: String,
+    val isDemo: Boolean = false
 )
 
-@Entity(tableName = "app_notifications")
+@Entity(
+    tableName = "app_notifications",
+    indices = [
+        Index("timestamp"),
+        Index("isRead"),
+        Index("isDemo")
+    ]
+)
 data class AppNotificationEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val title: String,
@@ -109,10 +166,19 @@ data class AppNotificationEntity(
     val categoryTag: String, // "BUDGET", "BILL", "SECURITY", "INSIGHT", "DEBT", "GOAL", "REMINDER"
     val timestamp: Long,
     val isRead: Boolean = false,
-    val accentColorHex: Long
+    val accentColorHex: Long,
+    val isDemo: Boolean = false
 )
 
-@Entity(tableName = "scheduled_reminders")
+@Entity(
+    tableName = "scheduled_reminders",
+    indices = [
+        Index("triggerTimeMillis"),
+        Index("sourceType", "sourceId"),
+        Index("notificationId"),
+        Index("isDemo")
+    ]
+)
 data class ScheduledReminderEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val notificationId: Int, // Stable unique ID derived from sourceType + sourceId
@@ -127,7 +193,8 @@ data class ScheduledReminderEntity(
     val leadTimeDays: Int = 1,
     val isEnabled: Boolean = true,
     val lastNotifiedMillis: Long = 0L,
-    val accentColorHex: Long = 0xFF6D4AFFL
+    val accentColorHex: Long = 0xFF6D4AFFL,
+    val isDemo: Boolean = false
 )
 
 @Entity(tableName = "exchange_rates")
@@ -162,5 +229,7 @@ data class UserPreferencesEntity(
     val quietHoursStartHour: Int = 22,
     val quietHoursEndHour: Int = 7,
     val reminderLeadTimeDays: Int = 1,
-    val hapticsEnabled: Boolean = true
+    val hapticsEnabled: Boolean = true,
+    val demoDataSeeded: Boolean = false,
+    val demoDataDeleted: Boolean = false
 )

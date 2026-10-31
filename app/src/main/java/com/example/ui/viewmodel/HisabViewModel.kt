@@ -18,6 +18,8 @@ import com.example.data.repository.HisabRepository
 import com.example.util.CurrencyCatalog
 import com.example.util.CurrencyFormatter
 import com.example.util.HisabNotificationManager
+import com.example.util.PdfExportResult
+import com.example.util.PdfExporter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -1083,10 +1085,31 @@ class HisabViewModel(
         }
     }
 
+    fun deleteDemoData() {
+        viewModelScope.launch {
+            repository.deleteDemoData()
+            showSnackbar("All demo accounts & sample transactions permanently deleted")
+        }
+    }
+
     fun resetSampleData() {
         viewModelScope.launch {
             repository.resetToDefaultSampleData()
             showSnackbar("Sample financial data & exchange rates restored")
+        }
+    }
+
+    fun exportPdfStatement(
+        context: Context,
+        onResult: (PdfExportResult) -> Unit
+    ) {
+        viewModelScope.launch {
+            val result = PdfExporter.generateAndSaveStatementPdf(
+                context = context,
+                uiState = uiState.value,
+                useBangladeshiFormat = useBangladeshiFormat.value
+            )
+            onResult(result)
         }
     }
 

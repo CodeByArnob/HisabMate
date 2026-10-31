@@ -44,13 +44,16 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AlarmAdd
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CurrencyExchange
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.DoneAll
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.Public
@@ -58,6 +61,11 @@ import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import com.example.util.PdfExporter
+import com.example.util.PdfExportResult
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -1160,20 +1168,25 @@ fun ProfileAndSettingsScreen(
     onImportCsv: (String) -> Unit,
     onExportSummary: () -> Unit,
     onResetData: () -> Unit,
+    onDeleteDemoData: () -> Unit = {},
     onNavigate: (AppScreen) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val view = LocalView.current
+    val coroutineScope = rememberCoroutineScope()
     val colors = HisabTheme.colors
     val baseMeta = CurrencyCatalog.getMetadata(baseCurrencyCode)
 
     var showResetConfirmation by remember { mutableStateOf(false) }
+    var showDeleteDemoConfirmation by remember { mutableStateOf(false) }
     var showPinSetupDialog by remember { mutableStateOf(false) }
     var showNotificationRationalePrimer by remember { mutableStateOf(false) }
     var dataDialogMode by remember { mutableStateOf<String?>(null) }
     var dataPayloadText by remember { mutableStateOf("") }
+    var isExportingPdf by remember { mutableStateOf(false) }
+    var pdfExportResult by remember { mutableStateOf<PdfExportResult?>(null) }
 
     var hasPostNotificationsPermission by remember {
         mutableStateOf(
@@ -1920,21 +1933,21 @@ fun ProfileAndSettingsScreen(
                 // PDF Statement Export
                 Button(
                     onClick = {
-                        val pdfPath = generatePdfStatementFile(
-                            context = context,
-                            uiState = uiState,
-                            useBangladeshiFormat = useBangladeshiFormat
-                        )
-                        dataPayloadText = "PDF Financial Statement generated at:\n$pdfPath\n\n" +
-                            "Base Currency: ${uiState.baseCurrencyCode}\n" +
-                            "Total Balance: ${CurrencyFormatter.formatCurrency(uiState.totalBalance, uiState.baseCurrencyCode, useBangladeshiFormat)}\n" +
-                            "Monthly Inflow: ${CurrencyFormatter.formatCurrency(uiState.monthlyIncome, uiState.baseCurrencyCode, useBangladeshiFormat)}\n" +
-                            "Monthly Outflow: ${CurrencyFormatter.formatCurrency(uiState.monthlyExpense, uiState.baseCurrencyCode, useBangladeshiFormat)}\n" +
-                            "Transactions Included: ${uiState.transactions.size}"
-                        dataDialogMode = "PDF_READY"
-                        onExportSummary()
+                        coroutineScope.launch {
+                            isExportingPdf = true
+                            val result = PdfExporter.generateAndSaveStatementPdf(
+                                context = context,
+                                uiState = uiState,
+                                useBangladeshiFormat = useBangladeshiFormat
+                            )
+                            isExportingPdf = false
+                            pdfExportResult = result
+                            dataDialogMode = "PDF_RESULT"
+                            onExportSummary()
+                        }
                     },
                     shape = RoundedCornerShape(16.dp),
+                    enabled = !isExportingPdf,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp)
@@ -1942,7 +1955,10 @@ fun ProfileAndSettingsScreen(
                 ) {
                     Icon(imageVector = Icons.Default.PictureAsPdf, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Export PDF Financial Statement ($baseCurrencyCode)", fontWeight = FontWeight.Bold)
+                    Text(
+                        if (isExportingPdf) "Generating Physical PDF Statement..." else "Export PDF Financial Statement ($baseCurrencyCode)",
+                        fontWeight = FontWeight.Bold
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
@@ -2037,10 +2053,28 @@ fun ProfileAndSettingsScreen(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
+                // Delete All Demo Data (Permanent) Action
+                OutlinedButton(
+                    onClick = { showDeleteDemoConfirmation = true },
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFDC2626)),
+                    border = BorderStroke(1.dp, Color(0xFFFCA5A5)),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .testTag("btn_delete_demo_data")
+                ) {
+                    Icon(imageVector = Icons.Default.DeleteSweep, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Delete All Demo Data (Permanent)", fontWeight = FontWeight.Bold)
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
                 OutlinedButton(
                     onClick = { showResetConfirmation = true },
                     shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.expenseText),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.inkSecondary),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp)
@@ -2065,70 +2099,200 @@ fun ProfileAndSettingsScreen(
     }
 
     dataDialogMode?.let { mode ->
+        if (mode == "PDF_RESULT") {
+            val res = pdfExportResult
+            AlertDialog(
+                onDismissRequest = { dataDialogMode = null },
+                containerColor = colors.cardSurface,
+                title = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        if (res?.isSuccess == true) {
+                            Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF059669))
+                            Text("PDF Statement Exported", fontWeight = FontWeight.Bold, color = colors.inkPrimary)
+                        } else {
+                            Icon(Icons.Default.Close, contentDescription = null, tint = Color(0xFFDC2626))
+                            Text("Export Failed", fontWeight = FontWeight.Bold, color = colors.inkPrimary)
+                        }
+                    }
+                },
+                text = {
+                    if (res?.isSuccess == true) {
+                        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Text(
+                                text = "Your official multi-currency financial statement has been generated and verified physically (>0 bytes).",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = colors.inkPrimary
+                            )
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = colors.containerInteractive,
+                                border = BorderStroke(1.dp, colors.borderStrong),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                                    Text("• File: ${res.fileName}", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold, color = colors.inkPrimary)
+                                    Text("• Size: ${res.fileSizeFormatted} (${res.byteCount} bytes)", style = MaterialTheme.typography.bodySmall, color = colors.inkSecondary)
+                                    Text("• Saved To: ${res.filePath}", style = MaterialTheme.typography.bodySmall, color = colors.inkSecondary)
+                                }
+                            }
+                        }
+                    } else {
+                        Text(
+                            text = res?.errorMessage ?: "An error occurred while generating PDF statement.",
+                            color = colors.expenseText
+                        )
+                    }
+                },
+                confirmButton = {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (res?.isSuccess == true && res.fileUri != null) {
+                            Button(
+                                onClick = {
+                                    runCatching {
+                                        context.startActivity(PdfExporter.createViewPdfIntent(context, res.fileUri))
+                                    }
+                                }
+                            ) {
+                                Icon(Icons.Default.OpenInNew, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("Open PDF", fontWeight = FontWeight.Bold)
+                            }
+
+                            OutlinedButton(
+                                onClick = {
+                                    runCatching {
+                                        context.startActivity(
+                                            PdfExporter.createSharePdfIntent(
+                                                context,
+                                                res.fileUri,
+                                                "HisabMate Financial Statement ($baseCurrencyCode)"
+                                            )
+                                        )
+                                    }
+                                }
+                            ) {
+                                Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("Share", fontWeight = FontWeight.Bold)
+                            }
+                        } else {
+                            Button(onClick = { dataDialogMode = null }) {
+                                Text("Close", fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                },
+                dismissButton = {
+                    if (res?.isSuccess == true) {
+                        TextButton(onClick = { dataDialogMode = null }) {
+                            Text("Done")
+                        }
+                    }
+                }
+            )
+        } else {
+            AlertDialog(
+                onDismissRequest = { dataDialogMode = null },
+                containerColor = colors.cardSurface,
+                title = {
+                    Text(
+                        text = when (mode) {
+                            "CSV_EXPORT" -> "CSV Ledger Exported"
+                            "CSV_IMPORT" -> "Import Transactions from CSV"
+                            "JSON_BACKUP" -> "Local JSON Backup Ready"
+                            else -> "Restore Database from JSON Backup"
+                        },
+                        fontWeight = FontWeight.Bold,
+                        color = colors.inkPrimary
+                    )
+                },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(
+                            text = when (mode) {
+                                "CSV_EXPORT" -> "Saved to hisabmate_transactions.csv. You can copy or inspect the CSV rows below:"
+                                "CSV_IMPORT" -> "Paste CSV lines (Title,Merchant,Amount,Currency,Type,Category,Account,Note):"
+                                "JSON_BACKUP" -> "Saved to hisabmate_backup.json. Copy or keep this JSON snapshot:"
+                                else -> "Paste your HisabMate JSON backup below to restore accounts and transactions:"
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = colors.inkSecondary
+                        )
+                        OutlinedTextField(
+                            value = dataPayloadText,
+                            onValueChange = { dataPayloadText = it },
+                            readOnly = mode == "CSV_EXPORT" || mode == "JSON_BACKUP",
+                            minLines = 5,
+                            maxLines = 9,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            when (mode) {
+                                "CSV_IMPORT" -> onImportCsv(dataPayloadText)
+                                "JSON_RESTORE" -> if (dataPayloadText.isNotBlank()) onRestoreBackupJson(dataPayloadText)
+                            }
+                            dataDialogMode = null
+                        }
+                    ) {
+                        Text(
+                            text = when (mode) {
+                                "CSV_IMPORT" -> "Import CSV Rows"
+                                "JSON_RESTORE" -> "Restore Backup"
+                                else -> "Done"
+                            },
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                },
+                dismissButton = {
+                    if (mode == "CSV_IMPORT" || mode == "JSON_RESTORE") {
+                        TextButton(onClick = { dataDialogMode = null }) {
+                            Text("Cancel")
+                        }
+                    }
+                }
+            )
+        }
+    }
+
+    if (showDeleteDemoConfirmation) {
         AlertDialog(
-            onDismissRequest = { dataDialogMode = null },
+            onDismissRequest = { showDeleteDemoConfirmation = false },
             containerColor = colors.cardSurface,
             title = {
                 Text(
-                    text = when (mode) {
-                        "PDF_READY" -> "PDF Statement Generated"
-                        "CSV_EXPORT" -> "CSV Ledger Exported"
-                        "CSV_IMPORT" -> "Import Transactions from CSV"
-                        "JSON_BACKUP" -> "Local JSON Backup Ready"
-                        else -> "Restore Database from JSON Backup"
-                    },
+                    text = "Delete All Demo Data?",
                     fontWeight = FontWeight.Bold,
                     color = colors.inkPrimary
                 )
             },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        text = when (mode) {
-                            "PDF_READY" -> "Your formatted multi-currency PDF statement has been saved to local storage."
-                            "CSV_EXPORT" -> "Saved to hisabmate_transactions.csv. You can copy or inspect the CSV rows below:"
-                            "CSV_IMPORT" -> "Paste CSV lines (Title,Merchant,Amount,Currency,Type,Category,Account,Note):"
-                            "JSON_BACKUP" -> "Saved to hisabmate_backup.json. Copy or keep this JSON snapshot:"
-                            else -> "Paste your HisabMate JSON backup below to restore accounts and transactions:"
-                        },
-                        style = MaterialTheme.typography.bodySmall,
-                        color = colors.inkSecondary
-                    )
-                    OutlinedTextField(
-                        value = dataPayloadText,
-                        onValueChange = { dataPayloadText = it },
-                        readOnly = mode == "PDF_READY" || mode == "CSV_EXPORT" || mode == "JSON_BACKUP",
-                        minLines = 5,
-                        maxLines = 9,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
+                Text(
+                    text = "This will permanently remove all pre-loaded sample accounts, demo transactions, recurring bills, demo debts and savings goals.\n\nAny accounts or transactions you personally created will remain completely intact.\n\nNotice: Once deleted, demo data will NEVER reappear upon app restart or screen reload.",
+                    color = colors.inkSecondary
+                )
             },
             confirmButton = {
                 Button(
                     onClick = {
-                        when (mode) {
-                            "CSV_IMPORT" -> onImportCsv(dataPayloadText)
-                            "JSON_RESTORE" -> if (dataPayloadText.isNotBlank()) onRestoreBackupJson(dataPayloadText)
-                        }
-                        dataDialogMode = null
-                    }
+                        onDeleteDemoData()
+                        showDeleteDemoConfirmation = false
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDC2626))
                 ) {
-                    Text(
-                        text = when (mode) {
-                            "CSV_IMPORT" -> "Import CSV Rows"
-                            "JSON_RESTORE" -> "Restore Backup"
-                            else -> "Done"
-                        },
-                        fontWeight = FontWeight.Bold
-                    )
+                    Text("Delete All Demo Data", color = Color.White, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
-                if (mode == "CSV_IMPORT" || mode == "JSON_RESTORE") {
-                    TextButton(onClick = { dataDialogMode = null }) {
-                        Text("Cancel")
-                    }
+                TextButton(onClick = { showDeleteDemoConfirmation = false }) {
+                    Text("Cancel")
                 }
             }
         )
@@ -2230,70 +2394,3 @@ fun ProfileAndSettingsScreen(
     }
 }
 
-private fun generatePdfStatementFile(
-    context: android.content.Context,
-    uiState: HisabUiState,
-    useBangladeshiFormat: Boolean
-): String {
-    val file = File(context.filesDir, "HisabMate_Statement_${uiState.baseCurrencyCode}.pdf")
-    runCatching {
-        val pdfDocument = PdfDocument()
-        val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create()
-        val page = pdfDocument.startPage(pageInfo)
-        val canvas = page.canvas
-        val titlePaint = Paint().apply {
-            textSize = 18f
-            isFakeBoldText = true
-        }
-        val bodyPaint = Paint().apply {
-            textSize = 11f
-        }
-
-        var y = 48f
-        canvas.drawText("HisabMate — Multi-Currency Financial Statement", 40f, y, titlePaint)
-        y += 26f
-        canvas.drawText(
-            "Base Currency: ${uiState.baseCurrencyCode} | Total Net Worth: ${
-                CurrencyFormatter.formatCurrency(uiState.totalBalance, uiState.baseCurrencyCode, useBangladeshiFormat)
-            }",
-            40f,
-            y,
-            bodyPaint
-        )
-        y += 18f
-        canvas.drawText(
-            "Monthly Inflow: ${
-                CurrencyFormatter.formatCurrency(uiState.monthlyIncome, uiState.baseCurrencyCode, useBangladeshiFormat)
-            } | Monthly Outflow: ${
-                CurrencyFormatter.formatCurrency(uiState.monthlyExpense, uiState.baseCurrencyCode, useBangladeshiFormat)
-            }",
-            40f,
-            y,
-            bodyPaint
-        )
-        y += 28f
-        canvas.drawText("Recent Transactions:", 40f, y, titlePaint)
-        y += 20f
-
-        uiState.transactions.take(22).forEach { tx ->
-            if (y < 790f) {
-                val amtStr = CurrencyFormatter.formatCurrency(
-                    tx.amount,
-                    tx.currencyCode,
-                    useBangladeshiFormat,
-                    includeCodeSuffix = true
-                )
-                val line = "${CurrencyFormatter.formatDateShort(tx.timestamp)}  |  ${tx.type}  |  ${tx.title} (${tx.accountLabel})  |  $amtStr"
-                canvas.drawText(line.take(92), 40f, y, bodyPaint)
-                y += 16f
-            }
-        }
-
-        pdfDocument.finishPage(page)
-        FileOutputStream(file).use { out ->
-            pdfDocument.writeTo(out)
-        }
-        pdfDocument.close()
-    }
-    return file.absolutePath
-}

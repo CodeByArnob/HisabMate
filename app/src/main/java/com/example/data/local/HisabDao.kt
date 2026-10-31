@@ -221,4 +221,48 @@ interface HisabDao {
 
     @Query("DELETE FROM exchange_rates")
     suspend fun clearAllExchangeRates()
+
+    // Targeted Demo Data Management
+    @Query("DELETE FROM transactions WHERE isDemo = 1")
+    suspend fun deleteDemoTransactions()
+
+    @Query("DELETE FROM accounts WHERE isDemo = 1")
+    suspend fun deleteDemoAccounts()
+
+    @Query("DELETE FROM categories WHERE isDemo = 1")
+    suspend fun deleteDemoCategories()
+
+    @Query("DELETE FROM recurring_payments WHERE isDemo = 1")
+    suspend fun deleteDemoRecurring()
+
+    @Query("DELETE FROM debt_records WHERE isDemo = 1")
+    suspend fun deleteDemoDebts()
+
+    @Query("DELETE FROM savings_goals WHERE isDemo = 1")
+    suspend fun deleteDemoGoals()
+
+    @Query("DELETE FROM scheduled_reminders WHERE isDemo = 1")
+    suspend fun deleteDemoScheduledReminders()
+
+    @Query("DELETE FROM app_notifications WHERE isDemo = 1")
+    suspend fun deleteDemoNotifications()
+
+    @Query("SELECT COUNT(*) FROM transactions WHERE isDemo = 1")
+    suspend fun getDemoTransactionCount(): Int
+
+    @Query("SELECT COUNT(*) FROM accounts WHERE isDemo = 1")
+    suspend fun getDemoAccountCount(): Int
+
+    @androidx.room.Transaction
+    suspend fun deleteAllDemoData() {
+        deleteDemoTransactions()
+        deleteDemoAccounts()
+        deleteDemoCategories()
+        deleteDemoRecurring()
+        deleteDemoDebts()
+        deleteDemoGoals()
+        deleteDemoScheduledReminders()
+        deleteDemoNotifications()
+    }
 }
+

@@ -428,6 +428,7 @@ fun HisabMateAppRoot() {
                                     viewModel.showSnackbar("PDF Statement exported: Net Liquidity $netStr (${uiState.transactions.size} entries)")
                                 },
                                 onResetData = viewModel::resetSampleData,
+                                onDeleteDemoData = viewModel::deleteDemoData,
                                 onNavigate = viewModel::navigateTo,
                                 onBack = { viewModel.navigateBack() }
                             )

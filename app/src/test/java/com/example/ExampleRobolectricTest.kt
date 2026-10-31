@@ -46,6 +46,7 @@ import com.example.ui.viewmodel.ThemePreference
 import com.example.util.CurrencyCatalog
 import com.example.util.CurrencyFormatter
 import com.example.util.HisabNotificationManager
+import com.example.util.PdfExporter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -243,6 +244,123 @@ class ExampleRobolectricTest {
 
         val restoredSuccess = repository.restoreBackupJson(jsonPayload)
         assertTrue(restoredSuccess)
+    }
+
+    @Test
+    fun `delete all demo data deletes sample records and preserves real user records`() = runBlocking {
+        repository.ensureSeeded()
+        val initialAccounts = repository.accounts.first()
+        val initialTxs = repository.transactions.first()
+        assertTrue("Expected seeded accounts", initialAccounts.any { it.isDemo })
+        assertTrue("Expected seeded transactions", initialTxs.any { it.isDemo })
+
+        // Create a real user account and user transaction
+        repository.addAccount(
+            name = "Personal HSBC Salary",
+            type = "BANK",
+            balance = 85000.0,
+            currencyCode = "BDT",
+            maskedNumber = "HSBC •••• 9912",
+            colorHex = 0xFF059669L
+        )
+        val userAcc = repository.accounts.first().find { it.name == "Personal HSBC Salary" }!!
+        val userCat = repository.categories.first().first()
+
+        repository.addTransaction(
+            title = "Personal Grocery Store",
+            merchant = "Meena Bazar",
+            amount = 3200.0,
+            currencyCode = "BDT",
+            type = "EXPENSE",
+            category = userCat,
+            account = userAcc,
+            note = "Real User Purchase"
+        )
+
+        // Verify user items exist alongside demo items
+        val preDeleteAccounts = repository.accounts.first()
+        val preDeleteTxs = repository.transactions.first()
+        assertTrue(preDeleteAccounts.any { it.name == "Personal HSBC Salary" && !it.isDemo })
+        assertTrue(preDeleteTxs.any { it.title == "Personal Grocery Store" && !it.isDemo })
+
+        // Execute Delete All Demo Data
+        repository.deleteDemoData()
+
+        val postDeleteAccounts = repository.accounts.first()
+        val postDeleteTxs = repository.transactions.first()
+        val postDeleteDebts = repository.debtRecords.first()
+        val postDeleteGoals = repository.savingsGoals.first()
+        val postDeleteRecurring = repository.recurringPayments.first()
+
+        // Verify ALL demo items are eradicated
+        assertTrue("No demo accounts should exist", postDeleteAccounts.none { it.isDemo })
+        assertTrue("No demo transactions should exist", postDeleteTxs.none { it.isDemo })
+        assertTrue("No demo debts should exist", postDeleteDebts.none { it.isDemo })
+        assertTrue("No demo goals should exist", postDeleteGoals.none { it.isDemo })
+        assertTrue("No demo recurring should exist", postDeleteRecurring.none { it.isDemo })
+
+        // Verify the real user account and transaction were completely preserved
+        assertTrue("Real user account must be preserved", postDeleteAccounts.any { it.name == "Personal HSBC Salary" })
+        assertTrue("Real user transaction must be preserved", postDeleteTxs.any { it.title == "Personal Grocery Store" })
+    }
+
+    @Test
+    fun `app restart and database reopen never re-seeds demo data after deletion`() = runBlocking {
+        repository.ensureSeeded()
+        assertTrue(repository.accounts.first().isNotEmpty())
+
+        // Delete all demo data
+        repository.deleteDemoData()
+        val accountsAfterDelete = repository.accounts.first()
+        assertTrue("Demo accounts should be removed", accountsAfterDelete.none { it.isDemo })
+
+        // Simulate application restart or fresh ViewModel init by calling ensureSeeded() again
+        repository.ensureSeeded()
+
+        val accountsAfterRestart = repository.accounts.first()
+        val txsAfterRestart = repository.transactions.first()
+
+        // Critical Check: Demo data must NEVER reappear!
+        assertTrue("Demo accounts must NOT reappear after app restart", accountsAfterRestart.none { it.isDemo })
+        assertTrue("Demo transactions must NOT reappear after app restart", txsAfterRestart.none { it.isDemo })
+    }
+
+    @Test
+    fun `reset sample data restores demo records and re-arms idempotent state`() = runBlocking {
+        repository.ensureSeeded()
+        repository.deleteDemoData()
+        assertTrue(repository.transactions.first().none { it.isDemo })
+
+        // User explicitly triggers Reset Sample Data
+        repository.resetToDefaultSampleData()
+
+        val restoredAccounts = repository.accounts.first()
+        val restoredTxs = repository.transactions.first()
+
+        assertTrue("Demo accounts should be restored", restoredAccounts.any { it.isDemo })
+        assertTrue("Demo transactions should be restored", restoredTxs.any { it.isDemo })
+        assertEquals(5, restoredAccounts.filter { it.isDemo }.size)
+        assertEquals(19, restoredTxs.filter { it.isDemo }.size)
+    }
+
+    @Test
+    fun `pdf statement generation produces verified non-empty physical document with valid byte count`() = runBlocking {
+        val sampleUiState = buildSampleUiState(baseCurrency = "BDT")
+        val result = PdfExporter.generateAndSaveStatementPdf(
+            context = context,
+            uiState = sampleUiState,
+            useBangladeshiFormat = true
+        )
+
+        assertTrue("Expected PDF export to succeed: ${result.errorMessage}", result.isSuccess)
+        assertNotNull("Expected valid file URI", result.fileUri)
+        assertNotNull("Expected valid file path", result.filePath)
+        assertTrue("Expected PDF byte count > 1000 bytes (was ${result.byteCount})", result.byteCount > 1000L)
+        assertTrue("Expected non-empty filename", result.fileName.endsWith(".pdf"))
+
+        val internalFile = File(context.filesDir, "exports/${result.fileName}")
+        assertTrue("Internal PDF file must physically exist", internalFile.exists())
+        assertEquals(result.byteCount, internalFile.length())
     }
 
     @Test

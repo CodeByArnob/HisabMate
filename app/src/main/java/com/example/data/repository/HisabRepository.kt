@@ -16,7 +16,9 @@ import com.example.util.CurrencyCatalog
 import com.example.util.CurrencyFormatter
 import com.example.util.HisabHaptics
 import com.example.util.HisabNotificationManager
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -33,7 +35,7 @@ class HisabRepository(private val dao: HisabDao) {
     val exchangeRates: Flow<List<ExchangeRateEntity>> = dao.getAllExchangeRates()
     val userPreferences: Flow<UserPreferencesEntity?> = dao.getUserPreferences()
 
-    suspend fun ensureSeeded() {
+    suspend fun ensureSeeded() = withContext(Dispatchers.IO) {
         val existingRates = dao.getExchangeRatesList()
         if (existingRates.size < CurrencyCatalog.supportedCurrencies.size) {
             val existingCodes = existingRates.map { it.currencyCode.uppercase() }.toSet()
@@ -52,19 +54,78 @@ class HisabRepository(private val dao: HisabDao) {
                 hasCompletedOnboarding = false,
                 useSouthAsianGrouping = true,
                 themeMode = "LIGHT",
-                isBalanceHidden = false
+                isBalanceHidden = false,
+                demoDataSeeded = true,
+                demoDataDeleted = false
             )
             dao.insertUserPreferences(defaultPrefs)
             HisabHaptics.isHapticsEnabled = defaultPrefs.hapticsEnabled
+            if (dao.getAccountCount() == 0) {
+                seedAllDefaultData()
+            }
         } else {
             HisabHaptics.isHapticsEnabled = currentPrefs.hapticsEnabled
-        }
-        if (dao.getAccountCount() == 0) {
-            seedAllDefaultData()
+            // CRITICAL IDEMPOTENCY GUARD:
+            // If demo data was explicitly deleted or already seeded, NEVER re-seed on restart/launch!
+            if (!currentPrefs.demoDataDeleted && !currentPrefs.demoDataSeeded) {
+                if (dao.getAccountCount() == 0) {
+                    seedAllDefaultData()
+                    dao.insertUserPreferences(currentPrefs.copy(demoDataSeeded = true))
+                }
+            }
         }
     }
 
-    suspend fun resetToDefaultSampleData() {
+    suspend fun deleteDemoData() = withContext(Dispatchers.IO) {
+        dao.deleteAllDemoData()
+
+        // If no user accounts remain, guarantee at least one primary user account
+        if (dao.getAccountCount() == 0) {
+            dao.insertAccount(
+                AccountEntity(
+                    name = "Primary Cash Wallet",
+                    type = "CASH",
+                    balance = 0.0,
+                    currencyCode = "BDT",
+                    maskedNumber = "Cash",
+                    colorHex = 0xFF059669L,
+                    iconKey = "CASH",
+                    isPrimary = true,
+                    isDemo = false
+                )
+            )
+        }
+
+        // If no user categories remain, guarantee essential categories
+        val cats = dao.getAllCategoriesOnce()
+        if (cats.isEmpty()) {
+            val now = System.currentTimeMillis()
+            dao.insertCategory(
+                CategoryEntity(
+                    name = "General Expense",
+                    type = "EXPENSE",
+                    monthlyBudget = 15000.0,
+                    budgetCurrencyCode = "BDT",
+                    colorHex = 0xFF6D4AFFL,
+                    iconKey = "GROCERIES",
+                    startDateMillis = now,
+                    endDateMillis = now + 30L * 24L * 60L * 60L * 1000L,
+                    isQuickAction = true,
+                    isDemo = false
+                )
+            )
+        }
+
+        val currentPrefs = dao.getUserPreferencesOnce() ?: UserPreferencesEntity()
+        dao.insertUserPreferences(
+            currentPrefs.copy(
+                demoDataDeleted = true,
+                demoDataSeeded = false
+            )
+        )
+    }
+
+    suspend fun resetToDefaultSampleData() = withContext(Dispatchers.IO) {
         dao.clearAllTransactions()
         dao.clearAllAccounts()
         dao.clearAllCategories()
@@ -76,6 +137,14 @@ class HisabRepository(private val dao: HisabDao) {
         dao.clearAllExchangeRates()
         dao.insertExchangeRates(SeedDataGenerator.initialExchangeRates())
         seedAllDefaultData()
+
+        val currentPrefs = dao.getUserPreferencesOnce() ?: UserPreferencesEntity()
+        dao.insertUserPreferences(
+            currentPrefs.copy(
+                demoDataDeleted = false,
+                demoDataSeeded = true
+            )
+        )
     }
 
     private suspend fun seedAllDefaultData() {
@@ -862,9 +931,9 @@ class HisabRepository(private val dao: HisabDao) {
     // Backup, Restore, CSV Export & CSV Import
     // =========================================================================
 
-    suspend fun exportBackupJson(): String {
+    suspend fun exportBackupJson(): String = withContext(Dispatchers.IO) {
         val root = JSONObject()
-        root.put("version", 5)
+        root.put("version", 6)
         root.put("exportedAt", System.currentTimeMillis())
 
         val prefs = dao.getUserPreferencesOnce() ?: UserPreferencesEntity()
@@ -888,6 +957,7 @@ class HisabRepository(private val dao: HisabDao) {
                     put("colorHex", acc.colorHex)
                     put("iconKey", acc.iconKey)
                     put("isPrimary", acc.isPrimary)
+                    put("isDemo", acc.isDemo)
                 }
             )
         }
@@ -915,17 +985,18 @@ class HisabRepository(private val dao: HisabDao) {
                     put("receiptUri", tx.receiptUri)
                     put("splitDetails", tx.splitDetails)
                     put("isFavorite", tx.isFavorite)
+                    put("isDemo", tx.isDemo)
                 }
             )
         }
         root.put("transactions", txsArr)
-        return root.toString(2)
+        root.toString(2)
     }
 
-    suspend fun restoreBackupJson(jsonString: String): Boolean {
-        return try {
+    suspend fun restoreBackupJson(jsonString: String): Boolean = withContext(Dispatchers.IO) {
+        try {
             val root = JSONObject(jsonString)
-            val txsArr = root.optJSONArray("transactions") ?: return false
+            val txsArr = root.optJSONArray("transactions") ?: return@withContext false
             val importedTxs = mutableListOf<TransactionEntity>()
             for (i in 0 until txsArr.length()) {
                 val obj = txsArr.getJSONObject(i)
@@ -948,7 +1019,8 @@ class HisabRepository(private val dao: HisabDao) {
                         isRecurring = obj.optBoolean("isRecurring", false),
                         receiptUri = obj.optString("receiptUri", ""),
                         splitDetails = obj.optString("splitDetails", ""),
-                        isFavorite = obj.optBoolean("isFavorite", false)
+                        isFavorite = obj.optBoolean("isFavorite", false),
+                        isDemo = obj.optBoolean("isDemo", false)
                     )
                 )
             }
@@ -962,7 +1034,7 @@ class HisabRepository(private val dao: HisabDao) {
         }
     }
 
-    suspend fun exportTransactionsCsv(): String {
+    suspend fun exportTransactionsCsv(): String = withContext(Dispatchers.IO) {
         val sb = StringBuilder()
         sb.appendLine("Date,Title,Merchant,Type,OriginalAmount,CurrencyCode,Category,Account,Note,SplitDetails,Receipt")
         val list = dao.getAllTransactionsOnce()
@@ -975,16 +1047,16 @@ class HisabRepository(private val dao: HisabDao) {
             val safeReceipt = tx.receiptUri.replace(",", " ")
             sb.appendLine("$dateStr,$safeTitle,$safeMerchant,${tx.type},${tx.amount},${tx.currencyCode},${tx.categoryName},${tx.accountLabel},$safeNote,$safeSplit,$safeReceipt")
         }
-        return sb.toString()
+        sb.toString()
     }
 
-    suspend fun importTransactionsCsv(csvContent: String): Int {
+    suspend fun importTransactionsCsv(csvContent: String): Int = withContext(Dispatchers.IO) {
         val lines = csvContent.lines().map { it.trim() }.filter { it.isNotEmpty() }
-        if (lines.isEmpty()) return 0
+        if (lines.isEmpty()) return@withContext 0
         val accounts = dao.getAllAccountsOnce()
         val categories = dao.getAllCategoriesOnce()
-        val defaultAcc = accounts.firstOrNull() ?: return 0
-        val defaultCat = categories.firstOrNull() ?: return 0
+        val defaultAcc = accounts.firstOrNull() ?: return@withContext 0
+        val defaultCat = categories.firstOrNull() ?: return@withContext 0
 
         var importedCount = 0
         val startIndex = if (lines.first().lowercase().startsWith("date,")) 1 else 0
@@ -1013,6 +1085,6 @@ class HisabRepository(private val dao: HisabDao) {
                 importedCount++
             }
         }
-        return importedCount
+        importedCount
     }
 }

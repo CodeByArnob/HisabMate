@@ -19,7 +19,7 @@ import com.example.util.CurrencyCatalog
         ExchangeRateEntity::class,
         UserPreferencesEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 abstract class HisabDatabase : RoomDatabase() {
@@ -29,6 +29,49 @@ abstract class HisabDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: HisabDatabase? = null
 
+        val MIGRATION_5_6 = object : androidx.room.migration.Migration(5, 6) {
+            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE accounts ADD COLUMN isDemo INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE categories ADD COLUMN isDemo INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE transactions ADD COLUMN isDemo INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE recurring_payments ADD COLUMN isDemo INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE debt_records ADD COLUMN isDemo INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE savings_goals ADD COLUMN isDemo INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE scheduled_reminders ADD COLUMN isDemo INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE app_notifications ADD COLUMN isDemo INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE user_preferences ADD COLUMN demoDataSeeded INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE user_preferences ADD COLUMN demoDataDeleted INTEGER NOT NULL DEFAULT 0")
+
+                // Indices for performance
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_accounts_isPrimary ON accounts(isPrimary)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_accounts_currencyCode ON accounts(currencyCode)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_accounts_isDemo ON accounts(isDemo)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_categories_type ON categories(type)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_categories_isDemo ON categories(isDemo)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_transactions_timestamp ON transactions(timestamp)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_transactions_accountId ON transactions(accountId)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_transactions_categoryId ON transactions(categoryId)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_transactions_type ON transactions(type)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_transactions_isFavorite ON transactions(isFavorite)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_transactions_isDemo ON transactions(isDemo)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_recurring_payments_nextDueDateMillis ON recurring_payments(nextDueDateMillis)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_recurring_payments_categoryId ON recurring_payments(categoryId)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_recurring_payments_isDemo ON recurring_payments(isDemo)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_debt_records_dueDateMillis ON debt_records(dueDateMillis)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_debt_records_type ON debt_records(type)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_debt_records_isDemo ON debt_records(isDemo)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_savings_goals_deadlineMillis ON savings_goals(deadlineMillis)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_savings_goals_isDemo ON savings_goals(isDemo)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_scheduled_reminders_triggerTimeMillis ON scheduled_reminders(triggerTimeMillis)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_scheduled_reminders_sourceType_sourceId ON scheduled_reminders(sourceType, sourceId)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_scheduled_reminders_notificationId ON scheduled_reminders(notificationId)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_scheduled_reminders_isDemo ON scheduled_reminders(isDemo)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_app_notifications_timestamp ON app_notifications(timestamp)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_app_notifications_isRead ON app_notifications(isRead)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_app_notifications_isDemo ON app_notifications(isDemo)")
+            }
+        }
+
         fun getInstance(context: Context): HisabDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -36,6 +79,7 @@ abstract class HisabDatabase : RoomDatabase() {
                     HisabDatabase::class.java,
                     "hisabmate_finance_db"
                 )
+                    .addMigrations(MIGRATION_5_6)
                     .fallbackToDestructiveMigration(dropAllTables = true)
                     .build()
                 INSTANCE = instance
@@ -118,7 +162,7 @@ object SeedDataGenerator {
             iconKey = "CASH",
             isPrimary = false
         )
-    )
+    ).map { it.copy(isDemo = true) }
 
     fun initialCategories(): List<CategoryEntity> {
         val now = System.currentTimeMillis()
@@ -235,7 +279,7 @@ object SeedDataGenerator {
                 iconKey = "FREELANCE",
                 isQuickAction = false
             )
-        )
+        ).map { it.copy(isDemo = true) }
     }
 
     fun initialTransactions(): List<TransactionEntity> {
@@ -584,7 +628,7 @@ object SeedDataGenerator {
                 timestamp = now - 2L * DAY_MS,
                 note = "Design system architecture consulting ($240.00 USD)"
             )
-        )
+        ).map { it.copy(isDemo = true) }
     }
 
     fun initialRecurringPayments(): List<RecurringPaymentEntity> {
@@ -650,7 +694,7 @@ object SeedDataGenerator {
                 iconKey = "RENT",
                 autoPay = false
             )
-        )
+        ).map { it.copy(isDemo = true) }
     }
 
     fun initialDebts(): List<DebtRecordEntity> {
@@ -695,7 +739,7 @@ object SeedDataGenerator {
                 colorHex = 0xFFF26419L,
                 repaymentHistory = "Oct 11: -৳4,000 via City Bank Amex"
             )
-        )
+        ).map { it.copy(isDemo = true) }
     }
 
     fun initialGoals(): List<SavingsGoalEntity> {
@@ -734,7 +778,7 @@ object SeedDataGenerator {
                 colorHex = 0xFF0084E9L,
                 iconKey = "FLIGHT"
             )
-        )
+        ).map { it.copy(isDemo = true) }
     }
 
     fun initialScheduledReminders(): List<ScheduledReminderEntity> {
@@ -815,7 +859,7 @@ object SeedDataGenerator {
                 isEnabled = true,
                 accentColorHex = 0xFF6D4AFFL
             )
-        )
+        ).map { it.copy(isDemo = true) }
     }
 
     fun initialNotifications(): List<AppNotificationEntity> {
@@ -848,6 +892,6 @@ object SeedDataGenerator {
                 isRead = true,
                 accentColorHex = 0xFF059669L
             )
-        )
+        ).map { it.copy(isDemo = true) }
     }
 }
