@@ -33,3 +33,4 @@ output-metadata.json
 
 # Temporary AI Studio chat attachments
 public/assets/aistudio/
+release-dist/

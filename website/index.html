@@ -77,7 +77,7 @@
         <a href="#currencies" class="mobile-nav-link"><span>14-Currency Offline FX Engine</span><span>→</span></a>
         <a href="#screenshots" class="mobile-nav-link"><span>Genuine App Screenshots (12)</span><span>→</span></a>
         <a href="#features" class="mobile-nav-link"><span>Core Fintech Capabilities</span><span>→</span></a>
-        <a href="#architecture" class="mobile-nav-link"><span>Clean MVVM &amp; Room SQLite v5</span><span>→</span></a>
+        <a href="#architecture" class="mobile-nav-link"><span>Clean MVVM &amp; Room SQLite v6</span><span>→</span></a>
         <a href="#faq" class="mobile-nav-link"><span>Privacy &amp; Engineering FAQ</span><span>→</span></a>
       </nav>
       <div class="mobile-drawer-cta">
@@ -116,10 +116,10 @@
 
           <div class="hero-cta">
             <a href="https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/HisabMate-v1.0.1-release.apk" class="btn btn-primary" rel="noopener">
-              ⬇ Download APK (v1.0.1)
+              Download APK (v1.0.1)
             </a>
             <a href="https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/HisabMate-v1.0.1-release.aab" class="btn btn-emerald" rel="noopener">
-              ⬇ Download App Bundle (.AAB)
+              Download App Bundle (AAB)
             </a>
             <a href="https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.1" class="btn btn-outline" target="_blank" rel="noopener">
               Release Notes &amp; Checksums
@@ -127,9 +127,9 @@
           </div>
 
           <div class="release-quick-meta">
-            <span>✓ Package: <code>com.aistudio.hisabmate.fntkbd</code></span>
-            <span>✓ Android 7.0 – 16 (API 24–36)</span>
-            <span>✓ Zero <code>INTERNET</code> Permission</span>
+            <span>Package: <code>com.aistudio.hisabmate.fntkbd</code></span>
+            <span>Android 7.0 – 16 (API 24–36)</span>
+            <span>Zero <code>INTERNET</code> Permission</span>
           </div>
 
           <div class="hero-metrics">
@@ -139,7 +139,7 @@
             </div>
             <div class="metric-item">
               <strong data-target-count="10" data-suffix=" Entities">10 Entities</strong>
-              <span>Room SQLite v5 Local Schema</span>
+              <span>Room SQLite v6 Local Schema</span>
             </div>
             <div class="metric-item">
               <strong data-target-count="100" data-suffix="% Local">100% Local</strong>
@@ -397,7 +397,7 @@
                   ৳3,65,000 of ৳5,00,000
                 </strong>
                 <span style="display: block; font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">
-                  100% on-device Room SQLite v5 record
+                  100% on-device Room SQLite v6 record
                 </span>
               </div>
             </div>
@@ -460,17 +460,17 @@
               </p>
               <ul class="download-meta-list">
                 <li><strong>Package ID:</strong> <code>com.aistudio.hisabmate.fntkbd</code></li>
-                <li><strong>Version:</strong> <code>1.0.0 (versionCode 1)</code></li>
+                <li><strong>Version:</strong> <code>1.0.1 (versionCode 2)</code></li>
                 <li><strong>Signature:</strong> APK Signature Scheme v2 (RSA-2048)</li>
               </ul>
             </div>
             <div>
               <div class="checksum-box" style="margin-bottom: 14px;">
-                <span>SHA-256: <code>98ce4769ec00433...65d63</code></span>
-                <button type="button" class="copy-btn" data-copy-text="98ce4769ec00433434db9ae0fbfc43a70cbbdc819571b929d840f6c469065d63">Copy</button>
+                <span>SHA-256: <code>eed42e6ea5d921e...3f2c46e</code></span>
+                <button type="button" class="copy-btn" data-copy-text="eed42e6ea5d921ef00eb990910ee931c2423aaeb6ed7ade11c1482d2e3f2c46e">Copy</button>
               </div>
               <a href="https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/HisabMate-v1.0.1-release.apk" class="btn btn-primary" style="width: 100%;" rel="noopener">
-                ⬇ Download HisabMate-v1.0.1-release.apk
+                Download HisabMate-v1.0.1-release.apk
               </a>
             </div>
           </article>
@@ -494,7 +494,7 @@
                 <a href="https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/SHA256SUMS.txt" style="text-decoration: underline; font-weight: 700; color: var(--accent-emerald);" target="_blank" rel="noopener">Download SHA256SUMS.txt</a>
               </div>
               <a href="https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/HisabMate-v1.0.1-release.aab" class="btn btn-emerald" style="width: 100%;" rel="noopener">
-                ⬇ Download HisabMate-v1.0.1-release.aab
+                Download HisabMate-v1.0.1-release.aab
               </a>
             </div>
           </article>
@@ -722,42 +722,74 @@
         <div class="section-header">
           <span class="section-tag">Production Capabilities</span>
           <h2>Engineered for Complete Financial Control</h2>
-          <p>Every screen and data flow in HisabMate is backed by Room SQLite v5 persistence, authentic ISO 4217 currency math, and responsive Material 3 components.</p>
+          <p>Every screen and data flow in HisabMate is backed by Room SQLite v6 persistence, authentic ISO 4217 currency math, and responsive Material 3 components.</p>
         </div>
 
         <div class="feature-grid">
           <div class="feature-card">
-            <div class="feature-icon">৳/$</div>
+            <div class="feature-icon" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 6v12M15 9.5a3.5 3.5 0 0 0-7 0c0 2 2 3 3.5 3.5s3.5 1.5 3.5 3.5a3.5 3.5 0 0 1-7 0"></path>
+              </svg>
+            </div>
             <h3>True Multi-Currency Architecture</h3>
             <p>Every account, transaction, budget, recurring bill, debt record, and savings goal stores its original ISO 4217 currency code and amount while consolidating into your chosen base currency.</p>
           </div>
 
           <div class="feature-card">
-            <div class="feature-icon">🏦</div>
+            <div class="feature-icon" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                <line x1="2" y1="10" x2="22" y2="10"></line>
+              </svg>
+            </div>
             <h3>Bank, Card &amp; MFS Presets</h3>
             <p>Purpose-built presets for Bangladeshi &amp; global rails including bKash, Nagad, Rocket, BRAC/City Bank cards, Wise USD, Revolut EUR, and physical cash wallets.</p>
           </div>
 
           <div class="feature-card">
-            <div class="feature-icon">📊</div>
+            <div class="feature-icon" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10"></line>
+                <line x1="12" y1="20" x2="12" y2="4"></line>
+                <line x1="6" y1="20" x2="6" y2="14"></line>
+              </svg>
+            </div>
             <h3>Multi-Period Smart Budgets</h3>
             <p>Configure Daily, Weekly, Monthly, Yearly, or Custom date-range budgets in any currency with customizable 50%–100% alert thresholds.</p>
           </div>
 
           <div class="feature-card">
-            <div class="feature-icon">🔔</div>
+            <div class="feature-icon" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+              </svg>
+            </div>
             <h3>Local AlarmManager Reminders</h3>
             <p>Four dedicated Android notification channels for bills, budgets, debts, and goal milestones—automatically rescheduled across device reboots.</p>
           </div>
 
           <div class="feature-card">
-            <div class="feature-icon">🤝</div>
+            <div class="feature-icon" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+            </div>
             <h3>Debt Ledger &amp; Savings Pots</h3>
             <p>Track money lent and borrowed with partial repayment logs alongside visual savings goals with milestone progress indicators.</p>
           </div>
 
           <div class="feature-card">
-            <div class="feature-icon">🔒</div>
+            <div class="feature-icon" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              </svg>
+            </div>
             <h3>100% Offline Privacy &amp; Export</h3>
             <p>No cloud accounts, no ads, and no telemetry. Protect your session with a 4-digit PIN lock and export your data anytime via JSON, CSV, or PDF.</p>
           </div>
@@ -775,7 +807,7 @@
         </div>
 
         <div class="motion-showcase-wrap">
-          <img src="assets/screenshots/architecture-motion.svg" alt="HisabMate Clean MVVM and Room SQLite v5 Architecture Diagram" width="1200" height="420" onerror="this.src='https://raw.githubusercontent.com/CodeByArnob/HisabMate/main/docs/screenshots/architecture-motion.svg'" />
+          <img src="assets/screenshots/architecture-motion.svg" alt="HisabMate Clean MVVM and Room SQLite v6 Architecture Diagram" width="1200" height="420" onerror="this.src='https://raw.githubusercontent.com/CodeByArnob/HisabMate/main/docs/screenshots/architecture-motion.svg'" />
         </div>
 
         <div class="arch-grid" id="build">
@@ -783,11 +815,11 @@
             <h3>Architecture &amp; Technical Stack</h3>
             <p style="color: var(--text-secondary); font-size: 0.92rem;">Built from the ground up with modern Android engineering standards:</p>
             <ul class="arch-list">
-              <li><span class="check-dot">✓</span> <span><strong>UI Layer:</strong> 100% Jetpack Compose with Material 3 &amp; centralized <code>HisabTheme</code> Light/Dark semantic tokens.</span></li>
-              <li><span class="check-dot">✓</span> <span><strong>State Management:</strong> Unidirectional MVVM via <code>HisabViewModel</code> &amp; lifecycle-aware <code>StateFlow</code> pipelines.</span></li>
-              <li><span class="check-dot">✓</span> <span><strong>Persistence:</strong> AndroidX Room SQLite v5 with 10 relational entities &amp; reactive Kotlin Flow DAOs.</span></li>
-              <li><span class="check-dot">✓</span> <span><strong>Verification:</strong> Automated Robolectric JVM unit &amp; Compose UI test suite + Android Lint verification.</span></li>
-              <li><span class="check-dot">✓</span> <span><strong>Release Signing:</strong> Production <code>assembleRelease</code> &amp; <code>bundleRelease</code> pipeline backed by encrypted GitHub Actions secrets.</span></li>
+              <li><span class="bullet-dot">&bull;</span> <span><strong>UI Layer:</strong> 100% Jetpack Compose with Material 3 &amp; centralized <code>HisabTheme</code> Light/Dark semantic tokens.</span></li>
+              <li><span class="bullet-dot">&bull;</span> <span><strong>State Management:</strong> Unidirectional MVVM via <code>HisabViewModel</code> &amp; lifecycle-aware <code>StateFlow</code> pipelines.</span></li>
+              <li><span class="bullet-dot">&bull;</span> <span><strong>Persistence:</strong> AndroidX Room SQLite v6 with 10 relational entities &amp; reactive Kotlin Flow DAOs.</span></li>
+              <li><span class="bullet-dot">&bull;</span> <span><strong>Verification:</strong> Automated Robolectric JVM unit &amp; Compose UI test suite + Android Lint verification.</span></li>
+              <li><span class="bullet-dot">&bull;</span> <span><strong>Release Signing:</strong> Production <code>assembleRelease</code> &amp; <code>bundleRelease</code> pipeline backed by encrypted GitHub Actions secrets.</span></li>
             </ul>
           </div>
 
@@ -804,7 +836,7 @@ gradle :app:testDebugUnitTest :app:lintDebug
 # Build Debug &amp; Signed Release APK + AAB
 gradle :app:assembleDebug :app:assembleRelease :app:bundleRelease</code></pre>
             <p style="margin-top: 12px; font-size: 0.84rem; color: var(--text-muted);">
-              Application ID: <code>com.aistudio.hisabmate.fntkbd</code> • Version: <code>1.0.0 (1)</code> • SDK: <code>minSdk 24 / targetSdk 36</code>
+              Application ID: <code>com.aistudio.hisabmate.fntkbd</code> • Version: <code>1.0.1 (2)</code> • SDK: <code>minSdk 24 / targetSdk 36</code>
             </p>
           </div>
         </div>
@@ -823,7 +855,7 @@ gradle :app:assembleDebug :app:assembleRelease :app:bundleRelease</code></pre>
         <div class="faq-list">
           <details class="faq-item" open>
             <summary><span>Does HisabMate send any financial data to external servers?</span><span>+</span></summary>
-            <p>No. HisabMate does not even request the Android <code>INTERNET</code> permission. All accounts, transactions, budgets, exchange rates, and reminders are stored strictly on-device in Room SQLite v5.</p>
+            <p>No. HisabMate does not even request the Android <code>INTERNET</code> permission. All accounts, transactions, budgets, exchange rates, and reminders are stored strictly on-device in Room SQLite v6.</p>
           </details>
 
           <details class="faq-item">

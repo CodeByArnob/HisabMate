@@ -179,27 +179,6 @@ document.addEventListener('DOMContentLoaded', () => {
         coinObjects.push({ mesh, pos, seed: idx * 1.5 });
       });
 
-      // 3D Ambient Dust Particle Cloud
-      const particleCount = 180;
-      const particleGeo = new THREE.BufferGeometry();
-      const particlePositions = new Float32Array(particleCount * 3);
-
-      for (let i = 0; i < particleCount * 3; i += 3) {
-        particlePositions[i] = (Math.random() - 0.5) * 44;
-        particlePositions[i + 1] = (Math.random() - 0.5) * 32;
-        particlePositions[i + 2] = (Math.random() - 0.5) * 20;
-      }
-      particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
-
-      const particleMat = new THREE.PointsMaterial({
-        color: 0x7c5cff,
-        size: 0.16,
-        transparent: true,
-        opacity: 0.65
-      });
-      const particleSystem = new THREE.Points(particleGeo, particleMat);
-      scene.add(particleSystem);
-
       // Mouse & Pointer Parallax
       let mouseX = 0;
       let mouseY = 0;
@@ -228,9 +207,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         tokensGroup.rotation.y = targetX * 0.25;
         tokensGroup.rotation.x = -targetY * 0.25;
-
-        particleSystem.rotation.y = elapsedTime * 0.02 + targetX * 0.1;
-        particleSystem.rotation.x = elapsedTime * 0.01;
 
         // Floating dynamic wave physics for coins
         coinObjects.forEach((item) => {
@@ -265,10 +241,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       window.__hisabmateThreeUpdateTheme = (theme) => {
         if (theme === 'light') {
-          particleMat.color.setHex(0x5b3df5);
           ambientLight.intensity = 0.9;
         } else {
-          particleMat.color.setHex(0x7c5cff);
           ambientLight.intensity = 0.7;
         }
       };
@@ -614,34 +588,9 @@ document.addEventListener('DOMContentLoaded', () => {
       currentSavings = Math.min(currentSavings + 25000, targetSavings);
       updateSavingsRing();
 
-      // Trigger GSAP coin particles burst
-      if (typeof gsap !== 'undefined' && coinZone && !isReducedMotion) {
-        for (let i = 0; i < 6; i++) {
-          const coin = document.createElement('div');
-          coin.textContent = '৳';
-          coin.style.position = 'absolute';
-          coin.style.left = '50%';
-          coin.style.top = '50%';
-          coin.style.fontSize = '18px';
-          coin.style.fontWeight = 'bold';
-          coin.style.color = '#f59e0b';
-          coin.style.pointerEvents = 'none';
-          coin.style.zIndex = '100';
-          coinZone.appendChild(coin);
-
-          const angle = (Math.PI * 2 * i) / 6;
-          const dist = 40 + Math.random() * 30;
-
-          gsap.to(coin, {
-            x: Math.cos(angle) * dist,
-            y: Math.sin(angle) * dist - 20,
-            opacity: 0,
-            scale: 1.4,
-            duration: 0.8,
-            ease: 'power2.out',
-            onComplete: () => coin.remove()
-          });
-        }
+      // Elegant subtle pulse on progress ring
+      if (typeof gsap !== 'undefined' && savingsRingCircle && !isReducedMotion) {
+        gsap.fromTo(savingsRingCircle, { scale: 1.05 }, { scale: 1, duration: 0.35, ease: 'power2.out' });
       }
     });
   }

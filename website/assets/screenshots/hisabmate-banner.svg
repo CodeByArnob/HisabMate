@@ -1,0 +1,165 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 540" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#070A12"/>
+      <stop offset="50%" stop-color="#0E1424"/>
+      <stop offset="100%" stop-color="#090D18"/>
+    </linearGradient>
+    <radialGradient id="violetGlow" cx="22%" cy="28%" r="48%">
+      <stop offset="0%" stop-color="#7C5CFF" stop-opacity="0.34">
+        <animate attributeName="stop-opacity" values="0.22;0.38;0.22" dur="6s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" stop-color="#7C5CFF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="emeraldGlow" cx="82%" cy="68%" r="45%">
+      <stop offset="0%" stop-color="#10B981" stop-opacity="0.26">
+        <animate attributeName="stop-opacity" values="0.16;0.30;0.16" dur="7s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" stop-color="#10B981" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#A78BFA"/>
+      <stop offset="50%" stop-color="#38BDF8"/>
+      <stop offset="100%" stop-color="#34D399"/>
+    </linearGradient>
+    <linearGradient id="cardSurface" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#182238" stop-opacity="0.94"/>
+      <stop offset="100%" stop-color="#0F172A" stop-opacity="0.94"/>
+    </linearGradient>
+    <linearGradient id="chartArea" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#10B981" stop-opacity="0.36"/>
+      <stop offset="100%" stop-color="#10B981" stop-opacity="0.0"/>
+    </linearGradient>
+    <pattern id="gridPattern" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1E293B" stroke-width="0.7" stroke-opacity="0.55"/>
+    </pattern>
+  </defs>
+
+  <!-- Canvas & Ambient Glows -->
+  <rect width="1280" height="540" rx="28" fill="url(#bgGrad)"/>
+  <rect width="1280" height="540" rx="28" fill="url(#gridPattern)"/>
+  <rect width="1280" height="540" rx="28" fill="url(#violetGlow)"/>
+  <rect width="1280" height="540" rx="28" fill="url(#emeraldGlow)"/>
+  <rect x="1.5" y="1.5" width="1277" height="537" rx="26.5" fill="none" stroke="#334155" stroke-width="1.5" stroke-opacity="0.7"/>
+
+  <!-- Left Column: Brand Identity & Engineering Telemetry -->
+  <g transform="translate(64, 58)">
+    <!-- Live Status Pill -->
+    <rect x="0" y="0" width="388" height="34" rx="17" fill="#131C31" stroke="#334155" stroke-width="1"/>
+    <circle cx="20" cy="17" r="5" fill="#10B981">
+      <animate attributeName="r" values="4;6.5;4" dur="2.2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1;0.45;1" dur="2.2s" repeatCount="indefinite"/>
+    </circle>
+    <text x="36" y="22" fill="#E2E8F0" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="12.5" font-weight="700" letter-spacing="0.8">PRODUCTION ANDROID RELEASE • v1.0.1</text>
+
+    <!-- App Logo Badge + Title -->
+    <g transform="translate(0, 56)">
+      <rect x="0" y="0" width="68" height="68" rx="18" fill="#7C5CFF"/>
+      <rect x="4" y="4" width="60" height="60" rx="15" fill="#131B2E"/>
+      <text x="34" y="45" text-anchor="middle" fill="url(#brandGrad)" font-family="system-ui, -apple-system, sans-serif" font-size="32" font-weight="900">৳$</text>
+      <text x="86" y="40" fill="#F8FAFC" font-family="system-ui, -apple-system, sans-serif" font-size="44" font-weight="900" letter-spacing="-1">HisabMate</text>
+      <text x="88" y="64" fill="#94A3B8" font-family="system-ui, -apple-system, sans-serif" font-size="15.5" font-weight="600">Global Multi-Currency Personal Finance &amp; Wealth Engine</text>
+    </g>
+
+    <!-- Headline Copy -->
+    <text x="0" y="172" fill="#F8FAFC" font-family="system-ui, -apple-system, sans-serif" font-size="27" font-weight="800">
+      Institutional Financial Clarity. <tspan fill="url(#brandGrad)">100% Offline-First.</tspan>
+    </text>
+    <text x="0" y="204" fill="#CBD5E1" font-family="system-ui, -apple-system, sans-serif" font-size="15" font-weight="500">
+      Unify Bank Accounts, MFS Wallets (bKash, Nagad, Rocket), Wise/Revolut FX,
+    </text>
+    <text x="0" y="226" fill="#CBD5E1" font-family="system-ui, -apple-system, sans-serif" font-size="15" font-weight="500">
+      Multi-Period Budgets, Savings Pots, and Debt Ledgers across 14 ISO 4217 currencies.
+    </text>
+
+    <!-- 3 Telemetry Metric Cards -->
+    <g transform="translate(0, 256)">
+      <rect x="0" y="0" width="176" height="84" rx="16" fill="url(#cardSurface)" stroke="#334155" stroke-width="1.2"/>
+      <text x="18" y="34" fill="#A78BFA" font-family="system-ui, sans-serif" font-size="24" font-weight="800">14 ISO 4217</text>
+      <text x="18" y="56" fill="#94A3B8" font-family="system-ui, sans-serif" font-size="12.5" font-weight="600">Currencies &amp; FX Engine</text>
+      <text x="18" y="72" fill="#64748B" font-family="system-ui, sans-serif" font-size="11">BDT • USD • EUR • GBP • SAR</text>
+
+      <rect x="192" y="0" width="176" height="84" rx="16" fill="url(#cardSurface)" stroke="#334155" stroke-width="1.2"/>
+      <text x="210" y="34" fill="#34D399" font-family="system-ui, sans-serif" font-size="24" font-weight="800">Room v6</text>
+      <text x="210" y="56" fill="#94A3B8" font-family="system-ui, sans-serif" font-size="12.5" font-weight="600">Indexed Schemas</text>
+      <text x="210" y="72" fill="#64748B" font-family="system-ui, sans-serif" font-size="11">Reactive Kotlin StateFlow</text>
+
+      <rect x="384" y="0" width="176" height="84" rx="16" fill="url(#cardSurface)" stroke="#334155" stroke-width="1.2"/>
+      <text x="402" y="34" fill="#38BDF8" font-family="system-ui, sans-serif" font-size="24" font-weight="800">Zero Cloud</text>
+      <text x="402" y="56" fill="#94A3B8" font-family="system-ui, sans-serif" font-size="12.5" font-weight="600">No INTERNET Permission</text>
+      <text x="402" y="72" fill="#64748B" font-family="system-ui, sans-serif" font-size="11">PIN Lock • JSON/CSV/PDF</text>
+    </g>
+
+    <!-- Tech Stack Footer Pills -->
+    <g transform="translate(0, 366)">
+      <rect x="0" y="0" width="132" height="32" rx="16" fill="#1E1B4B" stroke="#6366F1" stroke-width="1"/>
+      <text x="66" y="20" text-anchor="middle" fill="#C7D2FE" font-family="system-ui, sans-serif" font-size="12" font-weight="700">Kotlin 2.x + KSP</text>
+
+      <rect x="144" y="0" width="166" height="32" rx="16" fill="#064E3B" stroke="#10B981" stroke-width="1"/>
+      <text x="227" y="20" text-anchor="middle" fill="#A7F3D0" font-family="system-ui, sans-serif" font-size="12" font-weight="700">Jetpack Compose M3</text>
+
+      <rect x="322" y="0" width="142" height="32" rx="16" fill="#0C4A6E" stroke="#0EA5E9" stroke-width="1"/>
+      <text x="393" y="20" text-anchor="middle" fill="#BAE6FD" font-family="system-ui, sans-serif" font-size="12" font-weight="700">API 24 – 36 Ready</text>
+
+      <rect x="476" y="0" width="128" height="32" rx="16" fill="#1E293B" stroke="#475569" stroke-width="1"/>
+      <text x="540" y="20" text-anchor="middle" fill="#E2E8F0" font-family="system-ui, sans-serif" font-size="12" font-weight="700">APK + AAB v1.0.1</text>
+    </g>
+  </g>
+
+  <!-- Right Column: Animated Interactive Fintech Telemetry Preview -->
+  <g transform="translate(684, 46)">
+    <!-- Rotating Orbital Ring -->
+    <circle cx="270" cy="224" r="210" fill="none" stroke="#334155" stroke-width="1" stroke-dasharray="6 8" opacity="0.65">
+      <animateTransform attributeName="transform" type="rotate" from="0 270 224" to="360 270 224" dur="38s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- Main Consolidated Liquidity Card -->
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0,0; 0,-6; 0,0" dur="5s" repeatCount="indefinite"/>
+      <rect x="26" y="20" width="496" height="272" rx="24" fill="url(#cardSurface)" stroke="#475569" stroke-width="1.5"/>
+
+      <!-- Card Header -->
+      <text x="54" y="56" fill="#94A3B8" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" letter-spacing="0.8">CONSOLIDATED NET LIQUIDITY (BASE: BDT)</text>
+      <rect x="394" y="38" width="102" height="26" rx="13" fill="#064E3B" stroke="#10B981" stroke-width="1"/>
+      <text x="445" y="55" text-anchor="middle" fill="#6EE7B7" font-family="system-ui, sans-serif" font-size="11.5" font-weight="700">+18.4% MoM</text>
+
+      <!-- Main Balance Value -->
+      <text x="54" y="98" fill="#F8FAFC" font-family="system-ui, sans-serif" font-size="36" font-weight="900">৳4,82,950.00</text>
+      <text x="312" y="96" fill="#A78BFA" font-family="system-ui, sans-serif" font-size="14" font-weight="700">≈ $4,007.88 USD</text>
+
+      <!-- Animated Cashflow Area & Spline -->
+      <path d="M 54 206 C 110 196, 145 162, 198 172 C 250 182, 290 138, 346 146 C 402 154, 442 118, 492 112 L 492 222 L 54 222 Z" fill="url(#chartArea)"/>
+      <path id="cashflowSpline" d="M 54 206 C 110 196, 145 162, 198 172 C 250 182, 290 138, 346 146 C 402 154, 442 118, 492 112" fill="none" stroke="#10B981" stroke-width="3.5" stroke-linecap="round"/>
+
+      <!-- Traveling Telemetry Pulse Along Spline -->
+      <circle r="6" fill="#34D399" stroke="#064E3B" stroke-width="2">
+        <animateMotion dur="5.5s" repeatCount="indefinite" path="M 54 206 C 110 196, 145 162, 198 172 C 250 182, 290 138, 346 146 C 402 154, 442 118, 492 112"/>
+      </circle>
+
+      <!-- Animated Budget Utilization Strip -->
+      <text x="54" y="250" fill="#CBD5E1" font-family="system-ui, sans-serif" font-size="12" font-weight="600">Monthly Budget Utilization</text>
+      <text x="492" y="250" text-anchor="end" fill="#38BDF8" font-family="system-ui, sans-serif" font-size="12" font-weight="700">68% of ৳65,000</text>
+      <rect x="54" y="260" width="438" height="10" rx="5" fill="#1E293B"/>
+      <rect x="54" y="260" width="298" height="10" rx="5" fill="url(#brandGrad)">
+        <animate attributeName="width" values="240;312;298" dur="4.5s" repeatCount="indefinite"/>
+      </rect>
+    </g>
+
+    <!-- Floating Multi-Currency Wallet Cards -->
+    <g transform="translate(0, 314)">
+      <animateTransform attributeName="transform" type="translate" values="0,314; 0,320; 0,314" dur="4.2s" repeatCount="indefinite"/>
+      <rect x="26" y="0" width="238" height="118" rx="20" fill="#151F36" stroke="#7C5CFF" stroke-width="1.3"/>
+      <text x="48" y="32" fill="#C4B5FD" font-family="system-ui, sans-serif" font-size="12" font-weight="700">bKash Personal + BRAC Bank</text>
+      <text x="48" y="64" fill="#F8FAFC" font-family="system-ui, sans-serif" font-size="23" font-weight="800">৳1,94,500.00</text>
+      <text x="48" y="92" fill="#94A3B8" font-family="system-ui, sans-serif" font-size="12" font-weight="600">Native BDT • South Asian Grouping</text>
+    </g>
+
+    <g transform="translate(284, 314)">
+      <animateTransform attributeName="transform" type="translate" values="284,314; 284,308; 284,314" dur="4.8s" repeatCount="indefinite"/>
+      <rect x="0" y="0" width="238" height="118" rx="20" fill="#151F36" stroke="#10B981" stroke-width="1.3"/>
+      <text x="22" y="32" fill="#6EE7B7" font-family="system-ui, sans-serif" font-size="12" font-weight="700">Wise USD &amp; Euro Vault</text>
+      <text x="22" y="64" fill="#F8FAFC" font-family="system-ui, sans-serif" font-size="23" font-weight="800">$2,390.00</text>
+      <text x="22" y="92" fill="#94A3B8" font-family="system-ui, sans-serif" font-size="12" font-weight="600">1 USD = ৳120.50 • Offline FX Ready</text>
+    </g>
+  </g>
+</svg>

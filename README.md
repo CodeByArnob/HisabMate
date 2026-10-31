@@ -1,274 +1,271 @@
-<div align="center">
+# HisabMate
 
-<img src="docs/screenshots/hisabmate-banner.svg" alt="HisabMate – Global Multi-Currency Personal Finance & Expense Manager Animated Banner" width="100%" />
+**Offline-first personal finance and multi-currency wealth management application for Android.**
 
-<br />
+[![Release](https://img.shields.io/badge/Release-v1.0.1-10B981?style=flat-square&logo=github)](https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.1)
+[![Android CI](https://img.shields.io/github/actions/workflow/status/CodeByArnob/HisabMate/android-ci.yml?branch=main&style=flat-square&logo=android&label=Android%20CI)](https://github.com/CodeByArnob/HisabMate/actions/workflows/android-ci.yml)
+[![Platform](https://img.shields.io/badge/Android-API%2024%E2%80%9336-3DDC84?style=flat-square&logo=android)](https://developer.android.com)
+[![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
+[![Website](https://img.shields.io/badge/Website-GitHub%20Pages-0EA5E9?style=flat-square&logo=googlechrome)](https://codebyarnob.github.io/HisabMate/)
 
-# HisabMate – Smart Multi-Currency Personal Finance Manager
-
-**A privacy-first, offline-native international personal finance, budgeting, multi-currency wallet, debt ledger, and wealth analytics application for Android.**
-
-[![Version](https://img.shields.io/badge/Release-v1.0.1-7C5CFF?style=for-the-badge&logo=github)](https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.1)
-[![Download APK](https://img.shields.io/badge/Download-APK%20(v1.0.1)-10B981?style=for-the-badge&logo=android)](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/HisabMate-v1.0.1-release.apk)
-[![Download AAB](https://img.shields.io/badge/Download-AAB%20Bundle-0EA5E9?style=for-the-badge&logo=googleplay)](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/HisabMate-v1.0.1-release.aab)
-[![Android CI](https://img.shields.io/github/actions/workflow/status/CodeByArnob/HisabMate/android-ci.yml?branch=main&style=for-the-badge&logo=android&label=Android%20CI)](https://github.com/CodeByArnob/HisabMate/actions/workflows/android-ci.yml)
-[![Website](https://img.shields.io/badge/GitHub%20Pages-Live%20Website-10B981?style=for-the-badge&logo=googlechrome)](https://codebyarnob.github.io/HisabMate/)
-[![Platform](https://img.shields.io/badge/Android-API%2024%E2%80%9336-3DDC84?style=for-the-badge&logo=android)](https://developer.android.com)
-[![License: MIT](https://img.shields.io/badge/License-MIT-F59E0B?style=for-the-badge)](LICENSE)
-
-[**Live Project Website**](https://codebyarnob.github.io/HisabMate/) • [**Download APK (`v1.0.1`)**](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/HisabMate-v1.0.1-release.apk) • [**Download AAB (`v1.0.1`)**](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/HisabMate-v1.0.1-release.aab) • [**Release Notes**](https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.1) • [**Screenshots**](#-application-screenshots--motion-walkthrough) • [**Architecture**](#-architecture--engineering)
-
-</div>
+[Live Project Website](https://codebyarnob.github.io/HisabMate/) | [Download APK](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/HisabMate-v1.0.1-release.apk) | [Download AAB](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/HisabMate-v1.0.1-release.aab) | [Release Notes](https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.1) | [Architecture](#architecture) | [Security](#security-and-privacy)
 
 ---
 
-## Direct Release Downloads (`v1.0.1`)
-
-Compiled from verified source using Gradle `:app:assembleRelease` and `:app:bundleRelease`, validated with Android SDK `apksigner`, `aapt2`, Android Lint (`:app:lintDebug`), and Robolectric JVM/Compose UI tests (`:app:testDebugUnitTest`):
-
-| Artifact | Format | Target / Purpose | Direct Download Link |
-| :--- | :---: | :--- | :--- |
-| **`HisabMate-v1.0.1-release.apk`** | `.apk` (`~11.1 MB`) | Direct installation on Android 7.0 – 16 (`API 24–36`) devices | [**Download APK (v1.0.1)**](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/HisabMate-v1.0.1-release.apk) |
-| **`HisabMate-v1.0.1-release.aab`** | `.aab` (`~10.8 MB`) | Android App Bundle for Play Console / `bundletool` distribution | [**Download AAB (v1.0.1)**](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/HisabMate-v1.0.1-release.aab) |
-| **`SHA256SUMS.txt`** | `.txt` | SHA-256 cryptographic checksums for release verification | [**Download SHA256SUMS.txt**](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/SHA256SUMS.txt) |
-
-- **Application ID**: `com.aistudio.hisabmate.fntkbd`
-- **Version**: `1.0.1` (`versionCode = 2`)
-- **Supported Android Versions**: Android 7.0 Nougat (`minSdk = 24`) through Android 16 (`targetSdk = 36`, `compileSdk = 36`)
-- **APK SHA-256**: `eed42e6ea5d921ef00eb990910ee931c2423aaeb6ed7ade11c1482d2e3f2c46e`
-- **AAB SHA-256**: `6e4e4c0214d33a85d08bde633507d478aac0669d03581ac95f249c54e729bb2b`
+![HisabMate Application Banner](docs/screenshots/hisabmate-banner.svg)
 
 ---
 
 ## Overview
 
-**HisabMate** (`com.aistudio.hisabmate.fntkbd`) is a modern Android personal finance application engineered with **Kotlin**, **Jetpack Compose (Material 3)**, and **Room SQLite v5**. Designed for global professionals, freelancers, travelers, and households managing money across multiple currencies and payment rails (bank cards, mobile financial services like **bKash**, **Nagad**, **Rocket**, international **Wise / Revolut** accounts, and cash wallets), HisabMate combines institutional-grade financial clarity with **100% offline-first privacy**.
+HisabMate (`com.aistudio.hisabmate.fntkbd`) is an open-source, offline-first personal finance and expense management application engineered for Android using **Kotlin**, **Jetpack Compose (Material 3)**, and **Room SQLite v6**.
 
-Every monetary record is stored in its **authentic native ISO 4217 currency** alongside a snapshot exchange rate, while dashboard net worth, category budgets, and cashflow reports dynamically consolidate into your chosen base currency.
+Designed for individuals, professionals, and households managing finances across multiple rails and regional boundaries, HisabMate brings together bank accounts, credit cards, mobile financial services (bKash, Nagad, Rocket), international multi-currency vaults (Wise, Revolut), multi-period budgets, debt ledgers, and recurring obligations into a single cohesive interface.
 
----
-
-## Application Screenshots & Motion Walkthrough
-
-All screenshots below are rendered directly from the running HisabMate Jetpack Compose UI via Robolectric Native Graphics (`@GraphicsMode(NATIVE)`).
-
-### Light Mode, Dark Mode & Animated Walkthrough Reel
-
-| **Home Dashboard (Light Mode)** | **Home Dashboard (Dark Mode)** | **Animated 10-Screen Walkthrough** |
-| :---: | :---: | :---: |
-| <img src="docs/screenshots/dashboard-light.png" alt="HisabMate Home Dashboard Light Mode" width="260" /> | <img src="docs/screenshots/dashboard-dark.png" alt="HisabMate Home Dashboard Dark Mode" width="260" /> | <img src="docs/screenshots/hisabmate-motion-walkthrough.gif" alt="HisabMate Animated Walkthrough GIF" width="260" /> |
-| *Soft Slate-Cool canvas (`#E6ECF5`) with elevated `#FFFFFF` cards* | *Obsidian surface hierarchy (`#0A0D14` / `#131824`) for zero eye strain* | *Automated walkthrough across core Compose screens* |
-
-### Core Financial Flows & Modules
-
-| **Multi-Currency & Offline FX Converter** | **Accounts, Cards & MFS Wallets** | **Category Wallet & Daily Spend Curve** |
-| :---: | :---: | :---: |
-| <img src="docs/screenshots/multi-currency-fx.png" alt="Multi-Currency & Offline FX Converter" width="260" /> | <img src="docs/screenshots/accounts-wallets.png" alt="Accounts and Wallets" width="260" /> | <img src="docs/screenshots/wallet-details-analytics.png" alt="Wallet Details and Daily Spend Curve" width="260" /> |
-
-| **Budget Management & Thresholds** | **Spend Analysis & Cashflow Reports** | **Savings Goals & Milestone Pots** |
-| :---: | :---: | :---: |
-| <img src="docs/screenshots/budget-management.png" alt="Budget Management" width="260" /> | <img src="docs/screenshots/financial-reports.png" alt="Spend Analysis and Financial Reports" width="260" /> | <img src="docs/screenshots/savings-goals.png" alt="Savings Goals" width="260" /> |
-
-| **Debt & Loan Ledger** | **Scheduled Reminders & Alerts** | **Security, Backup & Settings** |
-| :---: | :---: | :---: |
-| <img src="docs/screenshots/debt-management.png" alt="Debt and Loan Management" width="260" /> | <img src="docs/screenshots/bills-notifications.png" alt="Bills and Notifications" width="260" /> | <img src="docs/screenshots/settings-security.png" alt="Settings and Security" width="260" /> |
-
-| **Interactive 7-Step Onboarding Experience** |
-| :---: |
-| <img src="docs/screenshots/onboarding-overview.png" alt="Interactive 7-Step Onboarding" width="300" /> |
+Every financial record is persisted in its native ISO 4217 currency with offline foreign exchange conversion, ensuring strict mathematical accuracy without requiring external cloud servers or telemetry.
 
 ---
 
-## Key Features
+## Release Downloads
 
-### 1. Authentic Multi-Currency Architecture & Offline FX Engine
-- **14 Built-in ISO 4217 Currencies**: Native symbols, regional decimal precision (`0` decimals for `JPY`, `2` for `BDT`/`USD`/`EUR`/`GBP`, `3` for `KWD`), and optional South Asian (`1,25,000`) vs. International (`125,000`) digit grouping.
-- **Per-Entity Native Currency Persistence**: Accounts, transactions, budgets, recurring bills, savings goals, debt records, and scheduled notifications each preserve their own native `currencyCode`.
-- **Interactive Offline FX Converter & Custom Rates**: Convert between any supported currency pair offline and override exchange rates manually in the **Currencies & FX Rates** manager.
+Official release packages are compiled from verified source via Gradle `:app:assembleRelease` and `:app:bundleRelease`, verified with Android SDK `apksigner`, `aapt2`, and local Robolectric test suites.
 
-### 2. Multi-Rail Account & Wallet Management
-- Track **Bank Accounts**, **Credit/Debit Cards**, **Mobile Financial Services (bKash, Nagad, Rocket)**, **Global Multi-Currency Accounts (Wise, Revolut)**, and **Cash Wallets**.
-- Instant inter-account transfers with automatic cross-currency conversion when moving funds between accounts of different currencies.
+| Package | Format | File Size | Target Architecture | Download |
+| :--- | :---: | :---: | :--- | :--- |
+| **HisabMate-v1.0.1-release.apk** | `.apk` | `11.1 MB` | Direct installation on Android 7.0 to 16 (`API 24–36`) | [Download APK](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/HisabMate-v1.0.1-release.apk) |
+| **HisabMate-v1.0.1-release.aab** | `.aab` | `10.8 MB` | Android App Bundle for Google Play / `bundletool` | [Download AAB](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/HisabMate-v1.0.1-release.aab) |
+| **SHA256SUMS.txt** | `.txt` | `190 B` | Release checksum verification manifest | [Download Checksums](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/SHA256SUMS.txt) |
 
-### 3. Smart Transactions, Split Bills & Receipt OCR Simulation
-- Record **Expenses**, **Income**, and **Transfers** with merchant metadata, notes, favorite templates, and split-expense breakdowns.
-- Interactive **Wallet Details** view with daily spend line charts, month-over-month navigation, and quick category filtering.
+### Cryptographic Checksums (v1.0.1)
 
-### 4. Multi-Period Budgets & Proactive Threshold Alerts
-- Configure category budgets across **Daily**, **Weekly**, **Monthly**, **Yearly**, or **Custom** date ranges in any ISO currency.
-- Customizable alert thresholds (`50%`–`100%`) that automatically trigger local notifications when spending approaches or exceeds limits.
-
-### 5. Planning Hub: Recurring Bills, Debt Ledger & Savings Goals
-- **Recurring Payments**: Track subscriptions, rent, utilities, and recurring income with one-tap bill settlement.
-- **Debt & Loan Ledger**: Separate tracking for **Money Lent (Receivables)** and **Money Borrowed (Payables)** with partial repayment history and progress bars.
-- **Savings Goals**: Dedicated visual pots with target deadlines, milestone tracking (`25%`, `50%`, `75%`, `100%`), and instant contributions.
-
-### 6. Currency-Aware Local Notifications & Scheduled Reminders
-- Built on Android `NotificationCompat` and `AlarmManager` with 4 dedicated notification channels (`Bill Reminders`, `Budget Threshold Alerts`, `Debt & Loan Reminders`, `Savings Goal Milestones`).
-- Automatically reschedules active reminders across device reboots and timezone changes via `ReminderBootAndTimeReceiver`.
-
-### 7. Security, Offline Privacy & Data Portability
-- **100% Offline-First**: Zero cloud lock-in, zero third-party analytics SDKs, and zero telemetry.
-- **App Lock**: Optional 4-digit PIN lock overlay and biometric unlock flow.
-- **Full Data Ownership**: Export and restore complete **JSON Backups**, export/import **CSV Spreadsheets**, and generate **PDF Financial Statements**.
+- **APK SHA-256**: `eed42e6ea5d921ef00eb990910ee931c2423aaeb6ed7ade11c1482d2e3f2c46e`
+- **AAB SHA-256**: `6e4e4c0214d33a85d08bde633507d478aac0669d03581ac95f249c54e729bb2b`
 
 ---
 
-## Supported Currencies (ISO 4217)
+## Application Screenshots
 
-<div align="center">
-  <img src="docs/screenshots/fx-pipeline-motion.svg" alt="Animated 14-Currency ISO 4217 FX Telemetry Pipeline" width="100%" />
-</div>
+The following screenshots are captured directly from the running Android application running on Android 16 with Jetpack Compose Material 3:
 
-<br />
+### Dashboard & Walkthrough
 
-| Code | Symbol | Currency Name | Region | Decimals | Grouping Support |
+| Home Dashboard (Light) | Home Dashboard (Dark) | 10-Screen Motion Walkthrough |
+| :---: | :---: | :---: |
+| <img src="docs/screenshots/dashboard-light.png" alt="HisabMate Home Dashboard Light Mode" width="240" /> | <img src="docs/screenshots/dashboard-dark.png" alt="HisabMate Home Dashboard Dark Mode" width="240" /> | <img src="docs/screenshots/hisabmate-motion-walkthrough.gif" alt="HisabMate Motion Walkthrough Reel" width="240" /> |
+| *Consolidated net liquidity and quick actions* | *Obsidian dark surface with high contrast* | *Animated walkthrough of primary flows* |
+
+### Accounts, Analytics & FX
+
+| Multi-Currency & Offline FX | Accounts & Wallets | Wallet Details & Trend |
+| :---: | :---: | :---: |
+| <img src="docs/screenshots/multi-currency-fx.png" alt="Multi-Currency and Offline FX Converter" width="240" /> | <img src="docs/screenshots/accounts-wallets.png" alt="Accounts and Wallets Ledger" width="240" /> | <img src="docs/screenshots/wallet-details-analytics.png" alt="Wallet Details and Daily Spend Trend" width="240" /> |
+| *14-Currency offline conversion pipeline* | *Bank, Card, bKash, Nagad, and Wise vaults* | *Daily spend curve and transaction log* |
+
+### Planning Hub & Financial Controls
+
+| Budget Management | Cashflow Analysis | Savings Goals |
+| :---: | :---: | :---: |
+| <img src="docs/screenshots/budget-management.png" alt="Budget Management" width="240" /> | <img src="docs/screenshots/financial-reports.png" alt="Cashflow Analysis and Reports" width="240" /> | <img src="docs/screenshots/savings-goals.png" alt="Savings Goals" width="240" /> |
+| *Category limits with 50%–100% threshold alerts* | *Monthly income vs. expense breakdown* | *Dedicated pots with deadline milestones* |
+
+### Obligations, Alerts & System Settings
+
+| Debt & Loan Ledger | Scheduled Reminders | Security & Backup |
+| :---: | :---: | :---: |
+| <img src="docs/screenshots/debt-management.png" alt="Debt and Loan Management" width="240" /> | <img src="docs/screenshots/bills-notifications.png" alt="Bills and Notifications" width="240" /> | <img src="docs/screenshots/settings-security.png" alt="Security and Backup Settings" width="240" /> |
+| *Receivables (lent) and payables (borrowed)* | *AlarmManager bill and budget notifications* | *PIN lock, JSON backup, and CSV/PDF export* |
+
+---
+
+## Core Capabilities
+
+### 1. Multi-Currency Engine with Offline FX
+- **14 Built-in ISO 4217 Currencies**: Includes native symbols, regional precision (0 decimals for JPY, 2 for BDT/USD/EUR, 3 for KWD), and configurable South Asian (`1,25,000.00`) vs. International (`125,000.00`) digit grouping.
+- **Native Persistence**: Accounts, transactions, budgets, bills, debts, and goals maintain their original currency identifier.
+- **Offline Currency Conversion**: Instant bidirectional conversion with user-configurable custom exchange rates.
+
+### 2. Account & Wallet Management
+- Support for **Bank Accounts**, **Credit/Debit Cards**, **Mobile Financial Services (bKash, Nagad, Rocket)**, **Global Multi-Currency Vaults (Wise, Revolut)**, and **Cash Wallets**.
+- Internal account transfers with automatic FX cross-rate conversion.
+
+### 3. Planning & Budget Controls
+- Multi-period budgets across **Daily**, **Weekly**, **Monthly**, **Yearly**, and **Custom** periods.
+- Alert thresholds (50% to 100%) that deliver local notifications when approaching spending caps.
+- Goal trackers with progress percentage indicators, target dates, and contribution histories.
+
+### 4. Obligations & Debt Ledger
+- Independent ledgers for **Money Lent (Receivables)** and **Money Borrowed (Payables)**.
+- Partial settlement logging, remaining balance calculation, and due date reminders.
+
+### 5. Document & Report Generation
+- **Executive PDF Statements**: Professional multi-page A4 financial statements containing KPI liquidity summaries, account balances, and itemized transaction ledgers.
+- **Android Scoped Storage**: Directly exports to the system `Download/HisabMate/` directory using `MediaStore.Downloads` on Android 10+ (API 29+).
+- **Secure Document Sharing**: Integrated Android `FileProvider` (`com.example.fileprovider`) for viewing and sharing without external storage permissions.
+- **Data Portability**: Full JSON backup and restore with checksum verification, plus CSV spreadsheet export and import.
+
+---
+
+## Supported Currencies
+
+| Code | Symbol | Currency Name | Region | Decimals | Grouping Style |
 | :--- | :---: | :--- | :--- | :---: | :--- |
 | **BDT** | `৳` | Bangladeshi Taka | Bangladesh | 2 | South Asian (`1,25,000.00`) & Standard |
-| **USD** | `$` | US Dollar | United States & Global | 2 | International (`125,000.00`) |
-| **EUR** | `€` | Euro | European Union | 2 | International |
-| **GBP** | `£` | British Pound Sterling | United Kingdom | 2 | International |
+| **USD** | `$` | US Dollar | United States / International | 2 | Standard (`125,000.00`) |
+| **EUR** | `€` | Euro | European Union | 2 | Standard |
+| **GBP** | `£` | British Pound | United Kingdom | 2 | Standard |
 | **INR** | `₹` | Indian Rupee | India | 2 | South Asian & Standard |
-| **JPY** | `¥` | Japanese Yen | Japan | 0 | International (`¥15,800`) |
-| **CNY** | `¥` | Chinese Yuan Renminbi | China | 2 | International |
-| **SAR** | `ر.س` | Saudi Riyal | Saudi Arabia | 2 | International |
-| **AED** | `د.إ` | UAE Dirham | United Arab Emirates | 2 | International |
-| **CAD** | `CA$` | Canadian Dollar | Canada | 2 | International |
-| **AUD** | `A$` | Australian Dollar | Australia | 2 | International |
-| **SGD** | `S$` | Singapore Dollar | Singapore | 2 | International |
-| **MYR** | `RM` | Malaysian Ringgit | Malaysia | 2 | International |
-| **KWD** | `د.ك` | Kuwaiti Dinar | Kuwait | 3 | International (`3` decimals) |
+| **JPY** | `¥` | Japanese Yen | Japan | 0 | Standard (`15,800`) |
+| **CNY** | `¥` | Chinese Yuan Renminbi | China | 2 | Standard |
+| **SAR** | `ر.স` | Saudi Riyal | Saudi Arabia | 2 | Standard |
+| **AED** | `د.إ` | UAE Dirham | United Arab Emirates | 2 | Standard |
+| **CAD** | `CA$` | Canadian Dollar | Canada | 2 | Standard |
+| **AUD** | `A$` | Australian Dollar | Australia | 2 | Standard |
+| **SGD** | `S$` | Singapore Dollar | Singapore | 2 | Standard |
+| **MYR** | `RM` | Malaysian Ringgit | Malaysia | 2 | Standard |
+| **KWD** | `د.ك` | Kuwaiti Dinar | Kuwait | 3 | Standard (`3` decimals) |
 
 ---
 
-## Architecture & Engineering
+## Architecture
 
-<div align="center">
-  <img src="docs/screenshots/architecture-motion.svg" alt="HisabMate Clean MVVM and Room SQLite v5 Architecture Diagram" width="100%" />
-</div>
-
-<br />
-
-HisabMate follows **Clean MVVM Architecture** with unidirectional data flow (`StateFlow`) and reactive Room SQLite persistence:
+HisabMate follows clean architectural patterns with unidirectional data flow and reactive SQLite persistence:
 
 ```text
-com.example
-├── MainActivity.kt                  # Edge-to-edge Activity host & root navigation state machine
+app/src/main/java/com/example
+├── MainActivity.kt                      # Host Activity with Edge-to-Edge window insets
 ├── data
 │   ├── local
-│   │   ├── Entities.kt              # 10 Room SQLite entities (Accounts, Transactions, Budgets, FX, etc.)
-│   │   ├── HisabDao.kt              # Reactive Flow queries & transactional DAO operations
-│   │   └── HisabDatabase.kt         # Room Database (v5) + realistic multi-currency seed generator
+│   │   ├── Entities.kt                  # 10 Room SQLite entities with query-indexed columns (v6)
+│   │   ├── HisabDao.kt                  # Transactional DAO with reactive Kotlin Flow queries
+│   │   └── HisabDatabase.kt             # Room Database definition and migration handlers (MIGRATION_5_6)
 │   └── repository
-│       └── HisabRepository.kt       # Single source of truth, FX conversion, JSON/CSV backup & restore
+│       └── HisabRepository.kt           # Repository layer, FX calculation, backup and CSV export/import
 ├── ui
 │   ├── components
-│   │   └── FintechComponents.kt     # Reusable M3 cards, interactive Canvas charts, dock & badges
+│   │   └── FintechComponents.kt         # Reusable Material 3 cards, progress bars, and navigation dock
 │   ├── screens
-│   │   ├── DashboardScreen.kt       # Balanced home dashboard, quick actions & wallet details
-│   │   ├── AccountsAndMoreScreens.kt# Accounts, global search, notifications & settings/security
-│   │   ├── PlanningHubScreen.kt     # Budgets, recurring bills, debt ledger & savings goals
-│   │   ├── CurrencyManagementScreen.kt # Offline FX converter & ISO 4217 rate manager
-│   │   ├── SpendAnalysisScreen.kt   # Multi-period analytics & cashflow bar charts
-│   │   ├── TransactionModals.kt     # Add/edit transaction sheet, split bills & receipt OCR presets
-│   │   ├── CalendarAndSecurityScreens.kt # Monthly calendar heatmap & PIN lock screen
-│   │   └── CinematicOnboardingScreen.kt  # Interactive 7-step fintech onboarding flow
+│   │   ├── DashboardScreen.kt           # Home dashboard, quick actions, and wallet breakdowns
+│   │   ├── AccountsAndMoreScreens.kt    # Account manager, data backup/restore, PDF export, settings
+│   │   ├── PlanningHubScreen.kt         # Budgets, recurring payments, debt ledger, savings goals
+│   │   ├── CurrencyManagementScreen.kt  # Currency selection and offline exchange rate editor
+│   │   ├── SpendAnalysisScreen.kt       # Period spend trends and cashflow reports
+│   │   ├── TransactionModals.kt         # Transaction creation sheets and split expense modals
+│   │   ├── CalendarAndSecurityScreens.kt # Financial calendar heatmap and PIN lock screen
+│   │   └── CinematicOnboardingScreen.kt  # 7-step guided setup experience
 │   ├── theme
-│   │   ├── Color.kt                 # Semantic Light/Dark surface, ink, border & category palettes
-│   │   ├── Theme.kt                 # HisabTheme tokens & Material 3 ColorScheme provider
-│   │   └── Type.kt                  # Space Grotesk, Plus Jakarta Sans & Inter typography hierarchy
+│   │   ├── Color.kt                     # Semantic light/dark surface, border, and brand palettes
+│   │   ├── Theme.kt                     # HisabTheme and dynamic Material 3 color provider
+│   │   └── Type.kt                      # Space Grotesk, Plus Jakarta Sans, and Inter typography
 │   └── viewmodel
-│       └── HisabViewModel.kt        # Reactive UI state aggregation & multi-currency math
+│       └── HisabViewModel.kt            # Coroutine-backed state aggregation (HisabUiState)
 └── util
-    ├── CurrencyFormatter.kt         # ISO 4217 catalog, regional formatting & cross-rate math
-    ├── HisabNotificationManager.kt  # AlarmManager scheduler, notification channels & receivers
-    └── HapticFeedbackHelper.kt      # Tactile feedback helper
+    ├── CurrencyFormatter.kt             # ISO 4217 formatting, South Asian digit grouping, FX conversion
+    ├── HisabNotificationManager.kt      # Android AlarmManager scheduler and 4 notification channels
+    ├── PdfExporter.kt                   # Scoped storage MediaStore PDF generation and FileProvider engine
+    └── HapticFeedbackHelper.kt          # Haptic feedback utilities
 ```
 
----
+### Technology Stack
 
-## Android Permissions Explained
-
-HisabMate adheres strictly to the principle of least privilege and operates 100% offline:
-
-| Permission | Required? | Purpose |
-| :--- | :---: | :--- |
-| `android.permission.POST_NOTIFICATIONS` | Optional (Runtime on Android 13+) | Delivers local bill due alerts, budget threshold warnings, debt reminders, and savings milestone notifications. |
-| `android.permission.RECEIVE_BOOT_COMPLETED` | Normal (Install-time) | Allows `ReminderBootAndTimeReceiver` to reschedule active local `AlarmManager` reminders after a device reboot. |
-| `android.permission.VIBRATE` | Normal (Install-time) | Provides subtle haptic feedback on financial actions and notification alerts when enabled in Settings. |
-| `android.permission.CAMERA` | Optional (`android:required="false"`) | Used only when capturing a physical receipt photo to attach to a transaction. |
-
-> **Note**: HisabMate does **not** request `INTERNET` or broad external storage permissions. Photo attachments use the zero-permission Android Photo Picker (`ActivityResultContracts.PickVisualMedia`).
+- **Language**: Kotlin 2.x
+- **UI Framework**: Jetpack Compose (Material Design 3)
+- **Local Persistence**: Room SQLite (Schema Version 6 with Indexed Queries)
+- **Asynchronous Execution**: Kotlin Coroutines & Reactive `StateFlow`
+- **Compiler Symbol Processing**: KSP
+- **Target SDK**: Android 16 (API 36)
+- **Minimum SDK**: Android 7.0 (API 24)
 
 ---
 
-## Installation, Build & Release Signing Instructions
+## Security and Privacy
 
-### Option 1: Direct APK Installation
-Download [**`HisabMate-v1.0.1-release.apk`**](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/HisabMate-v1.0.1-release.apk) from the [v1.0.1 Release page](https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.1) and install it on any Android 7.0+ (`API 24+`) device.
+1. **Zero Internet Permission**: The app manifest does not request `android.permission.INTERNET`. No network calls, telemetry, or analytics can be transmitted.
+2. **On-Device Data Storage**: All transactions, accounts, and personal records remain exclusively on the local device inside private application sandboxes.
+3. **Application Lock**: Optional PIN code protection with biometric support.
+4. **Least-Privilege Permissions**:
+   - `POST_NOTIFICATIONS`: Delivers local bill and budget reminders (runtime permission on Android 13+).
+   - `RECEIVE_BOOT_COMPLETED`: Reschedules active local reminders upon device reboot.
+   - `VIBRATE`: Provides haptic feedback during interactive workflows.
 
-### Option 2: Clone & Build Locally
+---
 
-1. **Clone the repository**
+## Building from Source
+
+### Prerequisites
+
+- JDK 17 or JDK 21
+- Android SDK with platform tools for API 24 through 36
+- Gradle 8.x or 9.x (managed via system toolchain)
+
+### Steps
+
+1. **Clone the repository**:
    ```bash
    git clone https://github.com/CodeByArnob/HisabMate.git
    cd HisabMate
+   ```
+
+2. **Initialize configuration**:
+   ```bash
    cp .env.example .env
    ```
 
-2. **Run Robolectric Unit/UI Tests & Android Lint**
+3. **Execute test suite**:
    ```bash
    gradle :app:testDebugUnitTest :app:lintDebug
    ```
 
-3. **Build the Debug APK**
+4. **Compile debug package**:
    ```bash
    gradle :app:assembleDebug
    ```
 
-### Option 3: Secure Production Release Signing (`assembleRelease` & `bundleRelease`)
-
-`app/build.gradle.kts` reads production signing credentials strictly from environment variables so private keys are never committed to git:
-
-```bash
-export KEYSTORE_PATH="/path/to/my-upload-key.jks"
-export STORE_PASSWORD="your-keystore-password"
-export KEY_PASSWORD="your-key-password"
-
-gradle :app:assembleRelease :app:bundleRelease
-```
-
-#### Configuring GitHub Actions Encrypted Repository Secrets
-The automated release workflow (`.github/workflows/release.yml`) supports full production signing via GitHub Actions encrypted secrets:
-1. Generate or locate your upload keystore (`keyAlias = "upload"`):
+5. **Compile signed release packages**:
    ```bash
-   keytool -genkeypair -v -keystore my-upload-key.jks -storetype PKCS12 -alias upload -keyalg RSA -keysize 2048 -validity 10000
-   ```
-2. Base64-encode the keystore file:
-   ```bash
-   base64 -w 0 my-upload-key.jks
-   ```
-3. In GitHub, navigate to **Settings → Secrets and variables → Actions → New repository secret** and add:
-   - `UPLOAD_KEYSTORE_BASE64`: Base64 string of `my-upload-key.jks`
-   - `STORE_PASSWORD`: Your keystore password
-   - `KEY_ALIAS`: `upload` (or your custom alias, which `.github/workflows/release.yml` automatically maps)
-   - `KEY_PASSWORD`: Your key password
+   export KEYSTORE_PATH="/path/to/upload-keystore.jks"
+   export STORE_PASSWORD="your-keystore-password"
+   export KEY_PASSWORD="your-key-password"
 
-*(Note: When these 4 repository secrets are not yet configured in GitHub Settings, `.github/workflows/release.yml` clearly logs a notice in the GitHub Actions Job Summary and generates an ephemeral RSA-2048 release key in `RUNNER_TEMP` so `:app:assembleRelease` and `:app:bundleRelease` remain verified and produce installable APK/AAB artifacts without ever committing a keystore file.)*
+   gradle :app:assembleRelease :app:bundleRelease
+   ```
+
+---
+
+## Quality Assurance & Testing
+
+Automated test verification is managed via **Robolectric** local JVM tests in `app/src/test/java/com/example/ExampleRobolectricTest.kt`. All 16 unit and UI tests validate:
+
+- **Permanent Demo Deletion**: Verifies that deleting sample records clears demo markers while preserving real user accounts, and that app restart or database re-open never re-seeds sample data.
+- **Room Migration**: Validates schema transition from version 5 to 6 (`MIGRATION_5_6`) with column additions and indexed queries.
+- **Physical PDF Generation**: Validates generation of compliant, non-empty multi-page statement files with verified byte counts.
+- **Multi-Currency Math**: Validates ISO 4217 conversions, formatting precision, and South Asian numbering separators.
+- **Notification Scheduling**: Validates local channel creation and AlarmManager broadcast registrations.
 
 ---
 
 ## Release History
 
-| Version | Date | Highlights | Artifacts |
+| Version | Date | Key Enhancements | Release Assets |
 | :--- | :--- | :--- | :--- |
-| **`v1.0.1`** | 2026-10-31 | Core performance optimization with Room entity indexes, idempotent permanent demo data deletion (Room migration 5→6), and full physical PDF financial statement export engine. | [APK](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/HisabMate-v1.0.1-release.apk) • [AAB](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/HisabMate-v1.0.1-release.aab) • [SHA256SUMS](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/SHA256SUMS.txt) |
-| **`v1.0.0`** | 2026-10-31 | Initial production release featuring 14 ISO 4217 currencies, offline FX converter, Bank/MFS wallets, multi-period budgets, savings goals, debt ledger, local AlarmManager notifications, 7-step interactive onboarding, and Light/Dark themes. | [APK](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/HisabMate-v1.0.0-release.apk) • [AAB](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/HisabMate-v1.0.0-release.aab) • [SHA256SUMS](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/SHA256SUMS.txt) |
+| **v1.0.1** | 2026-10-31 | Database query indexing for performance, permanent demo deletion with idempotent restart guards (Room v6), and physical PDF statement export with MediaStore Scoped Storage. | [APK](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/HisabMate-v1.0.1-release.apk) / [AAB](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/HisabMate-v1.0.1-release.aab) / [Checksums](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/SHA256SUMS.txt) |
+| **v1.0.0** | 2026-10-31 | Initial production release featuring 14 ISO 4217 currencies, offline FX engine, multi-rail wallets, budgets, savings goals, debt ledger, and local notifications. | [APK](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/HisabMate-v1.0.0-release.apk) / [AAB](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/HisabMate-v1.0.0-release.aab) / [Checksums](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/SHA256SUMS.txt) |
+
+---
+
+## Contributing
+
+Contributions are welcome. Please adhere to the following workflow:
+
+1. Fork the repository and create a feature branch (`git checkout -b feature/improvement-name`).
+2. Implement your changes adhering to Jetpack Compose Material 3 design guidelines and unidirectional data flows.
+3. Ensure all tests pass (`gradle :app:testDebugUnitTest`).
+4. Commit your changes with conventional commit messages (`feat:`, `fix:`, `docs:`, `perf:`).
+5. Open a Pull Request against the `main` branch.
 
 ---
 
 ## License
 
-Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for full license text.
+This project is licensed under the **MIT License**. Refer to the [LICENSE](LICENSE) file for complete details.
 
-Copyright © 2026 [CodeByArnob (Gameofbtc)](https://github.com/CodeByArnob).
+Copyright © 2026 [CodeByArnob](https://github.com/CodeByArnob). All rights reserved.

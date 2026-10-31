@@ -884,7 +884,7 @@ section {
 /* Interactive Budget & Savings Pots Studio */
 .interactive-fin-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
   gap: clamp(20px, 3vw, 32px);
   margin-top: 16px;
 }
@@ -996,7 +996,7 @@ section {
 /* Lottie Feature Cards */
 .lottie-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
   gap: 22px;
   margin-top: 18px;
 }
@@ -1043,7 +1043,7 @@ section {
 /* Download Grid */
 .download-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
   gap: 24px;
   margin-top: 12px;
 }
@@ -1138,7 +1138,7 @@ section {
 
 .fx-controls-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
   gap: 18px;
   align-items: flex-end;
 }
@@ -1226,7 +1226,7 @@ section {
 
 .currency-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(140px, 100%), 1fr));
   gap: 12px;
   margin-top: 24px;
 }
@@ -1302,7 +1302,7 @@ section {
 
 .screenshot-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr));
   gap: 22px;
 }
 
@@ -1380,7 +1380,7 @@ section {
 /* Feature Grid */
 .feature-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(290px, 100%), 1fr));
   gap: 22px;
 }
 
@@ -1429,7 +1429,7 @@ section {
 /* Architecture & Tech Stack */
 .arch-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
   gap: 24px;
 }
 
@@ -1464,6 +1464,7 @@ section {
   line-height: 1.5;
 }
 
+.bullet-dot,
 .check-dot {
   color: var(--accent-emerald);
   font-weight: 800;
