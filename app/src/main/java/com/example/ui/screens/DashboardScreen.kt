@@ -336,7 +336,7 @@ fun DashboardScreen(
             }
         }
 
-        item { Spacer(modifier = Modifier.height(12.dp)) }
+        item { Spacer(modifier = Modifier.height(16.dp)) }
 
         // 2. Spacious, Harmoniously Proportioned Quick Actions & Budget Categories Section
         item {
