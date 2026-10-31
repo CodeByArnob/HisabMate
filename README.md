@@ -8,35 +8,35 @@
 
 **A privacy-first, offline-native international personal finance, budgeting, multi-currency wallet, debt ledger, and wealth analytics application for Android.**
 
-[![Version](https://img.shields.io/badge/Release-v1.0.0-7C5CFF?style=for-the-badge&logo=github)](https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.0)
-[![Download APK](https://img.shields.io/badge/Download-APK%20(v1.0.0)-10B981?style=for-the-badge&logo=android)](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/HisabMate-v1.0.0-release.apk)
-[![Download AAB](https://img.shields.io/badge/Download-AAB%20Bundle-0EA5E9?style=for-the-badge&logo=googleplay)](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/HisabMate-v1.0.0-release.aab)
+[![Version](https://img.shields.io/badge/Release-v1.0.1-7C5CFF?style=for-the-badge&logo=github)](https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.1)
+[![Download APK](https://img.shields.io/badge/Download-APK%20(v1.0.1)-10B981?style=for-the-badge&logo=android)](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/HisabMate-v1.0.1-release.apk)
+[![Download AAB](https://img.shields.io/badge/Download-AAB%20Bundle-0EA5E9?style=for-the-badge&logo=googleplay)](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/HisabMate-v1.0.1-release.aab)
 [![Android CI](https://img.shields.io/github/actions/workflow/status/CodeByArnob/HisabMate/android-ci.yml?branch=main&style=for-the-badge&logo=android&label=Android%20CI)](https://github.com/CodeByArnob/HisabMate/actions/workflows/android-ci.yml)
 [![Website](https://img.shields.io/badge/GitHub%20Pages-Live%20Website-10B981?style=for-the-badge&logo=googlechrome)](https://codebyarnob.github.io/HisabMate/)
 [![Platform](https://img.shields.io/badge/Android-API%2024%E2%80%9336-3DDC84?style=for-the-badge&logo=android)](https://developer.android.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-F59E0B?style=for-the-badge)](LICENSE)
 
-[**Live Project Website**](https://codebyarnob.github.io/HisabMate/) • [**Download APK (`v1.0.0`)**](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/HisabMate-v1.0.0-release.apk) • [**Download AAB (`v1.0.0`)**](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/HisabMate-v1.0.0-release.aab) • [**Release Notes**](https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.0) • [**Screenshots**](#-application-screenshots--motion-walkthrough) • [**Architecture**](#-architecture--engineering)
+[**Live Project Website**](https://codebyarnob.github.io/HisabMate/) • [**Download APK (`v1.0.1`)**](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/HisabMate-v1.0.1-release.apk) • [**Download AAB (`v1.0.1`)**](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/HisabMate-v1.0.1-release.aab) • [**Release Notes**](https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.1) • [**Screenshots**](#-application-screenshots--motion-walkthrough) • [**Architecture**](#-architecture--engineering)
 
 </div>
 
 ---
 
-## Direct Release Downloads (`v1.0.0`)
+## Direct Release Downloads (`v1.0.1`)
 
 Compiled from verified source using Gradle `:app:assembleRelease` and `:app:bundleRelease`, validated with Android SDK `apksigner`, `aapt2`, Android Lint (`:app:lintDebug`), and Robolectric JVM/Compose UI tests (`:app:testDebugUnitTest`):
 
 | Artifact | Format | Target / Purpose | Direct Download Link |
 | :--- | :---: | :--- | :--- |
-| **`HisabMate-v1.0.0-release.apk`** | `.apk` (`~11.1 MB`) | Direct installation on Android 7.0 – 16 (`API 24–36`) devices | [**Download APK**](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/HisabMate-v1.0.0-release.apk) |
-| **`HisabMate-v1.0.0-release.aab`** | `.aab` (`~10.8 MB`) | Android App Bundle for Play Console / `bundletool` distribution | [**Download AAB**](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/HisabMate-v1.0.0-release.aab) |
-| **`SHA256SUMS.txt`** | `.txt` | SHA-256 cryptographic checksums for release verification | [**Download SHA256SUMS.txt**](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/SHA256SUMS.txt) |
+| **`HisabMate-v1.0.1-release.apk`** | `.apk` (`~11.1 MB`) | Direct installation on Android 7.0 – 16 (`API 24–36`) devices | [**Download APK (v1.0.1)**](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/HisabMate-v1.0.1-release.apk) |
+| **`HisabMate-v1.0.1-release.aab`** | `.aab` (`~10.8 MB`) | Android App Bundle for Play Console / `bundletool` distribution | [**Download AAB (v1.0.1)**](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/HisabMate-v1.0.1-release.aab) |
+| **`SHA256SUMS.txt`** | `.txt` | SHA-256 cryptographic checksums for release verification | [**Download SHA256SUMS.txt**](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/SHA256SUMS.txt) |
 
 - **Application ID**: `com.aistudio.hisabmate.fntkbd`
-- **Version**: `1.0.0` (`versionCode = 1`)
+- **Version**: `1.0.1` (`versionCode = 2`)
 - **Supported Android Versions**: Android 7.0 Nougat (`minSdk = 24`) through Android 16 (`targetSdk = 36`, `compileSdk = 36`)
-- **APK SHA-256**: `98ce4769ec00433434db9ae0fbfc43a70cbbdc819571b929d840f6c469065d63`
-- **AAB SHA-256**: `f73dc84502e20887569eafc60015569b59886ae765583df9768ed6daf6df3147`
+- **APK SHA-256**: `eed42e6ea5d921ef00eb990910ee931c2423aaeb6ed7ade11c1482d2e3f2c46e`
+- **AAB SHA-256**: `6e4e4c0214d33a85d08bde633507d478aac0669d03581ac95f249c54e729bb2b`
 
 ---
 
@@ -205,7 +205,7 @@ HisabMate adheres strictly to the principle of least privilege and operates 100%
 ## Installation, Build & Release Signing Instructions
 
 ### Option 1: Direct APK Installation
-Download [**`HisabMate-v1.0.0-release.apk`**](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/HisabMate-v1.0.0-release.apk) from the [v1.0.0 Release page](https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.0) and install it on any Android 7.0+ (`API 24+`) device.
+Download [**`HisabMate-v1.0.1-release.apk`**](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/HisabMate-v1.0.1-release.apk) from the [v1.0.1 Release page](https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.1) and install it on any Android 7.0+ (`API 24+`) device.
 
 ### Option 2: Clone & Build Locally
 
@@ -262,6 +262,7 @@ The automated release workflow (`.github/workflows/release.yml`) supports full p
 
 | Version | Date | Highlights | Artifacts |
 | :--- | :--- | :--- | :--- |
+| **`v1.0.1`** | 2026-10-31 | Core performance optimization with Room entity indexes, idempotent permanent demo data deletion (Room migration 5→6), and full physical PDF financial statement export engine. | [APK](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/HisabMate-v1.0.1-release.apk) • [AAB](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/HisabMate-v1.0.1-release.aab) • [SHA256SUMS](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.1/SHA256SUMS.txt) |
 | **`v1.0.0`** | 2026-10-31 | Initial production release featuring 14 ISO 4217 currencies, offline FX converter, Bank/MFS wallets, multi-period budgets, savings goals, debt ledger, local AlarmManager notifications, 7-step interactive onboarding, and Light/Dark themes. | [APK](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/HisabMate-v1.0.0-release.apk) • [AAB](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/HisabMate-v1.0.0-release.aab) • [SHA256SUMS](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/SHA256SUMS.txt) |
 
 ---
