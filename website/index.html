@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-site-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HisabMate – Global Multi-Currency Personal Finance &amp; Expense Manager</title>
-  <meta name="description" content="HisabMate is a privacy-first, offline-native Android personal finance, multi-currency wallet, budgeting, debt ledger, and wealth analytics app built with Kotlin and Jetpack Compose." />
-  <meta property="og:title" content="HisabMate – Smart Multi-Currency Personal Finance Manager" />
-  <meta property="og:description" content="Manage 14 ISO 4217 currencies, bank &amp; MFS wallets (bKash, Nagad, Wise), multi-period budgets, savings goals, and recurring bills 100% offline." />
+  <meta name="description" content="HisabMate is a privacy-first, offline-native Android personal finance, multi-currency wallet, budgeting, debt ledger, and wealth analytics app built with Kotlin, Jetpack Compose (Material 3), and Room SQLite." />
+  <meta property="og:title" content="HisabMate v1.0.0 – Global Multi-Currency Personal Finance Manager for Android" />
+  <meta property="og:description" content="Manage 14 ISO 4217 currencies, bank &amp; MFS wallets (bKash, Nagad, Rocket, Wise), multi-period budgets, savings goals, and debt ledgers 100% offline. Download APK &amp; AAB." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://codebyarnob.github.io/HisabMate/" />
   <meta property="og:image" content="https://raw.githubusercontent.com/CodeByArnob/HisabMate/main/docs/screenshots/dashboard-light.png" />
@@ -18,87 +18,327 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <!-- Sticky Navigation -->
+  <!-- Sticky Responsive Navigation -->
   <header class="navbar">
     <div class="container nav-inner">
-      <a href="#" class="brand">
-        <img src="favicon.svg" alt="HisabMate Logo" />
+      <a href="#" class="brand" aria-label="HisabMate Home">
+        <img src="favicon.svg" alt="HisabMate Logo" width="36" height="36" />
         <span>HisabMate</span>
         <span class="brand-badge">v1.0.0</span>
       </a>
+
       <nav class="nav-links" aria-label="Primary Navigation">
+        <a href="#download">Download APK/AAB</a>
+        <a href="#currencies">14 Currencies &amp; FX</a>
         <a href="#screenshots">Screenshots</a>
         <a href="#features">Features</a>
-        <a href="#currencies">14 Currencies</a>
         <a href="#architecture">Architecture</a>
-        <a href="#build">Build &amp; Release</a>
         <a href="#faq">FAQ</a>
       </nav>
+
       <div class="nav-actions">
-        <a href="https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.0" class="btn btn-outline" target="_blank" rel="noopener">Release v1.0.0</a>
-        <a href="https://github.com/CodeByArnob/HisabMate" class="btn btn-primary" target="_blank" rel="noopener">GitHub Repository</a>
+        <button type="button" id="site-theme-toggle" class="site-theme-toggle" aria-label="Toggle Website Light/Dark Theme" title="Switch Website Theme">
+          <span id="site-theme-icon" aria-hidden="true">☀️</span>
+        </button>
+        <a href="https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/HisabMate-v1.0.0-release.apk" class="btn btn-primary" rel="noopener">
+          Download APK
+        </a>
+        <a href="https://github.com/CodeByArnob/HisabMate" class="btn btn-outline" target="_blank" rel="noopener">
+          GitHub
+        </a>
+        <button type="button" id="mobile-menu-btn" class="mobile-menu-btn" aria-expanded="false" aria-controls="mobile-nav-drawer" aria-label="Open Navigation Menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <path d="M4 7h16M4 12h16M4 17h16" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Accessible Collapsible Mobile Navigation Drawer -->
+    <div id="mobile-nav-drawer" class="mobile-drawer" aria-label="Mobile Navigation Drawer">
+      <nav class="mobile-drawer-links">
+        <a href="#download" class="mobile-nav-link"><span>Download Release APK &amp; AAB</span><span>→</span></a>
+        <a href="#currencies" class="mobile-nav-link"><span>Interactive 14-Currency FX Engine</span><span>→</span></a>
+        <a href="#screenshots" class="mobile-nav-link"><span>Genuine App Screenshots (12)</span><span>→</span></a>
+        <a href="#features" class="mobile-nav-link"><span>Core Financial Capabilities</span><span>→</span></a>
+        <a href="#architecture" class="mobile-nav-link"><span>Clean MVVM &amp; Room SQLite v5</span><span>→</span></a>
+        <a href="#faq" class="mobile-nav-link"><span>Privacy &amp; Engineering FAQ</span><span>→</span></a>
+      </nav>
+      <div class="mobile-drawer-cta">
+        <a href="https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/HisabMate-v1.0.0-release.apk" class="btn btn-primary" rel="noopener">
+          Download HisabMate-v1.0.0-release.apk
+        </a>
+        <a href="https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/HisabMate-v1.0.0-release.aab" class="btn btn-emerald" rel="noopener">
+          Download HisabMate-v1.0.0-release.aab
+        </a>
+        <a href="https://github.com/CodeByArnob/HisabMate" class="btn btn-outline" target="_blank" rel="noopener">
+          Explore GitHub Repository
+        </a>
       </div>
     </div>
   </header>
 
-  <!-- Hero Section -->
   <main>
+    <!-- Hero Section -->
     <section class="hero">
       <div class="container hero-grid">
-        <div>
-          <div class="eyebrow">100% Offline-First • Kotlin &amp; Jetpack Compose • Material 3</div>
+        <div class="hero-content">
+          <div class="eyebrow">
+            <span class="pulse-dot" aria-hidden="true"></span>
+            <span>v1.0.0 Production Release • Kotlin &amp; Jetpack Compose M3 • 100% Offline</span>
+          </div>
+
           <h1>
             Global Personal Finance, <span class="gradient-text">Engineered for Total Clarity.</span>
           </h1>
+
           <p class="hero-lead">
-            HisabMate unifies multi-currency bank accounts, MFS wallets (bKash, Nagad, Rocket), Wise/Revolut balances, multi-period budgets, recurring bills, savings goals, and debt ledgers in a single high-contrast Android experience—with zero cloud tracking.
+            HisabMate unifies multi-currency bank accounts, MFS wallets (bKash, Nagad, Rocket), Wise &amp; Revolut balances, multi-period budgets, recurring bills, savings pots, and debt ledgers in a single high-contrast Android application—with zero cloud tracking.
           </p>
+
           <div class="hero-cta">
-            <a href="https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.0" class="btn btn-primary" target="_blank" rel="noopener">
-              View v1.0.0 Release &amp; Build Guide
+            <a href="https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/HisabMate-v1.0.0-release.apk" class="btn btn-primary" rel="noopener">
+              ⬇ Download APK (v1.0.0)
             </a>
-            <a href="https://github.com/CodeByArnob/HisabMate" class="btn btn-outline" target="_blank" rel="noopener">
-              Explore Source Code on GitHub
+            <a href="https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/HisabMate-v1.0.0-release.aab" class="btn btn-emerald" rel="noopener">
+              ⬇ Download App Bundle (.AAB)
+            </a>
+            <a href="https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.0" class="btn btn-outline" target="_blank" rel="noopener">
+              Release Notes &amp; SHA-256
             </a>
           </div>
+
+          <div class="release-quick-meta">
+            <span>✓ Package: <code>com.aistudio.hisabmate.fntkbd</code></span>
+            <span>✓ Android 7.0 – 16 (API 24–36)</span>
+            <span>✓ Zero <code>INTERNET</code> Permission</span>
+          </div>
+
           <div class="hero-metrics">
             <div class="metric-item">
-              <strong>14 ISO</strong>
-              <span>Native Currencies &amp; FX Engine</span>
+              <strong>14 ISO 4217</strong>
+              <span>Native Currencies &amp; Offline FX</span>
             </div>
             <div class="metric-item">
-              <strong>10 Tables</strong>
+              <strong>10 Entities</strong>
               <span>Room SQLite v5 Local Schema</span>
             </div>
             <div class="metric-item">
-              <strong>Zero</strong>
-              <span>Cloud Lock-In or Telemetry</span>
+              <strong>100% Local</strong>
+              <span>PIN Lock • JSON, CSV &amp; PDF</span>
             </div>
           </div>
         </div>
 
-        <div class="hero-Art">
-          <div class="theme-switcher" role="group" aria-label="Preview Theme Switcher">
+        <div class="hero-visual">
+          <div class="theme-switcher" role="group" aria-label="Interactive App Preview Switcher">
             <button type="button" class="theme-btn active" data-hero-theme="light" data-img-src="assets/screenshots/dashboard-light.png" data-img-alt="HisabMate Home Dashboard in Light Mode">
-              Light Mode (#E6ECF5)
+              Light (#E6ECF5)
             </button>
             <button type="button" class="theme-btn" data-hero-theme="dark" data-img-src="assets/screenshots/dashboard-dark.png" data-img-alt="HisabMate Home Dashboard in Dark Mode">
-              Dark Mode (#0A0D14)
+              Dark (#0A0D14)
+            </button>
+            <button type="button" class="theme-btn" data-hero-theme="reel" data-img-src="assets/screenshots/hisabmate-motion-walkthrough.gif" data-img-alt="HisabMate Animated Screen Walkthrough Reel">
+              Motion Reel
+            </button>
+            <button type="button" class="theme-btn" data-hero-theme="fx" data-img-src="assets/screenshots/multi-currency-fx.png" data-img-alt="HisabMate Multi-Currency & Offline FX Screen">
+              FX Engine
             </button>
           </div>
-          <div class="phone-frame">
-            <img id="hero-dashboard-img" src="assets/screenshots/dashboard-light.png" alt="HisabMate Home Dashboard in Light Mode" onerror="this.src='https://raw.githubusercontent.com/CodeByArnob/HisabMate/main/docs/screenshots/dashboard-light.png'" />
+
+          <div class="phone-stage">
+            <div class="phone-frame">
+              <img id="hero-dashboard-img" src="assets/screenshots/dashboard-light.png" alt="HisabMate Home Dashboard in Light Mode" width="320" height="680" onerror="this.src='https://raw.githubusercontent.com/CodeByArnob/HisabMate/main/docs/screenshots/dashboard-light.png'" />
+            </div>
+
+            <div class="floating-badges-row">
+              <div class="float-card">
+                <small>bKash + BRAC Bank (BDT)</small>
+                <strong>৳1,94,500.00</strong>
+                <span>South Asian Grouping</span>
+              </div>
+              <div class="float-card">
+                <small>Wise USD &amp; Euro Vault</small>
+                <strong>$2,390.00 USD</strong>
+                <span>1 USD = ৳120.50 Offline FX</span>
+              </div>
+            </div>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cinematic SVG Motion Banner Showcase -->
+    <section aria-label="Animated Fintech Telemetry Banner" style="padding-top: 12px; padding-bottom: 36px;">
+      <div class="container reveal">
+        <div class="motion-showcase-wrap">
+          <img src="assets/screenshots/hisabmate-banner.svg" alt="HisabMate Animated Fintech Telemetry Banner" width="1280" height="540" onerror="this.src='https://raw.githubusercontent.com/CodeByArnob/HisabMate/main/docs/screenshots/hisabmate-banner.svg'" />
+        </div>
+      </div>
+    </section>
+
+    <!-- Direct Release Download & Verification Section -->
+    <section id="download">
+      <div class="container reveal">
+        <div class="section-header">
+          <span class="section-tag">Verified GitHub Release v1.0.0</span>
+          <h2>Download Compiled Android APK &amp; App Bundle</h2>
+          <p>Built from verified source code using Gradle's <code>:app:assembleRelease</code> and <code>:app:bundleRelease</code> tasks, validated with <code>apksigner</code> and Robolectric unit/UI tests.</p>
+        </div>
+
+        <div class="download-grid">
+          <article class="download-card">
+            <div>
+              <span class="download-badge">Direct Device Install • APK</span>
+              <h3 style="margin-top: 10px;">HisabMate-v1.0.0-release.apk</h3>
+              <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 8px 0 14px;">
+                Universal signed Android APK ready to install directly on any Android 7.0+ (API 24–36) phone, foldable, or tablet.
+              </p>
+              <ul class="download-meta-list">
+                <li><strong>Package ID:</strong> <code>com.aistudio.hisabmate.fntkbd</code></li>
+                <li><strong>Version:</strong> <code>1.0.0 (versionCode 1)</code></li>
+                <li><strong>Signature:</strong> APK Signature Scheme v2 (RSA-2048)</li>
+              </ul>
+            </div>
+            <div>
+              <div class="checksum-box" id="apk-checksum-box" style="margin-bottom: 14px;">
+                SHA-256: <code>98ce4769ec00433434db9ae0fbfc43a70cbbdc819571b929d840f6c469065d63</code>
+              </div>
+              <a href="https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/HisabMate-v1.0.0-release.apk" class="btn btn-primary" style="width: 100%;" rel="noopener">
+                ⬇ Download HisabMate-v1.0.0-release.apk
+              </a>
+            </div>
+          </article>
+
+          <article class="download-card aab-card">
+            <div>
+              <span class="download-badge">Play Store &amp; Bundletool • AAB</span>
+              <h3 style="margin-top: 10px;">HisabMate-v1.0.0-release.aab</h3>
+              <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 8px 0 14px;">
+                Compiled Android App Bundle generated via <code>gradle :app:bundleRelease</code> for Play Console distribution or split APK extraction.
+              </p>
+              <ul class="download-meta-list">
+                <li><strong>Task:</strong> <code>:app:bundleRelease</code></li>
+                <li><strong>Target SDK:</strong> Android 16 (API 36) / Min SDK 24</li>
+                <li><strong>Checksums:</strong> <code>SHA256SUMS.txt</code> attached to release</li>
+              </ul>
+            </div>
+            <div>
+              <div class="checksum-box" style="margin-bottom: 14px;">
+                Companion Checksums: <a href="https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/SHA256SUMS.txt" style="text-decoration: underline;" target="_blank" rel="noopener">Download SHA256SUMS.txt</a>
+              </div>
+              <a href="https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/HisabMate-v1.0.0-release.aab" class="btn btn-emerald" style="width: 100%;" rel="noopener">
+                ⬇ Download HisabMate-v1.0.0-release.aab
+              </a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive 14-Currency & Offline FX Playground -->
+    <section id="currencies">
+      <div class="container reveal">
+        <div class="section-header">
+          <span class="section-tag">Authentic ISO 4217 Engine</span>
+          <h2>14 Currencies &amp; Interactive Offline FX Simulator</h2>
+          <p>Test HisabMate's real cross-currency math, native symbols, regional decimal precision (0 decimals for JPY, 2 for BDT/USD/EUR, 3 for KWD), and South Asian vs. International grouping.</p>
+        </div>
+
+        <div class="motion-showcase-wrap">
+          <img src="assets/screenshots/fx-pipeline-motion.svg" alt="Animated 14-Currency ISO 4217 FX Telemetry Pipeline" width="1200" height="220" onerror="this.src='https://raw.githubusercontent.com/CodeByArnob/HisabMate/main/docs/screenshots/fx-pipeline-motion.svg'" />
+        </div>
+
+        <div class="fx-playground" aria-label="Interactive Multi-Currency Calculator">
+          <div class="fx-controls-grid">
+            <div class="fx-field">
+              <label for="fx-amount">Amount to Convert</label>
+              <input type="number" id="fx-amount" class="fx-input" value="125000" min="0" step="any" />
+            </div>
+            <div class="fx-field">
+              <label for="fx-from">From Currency (ISO 4217)</label>
+              <select id="fx-from" class="fx-select">
+                <option value="BDT" selected>BDT (৳) – Bangladeshi Taka</option>
+                <option value="USD">USD ($) – US Dollar</option>
+                <option value="EUR">EUR (€) – Euro</option>
+                <option value="GBP">GBP (£) – British Pound</option>
+                <option value="INR">INR (₹) – Indian Rupee</option>
+                <option value="JPY">JPY (¥) – Japanese Yen</option>
+                <option value="CNY">CNY (¥) – Chinese Yuan</option>
+                <option value="SAR">SAR (ر.س) – Saudi Riyal</option>
+                <option value="AED">AED (د.إ) – UAE Dirham</option>
+                <option value="CAD">CAD (CA$) – Canadian Dollar</option>
+                <option value="AUD">AUD (A$) – Australian Dollar</option>
+                <option value="SGD">SGD (S$) – Singapore Dollar</option>
+                <option value="MYR">MYR (RM) – Malaysian Ringgit</option>
+                <option value="KWD">KWD (د.ك) – Kuwaiti Dinar</option>
+              </select>
+            </div>
+            <div class="fx-field">
+              <label for="fx-to">To Target Currency</label>
+              <select id="fx-to" class="fx-select">
+                <option value="BDT">BDT (৳) – Bangladeshi Taka</option>
+                <option value="USD" selected>USD ($) – US Dollar</option>
+                <option value="EUR">EUR (€) – Euro</option>
+                <option value="GBP">GBP (£) – British Pound</option>
+                <option value="INR">INR (₹) – Indian Rupee</option>
+                <option value="JPY">JPY (¥) – Japanese Yen</option>
+                <option value="CNY">CNY (¥) – Chinese Yuan</option>
+                <option value="SAR">SAR (ر.س) – Saudi Riyal</option>
+                <option value="AED">AED (د.إ) – UAE Dirham</option>
+                <option value="CAD">CAD (CA$) – Canadian Dollar</option>
+                <option value="AUD">AUD (A$) – Australian Dollar</option>
+                <option value="SGD">SGD (S$) – Singapore Dollar</option>
+                <option value="MYR">MYR (RM) – Malaysian Ringgit</option>
+                <option value="KWD">KWD (د.ك) – Kuwaiti Dinar</option>
+              </select>
+            </div>
+            <div class="fx-field">
+              <label for="fx-grouping">Digit Grouping Format</label>
+              <select id="fx-grouping" class="fx-select">
+                <option value="south_asian" selected>South Asian (1,25,000.00)</option>
+                <option value="international">International (125,000.00)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="fx-result-banner">
+            <div class="fx-result-main">
+              <small id="fx-source-formatted">Source: ৳1,25,000.00 BDT</small>
+              <strong id="fx-target-formatted">$1,037.34 USD</strong>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600;" id="fx-rate-caption">
+              Offline Reference Rate: 1 USD = ৳120.50 BDT
+            </div>
+          </div>
+        </div>
+
+        <div class="currency-grid">
+          <div class="currency-pill"><div class="curr-symbol">৳</div><div class="curr-meta"><strong>BDT</strong><span>Bangladeshi Taka</span></div></div>
+          <div class="currency-pill"><div class="curr-symbol">$</div><div class="curr-meta"><strong>USD</strong><span>US Dollar</span></div></div>
+          <div class="currency-pill"><div class="curr-symbol">€</div><div class="curr-meta"><strong>EUR</strong><span>Euro</span></div></div>
+          <div class="currency-pill"><div class="curr-symbol">£</div><div class="curr-meta"><strong>GBP</strong><span>British Pound</span></div></div>
+          <div class="currency-pill"><div class="curr-symbol">₹</div><div class="curr-meta"><strong>INR</strong><span>Indian Rupee</span></div></div>
+          <div class="currency-pill"><div class="curr-symbol">¥</div><div class="curr-meta"><strong>JPY</strong><span>Japanese Yen</span></div></div>
+          <div class="currency-pill"><div class="curr-symbol">¥</div><div class="curr-meta"><strong>CNY</strong><span>Chinese Yuan</span></div></div>
+          <div class="currency-pill"><div class="curr-symbol">ر.س</div><div class="curr-meta"><strong>SAR</strong><span>Saudi Riyal</span></div></div>
+          <div class="currency-pill"><div class="curr-symbol">د.إ</div><div class="curr-meta"><strong>AED</strong><span>UAE Dirham</span></div></div>
+          <div class="currency-pill"><div class="curr-symbol">CA$</div><div class="curr-meta"><strong>CAD</strong><span>Canadian Dollar</span></div></div>
+          <div class="currency-pill"><div class="curr-symbol">A$</div><div class="curr-meta"><strong>AUD</strong><span>Australian Dollar</span></div></div>
+          <div class="currency-pill"><div class="curr-symbol">S$</div><div class="curr-meta"><strong>SGD</strong><span>Singapore Dollar</span></div></div>
+          <div class="currency-pill"><div class="curr-symbol">RM</div><div class="curr-meta"><strong>MYR</strong><span>Malaysian Ringgit</span></div></div>
+          <div class="currency-pill"><div class="curr-symbol">د.ك</div><div class="curr-meta"><strong>KWD</strong><span>Kuwaiti Dinar</span></div></div>
         </div>
       </div>
     </section>
 
     <!-- Genuine Application Screenshots Gallery -->
     <section id="screenshots">
-      <div class="container">
+      <div class="container reveal">
         <div class="section-header">
-          <h2>Genuine Application Screenshots</h2>
-          <p>Captured directly from HisabMate's production Jetpack Compose screens across Light Mode, Dark Mode, Multi-Currency FX, Planning Hub, and Analytics.</p>
+          <span class="section-tag">100% Real Compose Screens</span>
+          <h2>Genuine Application Screenshot Gallery</h2>
+          <p>Rendered directly from HisabMate's production Jetpack Compose screens via Robolectric Native Graphics. Click any screen to inspect in full detail.</p>
         </div>
 
         <div class="gallery-filter" role="tablist" aria-label="Screenshot Categories">
@@ -209,12 +449,13 @@
       </div>
     </section>
 
-    <!-- Key Features -->
+    <!-- Core Fintech Capabilities -->
     <section id="features">
-      <div class="container">
+      <div class="container reveal">
         <div class="section-header">
+          <span class="section-tag">Production Capabilities</span>
           <h2>Engineered for Complete Financial Control</h2>
-          <p>Every screen and data flow in HisabMate is built with real Room SQLite persistence, authentic ISO 4217 currency math, and responsive Material 3 components.</p>
+          <p>Every screen and data flow in HisabMate is backed by Room SQLite v5 persistence, authentic ISO 4217 currency math, and responsive Material 3 components.</p>
         </div>
 
         <div class="feature-grid">
@@ -257,93 +498,95 @@
       </div>
     </section>
 
-    <!-- Supported Currencies -->
-    <section id="currencies">
-      <div class="container">
-        <div class="section-header">
-          <h2>14 Supported ISO 4217 Currencies</h2>
-          <p>Authentic regional symbols, accurate decimal precision (0, 2, or 3 decimals), and optional South Asian (Lakh/Crore) or International digit grouping.</p>
-        </div>
-
-        <div class="currency-grid">
-          <div class="currency-pill"><div class="curr-symbol">৳</div><div class="curr-meta"><strong>BDT</strong><span>Bangladeshi Taka</span></div></div>
-          <div class="currency-pill"><div class="curr-symbol">$</div><div class="curr-meta"><strong>USD</strong><span>US Dollar</span></div></div>
-          <div class="currency-pill"><div class="curr-symbol">€</div><div class="curr-meta"><strong>EUR</strong><span>Euro</span></div></div>
-          <div class="currency-pill"><div class="curr-symbol">£</div><div class="curr-meta"><strong>GBP</strong><span>British Pound</span></div></div>
-          <div class="currency-pill"><div class="curr-symbol">₹</div><div class="curr-meta"><strong>INR</strong><span>Indian Rupee</span></div></div>
-          <div class="currency-pill"><div class="curr-symbol">¥</div><div class="curr-meta"><strong>JPY</strong><span>Japanese Yen</span></div></div>
-          <div class="currency-pill"><div class="curr-symbol">¥</div><div class="curr-meta"><strong>CNY</strong><span>Chinese Yuan</span></div></div>
-          <div class="currency-pill"><div class="curr-symbol">ر.س</div><div class="curr-meta"><strong>SAR</strong><span>Saudi Riyal</span></div></div>
-          <div class="currency-pill"><div class="curr-symbol">د.إ</div><div class="curr-meta"><strong>AED</strong><span>UAE Dirham</span></div></div>
-          <div class="currency-pill"><div class="curr-symbol">CA$</div><div class="curr-meta"><strong>CAD</strong><span>Canadian Dollar</span></div></div>
-          <div class="currency-pill"><div class="curr-symbol">A$</div><div class="curr-meta"><strong>AUD</strong><span>Australian Dollar</span></div></div>
-          <div class="currency-pill"><div class="curr-symbol">S$</div><div class="curr-meta"><strong>SGD</strong><span>Singapore Dollar</span></div></div>
-          <div class="currency-pill"><div class="curr-symbol">RM</div><div class="curr-meta"><strong>MYR</strong><span>Malaysian Ringgit</span></div></div>
-          <div class="currency-pill"><div class="curr-symbol">د.ك</div><div class="curr-meta"><strong>KWD</strong><span>Kuwaiti Dinar</span></div></div>
-        </div>
-      </div>
-    </section>
-
     <!-- Architecture & Build Section -->
     <section id="architecture">
-      <div class="container arch-grid">
-        <div class="arch-panel">
-          <h3>Architecture &amp; Technical Stack</h3>
-          <p>Built from the ground up with modern Android engineering standards:</p>
-          <ul class="arch-list">
-            <li><span class="check-dot">✓</span> <span><strong>UI Layer:</strong> 100% Jetpack Compose with Material 3 &amp; centralized <code>HisabTheme</code> Light/Dark semantic tokens.</span></li>
-            <li><span class="check-dot">✓</span> <span><strong>State Management:</strong> Unidirectional MVVM via <code>HisabViewModel</code> &amp; lifecycle-aware <code>StateFlow</code> pipelines.</span></li>
-            <li><span class="check-dot">✓</span> <span><strong>Persistence:</strong> AndroidX Room SQLite v5 with 10 relational entities &amp; reactive Kotlin Flow DAOs.</span></li>
-            <li><span class="check-dot">✓</span> <span><strong>Verification:</strong> Automated Robolectric JVM unit &amp; Compose UI test suite with Native Graphics screenshot validation.</span></li>
-          </ul>
+      <div class="container reveal">
+        <div class="section-header">
+          <span class="section-tag">System Architecture &amp; DevOps</span>
+          <h2>Clean MVVM + Unidirectional StateFlow Pipeline</h2>
+          <p>Modular Android architecture tested with Robolectric Native Graphics and automated GitHub Actions CI/CD workflows.</p>
         </div>
 
-        <div class="arch-panel" id="build">
-          <h3>Build, Test &amp; Release Setup</h3>
-          <p>Clone the repository and run the full test suite or assemble the APK locally:</p>
-          <pre class="code-box"><code>git clone https://github.com/CodeByArnob/HisabMate.git
+        <div class="motion-showcase-wrap">
+          <img src="assets/screenshots/architecture-motion.svg" alt="HisabMate Clean MVVM and Room SQLite v5 Architecture Diagram" width="1200" height="420" onerror="this.src='https://raw.githubusercontent.com/CodeByArnob/HisabMate/main/docs/screenshots/architecture-motion.svg'" />
+        </div>
+
+        <div class="arch-grid" id="build">
+          <div class="arch-panel">
+            <h3>Architecture &amp; Technical Stack</h3>
+            <p style="color: var(--text-secondary); font-size: 0.92rem;">Built from the ground up with modern Android engineering standards:</p>
+            <ul class="arch-list">
+              <li><span class="check-dot">✓</span> <span><strong>UI Layer:</strong> 100% Jetpack Compose with Material 3 &amp; centralized <code>HisabTheme</code> Light/Dark semantic tokens.</span></li>
+              <li><span class="check-dot">✓</span> <span><strong>State Management:</strong> Unidirectional MVVM via <code>HisabViewModel</code> &amp; lifecycle-aware <code>StateFlow</code> pipelines.</span></li>
+              <li><span class="check-dot">✓</span> <span><strong>Persistence:</strong> AndroidX Room SQLite v5 with 10 relational entities &amp; reactive Kotlin Flow DAOs.</span></li>
+              <li><span class="check-dot">✓</span> <span><strong>Verification:</strong> Automated Robolectric JVM unit &amp; Compose UI test suite + Android Lint verification.</span></li>
+              <li><span class="check-dot">✓</span> <span><strong>Release Signing:</strong> Production <code>assembleRelease</code> &amp; <code>bundleRelease</code> pipeline backed by encrypted GitHub Actions secrets.</span></li>
+            </ul>
+          </div>
+
+          <div class="arch-panel">
+            <h3>Build, Test &amp; Release Commands</h3>
+            <p style="color: var(--text-secondary); font-size: 0.92rem;">Clone the repository and execute verification or release packaging locally:</p>
+            <pre class="code-box"><code>git clone https://github.com/CodeByArnob/HisabMate.git
 cd HisabMate
 cp .env.example .env
 
-# Run Robolectric Unit &amp; UI Tests
-gradle :app:testDebugUnitTest
+# Run Robolectric Unit/UI Tests &amp; Android Lint
+gradle :app:testDebugUnitTest :app:lintDebug
 
-# Build Debug APK
-gradle :app:assembleDebug</code></pre>
-          <p style="margin-top: 14px; font-size: 0.88rem; color: var(--text-muted);">
-            Application ID: <code>com.aistudio.hisabmate.fntkbd</code> • Version: <code>1.0.0 (1)</code> • SDK: <code>minSdk 24 / targetSdk 36</code>
-          </p>
+# Build Debug &amp; Signed Release APK + AAB
+gradle :app:assembleDebug :app:assembleRelease :app:bundleRelease</code></pre>
+            <p style="margin-top: 12px; font-size: 0.84rem; color: var(--text-muted);">
+              Application ID: <code>com.aistudio.hisabmate.fntkbd</code> • Version: <code>1.0.0 (1)</code> • SDK: <code>minSdk 24 / targetSdk 36</code>
+            </p>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- FAQ -->
     <section id="faq">
-      <div class="container">
+      <div class="container reveal">
         <div class="section-header">
+          <span class="section-tag">Documentation &amp; Trust</span>
           <h2>Frequently Asked Questions</h2>
-          <p>Everything you need to know about privacy, multi-currency accounting, and building HisabMate.</p>
+          <p>Everything you need to know about privacy, multi-currency accounting, release verification, and building HisabMate.</p>
         </div>
 
         <div class="faq-list">
           <details class="faq-item" open>
-            <summary>Does HisabMate send any financial data to external servers?</summary>
-            <p>No. HisabMate does not even request the Android <code>INTERNET</code> permission. All accounts, transactions, budgets, exchange rates, and reminders are stored strictly on-device in Room SQLite.</p>
+            <summary><span>Does HisabMate send any financial data to external servers?</span><span>+</span></summary>
+            <p>No. HisabMate does not even request the Android <code>INTERNET</code> permission. All accounts, transactions, budgets, exchange rates, and reminders are stored strictly on-device in Room SQLite v5.</p>
           </details>
 
           <details class="faq-item">
-            <summary>How does multi-currency conversion work when offline?</summary>
+            <summary><span>Where can I download the compiled Android APK and App Bundle (AAB)?</span><span>+</span></summary>
+            <p>You can download <code>HisabMate-v1.0.0-release.apk</code>, <code>HisabMate-v1.0.0-release.aab</code>, and <code>SHA256SUMS.txt</code> directly from the <a href="https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.0" style="text-decoration: underline;" target="_blank" rel="noopener">GitHub Release v1.0.0 page</a> or via the download buttons at the top of this website.</p>
+          </details>
+
+          <details class="faq-item">
+            <summary><span>How does multi-currency conversion work when offline?</span><span>+</span></summary>
             <p>HisabMate ships with verified baseline exchange rates for 14 major ISO 4217 currencies anchored to BDT and allows you to customize any exchange rate manually in the Currencies &amp; FX Rates screen. Changing your base currency dynamically recalculates all dashboard totals while keeping every transaction's original currency intact.</p>
           </details>
 
           <details class="faq-item">
-            <summary>How can I back up or migrate my financial records to a new phone?</summary>
+            <summary><span>How can I back up or migrate my financial records to a new phone?</span><span>+</span></summary>
             <p>Open <strong>Profile &amp; Settings → Data Portability</strong> to export a complete JSON backup or CSV spreadsheet of your transactions, which can be restored on any device running HisabMate.</p>
           </details>
         </div>
       </div>
     </section>
   </main>
+
+  <!-- Lightbox Modal for Screenshot Inspection -->
+  <div id="lightbox-modal" class="lightbox-modal" role="dialog" aria-modal="true" aria-label="Screenshot Preview">
+    <div class="lightbox-inner">
+      <button type="button" id="lightbox-close" class="lightbox-close" aria-label="Close Preview">✕</button>
+      <img id="lightbox-img" src="assets/screenshots/dashboard-light.png" alt="Screenshot Preview" />
+      <h3 id="lightbox-title" style="font-family: var(--font-display); font-size: 1.05rem; margin-bottom: 4px;">Screen Preview</h3>
+      <p id="lightbox-desc" style="font-size: 0.85rem; color: var(--text-muted);"></p>
+    </div>
+  </div>
 
   <!-- Footer -->
   <footer class="footer">
@@ -354,6 +597,8 @@ gradle :app:assembleDebug</code></pre>
       <div class="footer-links">
         <a href="https://github.com/CodeByArnob/HisabMate" target="_blank" rel="noopener">GitHub Repo</a>
         <a href="https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.0" target="_blank" rel="noopener">Release v1.0.0</a>
+        <a href="https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/HisabMate-v1.0.0-release.apk" rel="noopener">Download APK</a>
+        <a href="https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/HisabMate-v1.0.0-release.aab" rel="noopener">Download AAB</a>
         <a href="https://github.com/CodeByArnob/HisabMate/issues" target="_blank" rel="noopener">Report Issue</a>
         <a href="https://github.com/CodeByArnob/HisabMate/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
       </div>

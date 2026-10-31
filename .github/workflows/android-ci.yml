@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   build-and-test:
-    name: Build & Robolectric Test Suite
+    name: Build, Lint, Robolectric Test & Release Verification
     runs-on: ubuntu-latest
 
     steps:
@@ -34,7 +34,7 @@ jobs:
         with:
           gradle-version: '9.3.1'
 
-      - name: Prepare Debug Keystore & Environment Defaults
+      - name: Prepare Environment & Debug Keystore
         run: |
           if [ ! -f .env ] && [ -f .env.example ]; then
             cp .env.example .env
@@ -46,18 +46,69 @@ jobs:
       - name: Run Unit & Robolectric Tests
         run: gradle :app:testDebugUnitTest --stacktrace
 
+      - name: Run Android Lint Verification
+        run: gradle :app:lintDebug --stacktrace
+
       - name: Assemble Debug APK
         run: gradle :app:assembleDebug --stacktrace
 
-      - name: Upload Unit Test Reports
+      - name: Assemble & Verify Release APK and AAB
+        env:
+          UPLOAD_KEYSTORE_BASE64: ${{ secrets.UPLOAD_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          TEMP_KS="${RUNNER_TEMP}/ci-upload-key.jks"
+          rm -f "$TEMP_KS"
+          if [ -n "$UPLOAD_KEYSTORE_BASE64" ] && [ -n "$STORE_PASSWORD" ] && [ -n "$KEY_PASSWORD" ]; then
+            echo "Using configured GitHub Actions production upload keystore secret."
+            echo "$UPLOAD_KEYSTORE_BASE64" | base64 -d > "$TEMP_KS"
+            if [ -n "$KEY_ALIAS" ] && [ "$KEY_ALIAS" != "upload" ]; then
+              keytool -changealias -keystore "$TEMP_KS" -storepass "$STORE_PASSWORD" -alias "$KEY_ALIAS" -destalias "upload" -keypass "$KEY_PASSWORD" || true
+            fi
+            export KEYSTORE_PATH="$TEMP_KS"
+          else
+            echo "Production signing secrets not configured; generating ephemeral CI keystore in RUNNER_TEMP to verify :app:assembleRelease and :app:bundleRelease tasks."
+            keytool -genkeypair -v \
+              -keystore "$TEMP_KS" \
+              -storetype PKCS12 \
+              -alias upload \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -storepass "HisabMateCiVerify2026!" \
+              -keypass "HisabMateCiVerify2026!" \
+              -dname "CN=HisabMate CI Verification, OU=Engineering, O=CodeByArnob, L=Dhaka, S=Dhaka, C=BD"
+            export KEYSTORE_PATH="$TEMP_KS"
+            export STORE_PASSWORD="HisabMateCiVerify2026!"
+            export KEY_PASSWORD="HisabMateCiVerify2026!"
+          fi
+
+          gradle :app:assembleRelease :app:bundleRelease --stacktrace
+          rm -f "$TEMP_KS"
+
+          mkdir -p ci-release-outputs
+          cp app/build/outputs/apk/release/*.apk ci-release-outputs/HisabMate-v1.0.0-release.apk
+          cp app/build/outputs/bundle/release/*.aab ci-release-outputs/HisabMate-v1.0.0-release.aab
+          (cd ci-release-outputs && sha256sum HisabMate-v1.0.0-release.apk HisabMate-v1.0.0-release.aab > SHA256SUMS.txt)
+
+          APKSIGNER=$(find "${ANDROID_HOME}/build-tools" -name "apksigner" | sort -V | tail -n 1)
+          AAPT2=$(find "${ANDROID_HOME}/build-tools" -name "aapt2" | sort -V | tail -n 1)
+          "$APKSIGNER" verify --verbose ci-release-outputs/HisabMate-v1.0.0-release.apk
+          "$AAPT2" dump badging ci-release-outputs/HisabMate-v1.0.0-release.apk | head -n 15
+
+      - name: Upload Unit Test & Lint Reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: unit-test-reports
-          path: app/build/reports/tests/testDebugUnitTest/
+          name: verification-reports
+          path: |
+            app/build/reports/tests/testDebugUnitTest/
+            app/build/reports/lint-results-debug.*
 
-      - name: Upload Debug APK Artifact (CI Verification Only)
+      - name: Upload Release APK & AAB Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: hisabmate-ci-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          name: hisabmate-release-artifacts
+          path: ci-release-outputs/*

@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/screenshots/hisabmate-banner.svg" alt="HisabMate – Global Multi-Currency Personal Finance & Expense Manager Banner" width="100%" />
+<img src="docs/screenshots/hisabmate-banner.svg" alt="HisabMate – Global Multi-Currency Personal Finance & Expense Manager Animated Banner" width="100%" />
 
 <br />
 
@@ -9,36 +9,55 @@
 **A privacy-first, offline-native international personal finance, budgeting, multi-currency wallet, debt ledger, and wealth analytics application for Android.**
 
 [![Version](https://img.shields.io/badge/Release-v1.0.0-7C5CFF?style=for-the-badge&logo=github)](https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.0)
+[![Download APK](https://img.shields.io/badge/Download-APK%20(v1.0.0)-10B981?style=for-the-badge&logo=android)](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/HisabMate-v1.0.0-release.apk)
+[![Download AAB](https://img.shields.io/badge/Download-AAB%20Bundle-0EA5E9?style=for-the-badge&logo=googleplay)](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/HisabMate-v1.0.0-release.aab)
 [![Android CI](https://img.shields.io/github/actions/workflow/status/CodeByArnob/HisabMate/android-ci.yml?branch=main&style=for-the-badge&logo=android&label=Android%20CI)](https://github.com/CodeByArnob/HisabMate/actions/workflows/android-ci.yml)
 [![Website](https://img.shields.io/badge/GitHub%20Pages-Live%20Website-10B981?style=for-the-badge&logo=googlechrome)](https://codebyarnob.github.io/HisabMate/)
 [![Platform](https://img.shields.io/badge/Android-API%2024%E2%80%9336-3DDC84?style=for-the-badge&logo=android)](https://developer.android.com)
-[![Kotlin](https://img.shields.io/badge/Kotlin-Jetpack%20Compose-7F52FF?style=for-the-badge&logo=kotlin)](https://kotlinlang.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-F59E0B?style=for-the-badge)](LICENSE)
 
-[**Live Project Website**](https://codebyarnob.github.io/HisabMate/) • [**Latest Release (`v1.0.0`)**](https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.0) • [**Screenshot Gallery**](#-application-screenshots) • [**Architecture**](#-architecture--engineering) • [**Build & Test**](#-installation--build-instructions)
+[**Live Project Website**](https://codebyarnob.github.io/HisabMate/) • [**Download APK (`v1.0.0`)**](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/HisabMate-v1.0.0-release.apk) • [**Download AAB (`v1.0.0`)**](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/HisabMate-v1.0.0-release.aab) • [**Release Notes**](https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.0) • [**Screenshots**](#-application-screenshots--motion-walkthrough) • [**Architecture**](#-architecture--engineering)
 
 </div>
 
 ---
 
+## Direct Release Downloads (`v1.0.0`)
+
+Compiled from verified source using Gradle `:app:assembleRelease` and `:app:bundleRelease`, validated with Android SDK `apksigner`, `aapt2`, Android Lint (`:app:lintDebug`), and Robolectric JVM/Compose UI tests (`:app:testDebugUnitTest`):
+
+| Artifact | Format | Target / Purpose | Direct Download Link |
+| :--- | :---: | :--- | :--- |
+| **`HisabMate-v1.0.0-release.apk`** | `.apk` (`~11.1 MB`) | Direct installation on Android 7.0 – 16 (`API 24–36`) devices | [**Download APK**](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/HisabMate-v1.0.0-release.apk) |
+| **`HisabMate-v1.0.0-release.aab`** | `.aab` (`~10.8 MB`) | Android App Bundle for Play Console / `bundletool` distribution | [**Download AAB**](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/HisabMate-v1.0.0-release.aab) |
+| **`SHA256SUMS.txt`** | `.txt` | SHA-256 cryptographic checksums for release verification | [**Download SHA256SUMS.txt**](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/SHA256SUMS.txt) |
+
+- **Application ID**: `com.aistudio.hisabmate.fntkbd`
+- **Version**: `1.0.0` (`versionCode = 1`)
+- **Supported Android Versions**: Android 7.0 Nougat (`minSdk = 24`) through Android 16 (`targetSdk = 36`, `compileSdk = 36`)
+- **APK SHA-256**: `98ce4769ec00433434db9ae0fbfc43a70cbbdc819571b929d840f6c469065d63`
+- **AAB SHA-256**: `f73dc84502e20887569eafc60015569b59886ae765583df9768ed6daf6df3147`
+
+---
+
 ## Overview
 
-**HisabMate** (`com.aistudio.hisabmate.fntkbd`) is a modern Android personal finance application engineered with **Kotlin**, **Jetpack Compose (Material 3)**, and **Room SQLite**. Designed for global professionals, freelancers, travelers, and households managing money across multiple currencies and payment rails (bank cards, mobile financial services like **bKash**, **Nagad**, **Rocket**, international **Wise / Revolut** accounts, and cash wallets), HisabMate combines institutional-grade financial clarity with **100% offline-first privacy**.
+**HisabMate** (`com.aistudio.hisabmate.fntkbd`) is a modern Android personal finance application engineered with **Kotlin**, **Jetpack Compose (Material 3)**, and **Room SQLite v5**. Designed for global professionals, freelancers, travelers, and households managing money across multiple currencies and payment rails (bank cards, mobile financial services like **bKash**, **Nagad**, **Rocket**, international **Wise / Revolut** accounts, and cash wallets), HisabMate combines institutional-grade financial clarity with **100% offline-first privacy**.
 
 Every monetary record is stored in its **authentic native ISO 4217 currency** alongside a snapshot exchange rate, while dashboard net worth, category budgets, and cashflow reports dynamically consolidate into your chosen base currency.
 
 ---
 
-## Application Screenshots
+## Application Screenshots & Motion Walkthrough
 
-All screenshots below are rendered directly from the HisabMate Jetpack Compose UI using realistic sample data.
+All screenshots below are rendered directly from the running HisabMate Jetpack Compose UI via Robolectric Native Graphics (`@GraphicsMode(NATIVE)`).
 
-### Light Mode vs. Dark Mode Comparison
+### Light Mode, Dark Mode & Animated Walkthrough Reel
 
-| **Home Dashboard (Light Mode)** | **Home Dashboard (Dark Mode)** |
-| :---: | :---: |
-| <img src="docs/screenshots/dashboard-light.png" alt="HisabMate Home Dashboard Light Mode" width="380" /> | <img src="docs/screenshots/dashboard-dark.png" alt="HisabMate Home Dashboard Dark Mode" width="380" /> |
-| *Soft Slate-Cool canvas (`#E6ECF5`) with elevated `#FFFFFF` cards and high-contrast ink typography* | *Obsidian surface hierarchy (`#0A0D14` / `#131824`) calibrated for zero eye strain* |
+| **Home Dashboard (Light Mode)** | **Home Dashboard (Dark Mode)** | **Animated 10-Screen Walkthrough** |
+| :---: | :---: | :---: |
+| <img src="docs/screenshots/dashboard-light.png" alt="HisabMate Home Dashboard Light Mode" width="260" /> | <img src="docs/screenshots/dashboard-dark.png" alt="HisabMate Home Dashboard Dark Mode" width="260" /> | <img src="docs/screenshots/hisabmate-motion-walkthrough.gif" alt="HisabMate Animated Walkthrough GIF" width="260" /> |
+| *Soft Slate-Cool canvas (`#E6ECF5`) with elevated `#FFFFFF` cards* | *Obsidian surface hierarchy (`#0A0D14` / `#131824`) for zero eye strain* | *Automated walkthrough across core Compose screens* |
 
 ### Core Financial Flows & Modules
 
@@ -56,7 +75,7 @@ All screenshots below are rendered directly from the HisabMate Jetpack Compose U
 
 | **Interactive 7-Step Onboarding Experience** |
 | :---: |
-| <img src="docs/screenshots/onboarding-overview.png" alt="Interactive 7-Step Onboarding" width="320" /> |
+| <img src="docs/screenshots/onboarding-overview.png" alt="Interactive 7-Step Onboarding" width="300" /> |
 
 ---
 
@@ -97,6 +116,12 @@ All screenshots below are rendered directly from the HisabMate Jetpack Compose U
 
 ## Supported Currencies (ISO 4217)
 
+<div align="center">
+  <img src="docs/screenshots/fx-pipeline-motion.svg" alt="Animated 14-Currency ISO 4217 FX Telemetry Pipeline" width="100%" />
+</div>
+
+<br />
+
 | Code | Symbol | Currency Name | Region | Decimals | Grouping Support |
 | :--- | :---: | :--- | :--- | :---: | :--- |
 | **BDT** | `৳` | Bangladeshi Taka | Bangladesh | 2 | South Asian (`1,25,000.00`) & Standard |
@@ -117,6 +142,12 @@ All screenshots below are rendered directly from the HisabMate Jetpack Compose U
 ---
 
 ## Architecture & Engineering
+
+<div align="center">
+  <img src="docs/screenshots/architecture-motion.svg" alt="HisabMate Clean MVVM and Room SQLite v5 Architecture Diagram" width="100%" />
+</div>
+
+<br />
 
 HisabMate follows **Clean MVVM Architecture** with unidirectional data flow (`StateFlow`) and reactive Room SQLite persistence:
 
@@ -156,17 +187,6 @@ com.example
 
 ---
 
-## Tech Stack
-
-- **Language**: Kotlin 2.x
-- **UI Framework**: Jetpack Compose + Material Design 3 (`MaterialTheme` + custom `HisabTheme` semantic tokens)
-- **Local Persistence**: AndroidX Room SQLite (`2.7.x` with KSP compiler)
-- **Asynchronous Concurrency**: Kotlin Coroutines & `StateFlow` (`collectAsStateWithLifecycle`)
-- **Typography**: Locally bundled Google Fonts (`Space Grotesk`, `Plus Jakarta Sans`, `Inter`)
-- **Testing**: JUnit 4, AndroidX Compose UI Test, and **Robolectric (`@GraphicsMode(NATIVE)`)**
-
----
-
 ## Android Permissions Explained
 
 HisabMate adheres strictly to the principle of least privilege and operates 100% offline:
@@ -182,31 +202,33 @@ HisabMate adheres strictly to the principle of least privilege and operates 100%
 
 ---
 
-## Installation & Build Instructions
+## Installation, Build & Release Signing Instructions
 
-### Option 1: Clone & Build Locally
+### Option 1: Direct APK Installation
+Download [**`HisabMate-v1.0.0-release.apk`**](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/HisabMate-v1.0.0-release.apk) from the [v1.0.0 Release page](https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.0) and install it on any Android 7.0+ (`API 24+`) device.
+
+### Option 2: Clone & Build Locally
 
 1. **Clone the repository**
    ```bash
    git clone https://github.com/CodeByArnob/HisabMate.git
    cd HisabMate
+   cp .env.example .env
    ```
 
-2. **Prepare environment configuration**
+2. **Run Robolectric Unit/UI Tests & Android Lint**
    ```bash
-   cp .env.example .env
+   gradle :app:testDebugUnitTest :app:lintDebug
    ```
 
 3. **Build the Debug APK**
    ```bash
    gradle :app:assembleDebug
    ```
-   The compiled debug APK will be generated at:
-   `app/build/outputs/apk/debug/app-debug.apk`
 
-### Option 2: Building a Signed Production Release (`APK` / `AAB`)
+### Option 3: Secure Production Release Signing (`assembleRelease` & `bundleRelease`)
 
-Production release signing in `app/build.gradle.kts` reads credentials from environment variables so signing keys are never committed to source control:
+`app/build.gradle.kts` reads production signing credentials strictly from environment variables so private keys are never committed to git:
 
 ```bash
 export KEYSTORE_PATH="/path/to/my-upload-key.jks"
@@ -216,57 +238,31 @@ export KEY_PASSWORD="your-key-password"
 gradle :app:assembleRelease :app:bundleRelease
 ```
 
-To enable automated signed release artifacts in **GitHub Actions** (`.github/workflows/release.yml`), add the following repository secrets under **Settings → Secrets and variables → Actions**:
-- `UPLOAD_KEYSTORE_BASE64`: Base64-encoded upload keystore (`base64 -w 0 my-upload-key.jks`)
-- `STORE_PASSWORD`: Keystore password
-- `KEY_PASSWORD`: Key password (for alias `upload`)
+#### Configuring GitHub Actions Encrypted Repository Secrets
+The automated release workflow (`.github/workflows/release.yml`) supports full production signing via GitHub Actions encrypted secrets:
+1. Generate or locate your upload keystore (`keyAlias = "upload"`):
+   ```bash
+   keytool -genkeypair -v -keystore my-upload-key.jks -storetype PKCS12 -alias upload -keyalg RSA -keysize 2048 -validity 10000
+   ```
+2. Base64-encode the keystore file:
+   ```bash
+   base64 -w 0 my-upload-key.jks
+   ```
+3. In GitHub, navigate to **Settings → Secrets and variables → Actions → New repository secret** and add:
+   - `UPLOAD_KEYSTORE_BASE64`: Base64 string of `my-upload-key.jks`
+   - `STORE_PASSWORD`: Your keystore password
+   - `KEY_ALIAS`: `upload` (or your custom alias, which `.github/workflows/release.yml` automatically maps)
+   - `KEY_PASSWORD`: Your key password
+
+*(Note: When these 4 repository secrets are not yet configured in GitHub Settings, `.github/workflows/release.yml` clearly logs a notice in the GitHub Actions Job Summary and generates an ephemeral RSA-2048 release key in `RUNNER_TEMP` so `:app:assembleRelease` and `:app:bundleRelease` remain verified and produce installable APK/AAB artifacts without ever committing a keystore file.)*
 
 ---
 
-## Running Automated Tests
+## Release History
 
-HisabMate includes a comprehensive **Robolectric JVM & Compose UI test suite** (`app/src/test/java/com/example/ExampleRobolectricTest.kt`) that verifies:
-- Multi-currency ISO 4217 symbol formatting and cross-currency conversion accuracy
-- Room SQLite persistence for accounts, budgets, recurring bills, and currency-aware scheduled reminders
-- JSON full backup/restore and CSV export round-trip integrity
-- Notification channel initialization
-- Responsive Compose UI layout verification and native screenshot rendering
-
-Run all tests with:
-```bash
-gradle :app:testDebugUnitTest
-```
-
----
-
-## Project Structure
-
-```text
-HisabMate/
-├── .github/workflows/
-│   ├── android-ci.yml          # Continuous Integration: Gradle build + Robolectric test suite
-│   ├── website-pages.yml       # Automated GitHub Pages deployment from /website
-│   └── release.yml             # Tag-triggered release verification & signed APK/AAB packaging
-├── app/
-│   ├── build.gradle.kts        # App module Gradle config (com.aistudio.hisabmate.fntkbd, v1.0.0)
-│   ├── proguard-rules.pro      # R8 / ProGuard keep rules for Room & BroadcastReceivers
-│   └── src/
-│       ├── main/               # AndroidManifest.xml, Kotlin sources, fonts, adaptive launcher icon
-│       └── test/               # Robolectric unit, Compose UI & native screenshot tests
-├── docs/screenshots/           # Genuine PNG screenshots & SVG project banner
-├── website/                    # Responsive static showcase website deployed to GitHub Pages
-├── CONTRIBUTING.md             # Contributor workflow & engineering guidelines
-├── LICENSE                     # MIT License
-└── README.md                   # Project documentation
-```
-
----
-
-## Contributing & Issue Reporting
-
-Contributions, bug reports, and feature requests are welcome!
-- Read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a Pull Request.
-- Report bugs or request enhancements via [GitHub Issues](https://github.com/CodeByArnob/HisabMate/issues).
+| Version | Date | Highlights | Artifacts |
+| :--- | :--- | :--- | :--- |
+| **`v1.0.0`** | 2026-10-31 | Initial production release featuring 14 ISO 4217 currencies, offline FX converter, Bank/MFS wallets, multi-period budgets, savings goals, debt ledger, local AlarmManager notifications, 7-step interactive onboarding, and Light/Dark themes. | [APK](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/HisabMate-v1.0.0-release.apk) • [AAB](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/HisabMate-v1.0.0-release.aab) • [SHA256SUMS](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.0/SHA256SUMS.txt) |
 
 ---
 

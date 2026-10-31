@@ -371,8 +371,21 @@ object HisabNotificationManager {
                 builder.setVibrate(longArrayOf(0L))
             }
 
-            NotificationManagerCompat.from(context).notify(payload.notificationId, builder.build())
-            true
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                return@runCatching false
+            }
+
+            try {
+                NotificationManagerCompat.from(context).notify(payload.notificationId, builder.build())
+                true
+            } catch (_: SecurityException) {
+                false
+            }
         }.getOrDefault(false)
     }
 

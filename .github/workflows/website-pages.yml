@@ -26,12 +26,14 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Assemble Website & Genuine Screenshots
+      - name: Assemble Website & Genuine Visual Assets
         run: |
           mkdir -p _site/assets/screenshots
           cp -r website/* _site/
           if [ -d docs/screenshots ]; then
-            cp -r docs/screenshots/*.png _site/assets/screenshots/
+            cp -r docs/screenshots/*.png _site/assets/screenshots/ 2>/dev/null || true
+            cp -r docs/screenshots/*.svg _site/assets/screenshots/ 2>/dev/null || true
+            cp -r docs/screenshots/*.gif _site/assets/screenshots/ 2>/dev/null || true
           fi
           touch _site/.nojekyll
           ls -la _site/ _site/assets/screenshots/

@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 220" width="100%" height="100%">
+  <defs>
+    <linearGradient id="fxBg" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#090D18"/>
+      <stop offset="50%" stop-color="#111A2E"/>
+      <stop offset="100%" stop-color="#090D18"/>
+    </linearGradient>
+    <linearGradient id="fxAccent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#7C5CFF"/>
+      <stop offset="50%" stop-color="#38BDF8"/>
+      <stop offset="100%" stop-color="#10B981"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="220" rx="22" fill="url(#fxBg)" stroke="#334155" stroke-width="1.5"/>
+  <text x="36" y="42" fill="#F8FAFC" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="800">ISO 4217 Multi-Currency Formatting &amp; Offline Exchange Rate Engine (14 Currencies)</text>
+  <text x="36" y="64" fill="#94A3B8" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="500">Native symbols, regional decimal precision (0, 2, or 3 decimals), South Asian (Lakh/Crore) &amp; International grouping</text>
+
+  <!-- Row 1 of Currency Pills -->
+  <g transform="translate(36, 84)">
+    <g transform="translate(0,0)"><rect width="150" height="50" rx="12" fill="#162038" stroke="#7C5CFF"/><text x="16" y="31" fill="#F8FAFC" font-family="system-ui,sans-serif" font-size="15" font-weight="800">৳ BDT <tspan fill="#94A3B8" font-size="12" font-weight="600">Base 1.00</tspan></text></g>
+    <g transform="translate(162,0)"><rect width="150" height="50" rx="12" fill="#162038" stroke="#334155"/><text x="16" y="31" fill="#F8FAFC" font-family="system-ui,sans-serif" font-size="15" font-weight="800">$ USD <tspan fill="#34D399" font-size="12" font-weight="600">৳120.50</tspan></text></g>
+    <g transform="translate(324,0)"><rect width="150" height="50" rx="12" fill="#162038" stroke="#334155"/><text x="16" y="31" fill="#F8FAFC" font-family="system-ui,sans-serif" font-size="15" font-weight="800">€ EUR <tspan fill="#34D399" font-size="12" font-weight="600">৳130.20</tspan></text></g>
+    <g transform="translate(486,0)"><rect width="150" height="50" rx="12" fill="#162038" stroke="#334155"/><text x="16" y="31" fill="#F8FAFC" font-family="system-ui,sans-serif" font-size="15" font-weight="800">£ GBP <tspan fill="#34D399" font-size="12" font-weight="600">৳152.80</tspan></text></g>
+    <g transform="translate(648,0)"><rect width="150" height="50" rx="12" fill="#162038" stroke="#334155"/><text x="16" y="31" fill="#F8FAFC" font-family="system-ui,sans-serif" font-size="15" font-weight="800">₹ INR <tspan fill="#38BDF8" font-size="12" font-weight="600">৳1.43</tspan></text></g>
+    <g transform="translate(810,0)"><rect width="150" height="50" rx="12" fill="#162038" stroke="#334155"/><text x="16" y="31" fill="#F8FAFC" font-family="system-ui,sans-serif" font-size="15" font-weight="800">¥ JPY <tspan fill="#38BDF8" font-size="12" font-weight="600">0 Decimals</tspan></text></g>
+    <g transform="translate(972,0)"><rect width="156" height="50" rx="12" fill="#162038" stroke="#334155"/><text x="16" y="31" fill="#F8FAFC" font-family="system-ui,sans-serif" font-size="15" font-weight="800">¥ CNY <tspan fill="#38BDF8" font-size="12" font-weight="600">৳16.70</tspan></text></g>
+  </g>
+
+  <!-- Row 2 of Currency Pills -->
+  <g transform="translate(36, 146)">
+    <g transform="translate(0,0)"><rect width="150" height="50" rx="12" fill="#162038" stroke="#334155"/><text x="16" y="31" fill="#F8FAFC" font-family="system-ui,sans-serif" font-size="14.5" font-weight="800">ر.س SAR <tspan fill="#A78BFA" font-size="12" font-weight="600">৳32.10</tspan></text></g>
+    <g transform="translate(162,0)"><rect width="150" height="50" rx="12" fill="#162038" stroke="#334155"/><text x="16" y="31" fill="#F8FAFC" font-family="system-ui,sans-serif" font-size="14.5" font-weight="800">د.إ AED <tspan fill="#A78BFA" font-size="12" font-weight="600">৳32.80</tspan></text></g>
+    <g transform="translate(324,0)"><rect width="150" height="50" rx="12" fill="#162038" stroke="#334155"/><text x="16" y="31" fill="#F8FAFC" font-family="system-ui,sans-serif" font-size="14.5" font-weight="800">CA$ CAD <tspan fill="#34D399" font-size="12" font-weight="600">৳87.50</tspan></text></g>
+    <g transform="translate(486,0)"><rect width="150" height="50" rx="12" fill="#162038" stroke="#334155"/><text x="16" y="31" fill="#F8FAFC" font-family="system-ui,sans-serif" font-size="14.5" font-weight="800">A$ AUD <tspan fill="#34D399" font-size="12" font-weight="600">৳79.20</tspan></text></g>
+    <g transform="translate(648,0)"><rect width="150" height="50" rx="12" fill="#162038" stroke="#334155"/><text x="16" y="31" fill="#F8FAFC" font-family="system-ui,sans-serif" font-size="14.5" font-weight="800">S$ SGD <tspan fill="#34D399" font-size="12" font-weight="600">৳90.10</tspan></text></g>
+    <g transform="translate(810,0)"><rect width="150" height="50" rx="12" fill="#162038" stroke="#334155"/><text x="16" y="31" fill="#F8FAFC" font-family="system-ui,sans-serif" font-size="14.5" font-weight="800">RM MYR <tspan fill="#38BDF8" font-size="12" font-weight="600">৳27.40</tspan></text></g>
+    <g transform="translate(972,0)"><rect width="156" height="50" rx="12" fill="#162038" stroke="#10B981"/><text x="16" y="31" fill="#F8FAFC" font-family="system-ui,sans-serif" font-size="14.5" font-weight="800">د.ك KWD <tspan fill="#6EE7B7" font-size="12" font-weight="600">3 Decimals</tspan></text></g>
+  </g>
+
+  <!-- Animated Scan Bar -->
+  <rect x="36" y="206" width="220" height="4" rx="2" fill="url(#fxAccent)">
+    <animate attributeName="x" values="36;944;36" dur="6s" repeatCount="indefinite"/>
+  </rect>
+</svg>
