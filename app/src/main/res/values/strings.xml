@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">HisabMate</string>
+    <string name="cd_toggle_balance">Toggle balance visibility</string>
+    <string name="cd_notifications">Notifications</string>
+    <string name="cd_search">Search transactions and accounts</string>
+    <string name="cd_theme_toggle">Switch light and dark theme</string>
+    <string name="cd_add_transaction">Add new transaction</string>
+    <string name="cd_back">Navigate back</string>
+</resources>

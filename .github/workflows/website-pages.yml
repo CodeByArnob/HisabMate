@@ -1,0 +1,57 @@
+name: Deploy Project Website to GitHub Pages
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'website/**'
+      - 'docs/screenshots/**'
+      - '.github/workflows/website-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build-site:
+    name: Prepare Static Website Bundle
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Assemble Website & Genuine Screenshots
+        run: |
+          mkdir -p _site/assets/screenshots
+          cp -r website/* _site/
+          if [ -d docs/screenshots ]; then
+            cp -r docs/screenshots/*.png _site/assets/screenshots/
+          fi
+          touch _site/.nojekyll
+          ls -la _site/ _site/assets/screenshots/
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '_site'
+
+  deploy-site:
+    name: Publish to GitHub Pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build-site
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

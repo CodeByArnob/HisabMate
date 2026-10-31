@@ -1,35 +1,35 @@
-# Gradle files
+# Gradle & Kotlin build caches
 .gradle/
-build/
 .kotlin/
+build/
+**/build/
+.build-outputs/
+.aistudio/
 
-# Local configuration file (sdk path, etc)
+# Local environment & secrets
 local.properties
+/local.properties
+.env
+*.jks
+*.keystore
+debug.keystore
+google-services.json
 
-# Log/OS Files
+# IDE & OS files
+*.iml
+.idea/
+.DS_Store
 *.log
+*.hprof
 
-# Android Studio generated files and folders
+# Android native/build artifacts
 captures/
+/captures
 .externalNativeBuild/
 .cxx/
 *.aab
 *.apk
 output-metadata.json
 
-# IntelliJ
-*.iml
-.idea/
-misc.xml
-deploymentTargetDropDown.xml
-render.experimental.xml
-
-# Keystore files
-*.jks
-*.keystore
-
-# Google Services (e.g. APIs or Firebase)
-google-services.json
-
-# Android Profiling
-*.hprof
+# Temporary AI Studio chat attachments
+public/assets/aistudio/

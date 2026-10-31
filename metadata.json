@@ -1,0 +1,6 @@
+{
+  "name": "HisabMate",
+  "description": "Smart Expense Manager and personal fintech companion with BDT support, wallet folders, spend analytics, budgets, goals, and debt tracking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

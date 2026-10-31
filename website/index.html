@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HisabMate – Global Multi-Currency Personal Finance &amp; Expense Manager</title>
+  <meta name="description" content="HisabMate is a privacy-first, offline-native Android personal finance, multi-currency wallet, budgeting, debt ledger, and wealth analytics app built with Kotlin and Jetpack Compose." />
+  <meta property="og:title" content="HisabMate – Smart Multi-Currency Personal Finance Manager" />
+  <meta property="og:description" content="Manage 14 ISO 4217 currencies, bank &amp; MFS wallets (bKash, Nagad, Wise), multi-period budgets, savings goals, and recurring bills 100% offline." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://codebyarnob.github.io/HisabMate/" />
+  <meta property="og:image" content="https://raw.githubusercontent.com/CodeByArnob/HisabMate/main/docs/screenshots/dashboard-light.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;family=Space+Grotesk:wght@600;700;800&amp;display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Sticky Navigation -->
+  <header class="navbar">
+    <div class="container nav-inner">
+      <a href="#" class="brand">
+        <img src="favicon.svg" alt="HisabMate Logo" />
+        <span>HisabMate</span>
+        <span class="brand-badge">v1.0.0</span>
+      </a>
+      <nav class="nav-links" aria-label="Primary Navigation">
+        <a href="#screenshots">Screenshots</a>
+        <a href="#features">Features</a>
+        <a href="#currencies">14 Currencies</a>
+        <a href="#architecture">Architecture</a>
+        <a href="#build">Build &amp; Release</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+      <div class="nav-actions">
+        <a href="https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.0" class="btn btn-outline" target="_blank" rel="noopener">Release v1.0.0</a>
+        <a href="https://github.com/CodeByArnob/HisabMate" class="btn btn-primary" target="_blank" rel="noopener">GitHub Repository</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <main>
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <div class="eyebrow">100% Offline-First • Kotlin &amp; Jetpack Compose • Material 3</div>
+          <h1>
+            Global Personal Finance, <span class="gradient-text">Engineered for Total Clarity.</span>
+          </h1>
+          <p class="hero-lead">
+            HisabMate unifies multi-currency bank accounts, MFS wallets (bKash, Nagad, Rocket), Wise/Revolut balances, multi-period budgets, recurring bills, savings goals, and debt ledgers in a single high-contrast Android experience—with zero cloud tracking.
+          </p>
+          <div class="hero-cta">
+            <a href="https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.0" class="btn btn-primary" target="_blank" rel="noopener">
+              View v1.0.0 Release &amp; Build Guide
+            </a>
+            <a href="https://github.com/CodeByArnob/HisabMate" class="btn btn-outline" target="_blank" rel="noopener">
+              Explore Source Code on GitHub
+            </a>
+          </div>
+          <div class="hero-metrics">
+            <div class="metric-item">
+              <strong>14 ISO</strong>
+              <span>Native Currencies &amp; FX Engine</span>
+            </div>
+            <div class="metric-item">
+              <strong>10 Tables</strong>
+              <span>Room SQLite v5 Local Schema</span>
+            </div>
+            <div class="metric-item">
+              <strong>Zero</strong>
+              <span>Cloud Lock-In or Telemetry</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-Art">
+          <div class="theme-switcher" role="group" aria-label="Preview Theme Switcher">
+            <button type="button" class="theme-btn active" data-hero-theme="light" data-img-src="assets/screenshots/dashboard-light.png" data-img-alt="HisabMate Home Dashboard in Light Mode">
+              Light Mode (#E6ECF5)
+            </button>
+            <button type="button" class="theme-btn" data-hero-theme="dark" data-img-src="assets/screenshots/dashboard-dark.png" data-img-alt="HisabMate Home Dashboard in Dark Mode">
+              Dark Mode (#0A0D14)
+            </button>
+          </div>
+          <div class="phone-frame">
+            <img id="hero-dashboard-img" src="assets/screenshots/dashboard-light.png" alt="HisabMate Home Dashboard in Light Mode" onerror="this.src='https://raw.githubusercontent.com/CodeByArnob/HisabMate/main/docs/screenshots/dashboard-light.png'" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Genuine Application Screenshots Gallery -->
+    <section id="screenshots">
+      <div class="container">
+        <div class="section-header">
+          <h2>Genuine Application Screenshots</h2>
+          <p>Captured directly from HisabMate's production Jetpack Compose screens across Light Mode, Dark Mode, Multi-Currency FX, Planning Hub, and Analytics.</p>
+        </div>
+
+        <div class="gallery-filter" role="tablist" aria-label="Screenshot Categories">
+          <button type="button" class="filter-chip active" data-gallery-filter="all">All Screens (12)</button>
+          <button type="button" class="filter-chip" data-gallery-filter="dashboard">Dashboard &amp; Themes</button>
+          <button type="button" class="filter-chip" data-gallery-filter="wallets">Wallets &amp; Multi-Currency</button>
+          <button type="button" class="filter-chip" data-gallery-filter="planning">Budgets, Goals &amp; Debt</button>
+          <button type="button" class="filter-chip" data-gallery-filter="system">Analytics, Alerts &amp; Setup</button>
+        </div>
+
+        <div class="screenshot-grid">
+          <article class="shot-card" data-shot-category="dashboard">
+            <div class="shot-img-wrap">
+              <img src="assets/screenshots/dashboard-light.png" alt="Home Dashboard Light Mode" loading="lazy" onerror="this.src='https://raw.githubusercontent.com/CodeByArnob/HisabMate/main/docs/screenshots/dashboard-light.png'" />
+            </div>
+            <h3>Home Dashboard (Light Mode)</h3>
+            <p>Soft slate-cool canvas (#E6ECF5) with pure white elevated cards, net liquidity summary, and quick category folders.</p>
+          </article>
+
+          <article class="shot-card" data-shot-category="dashboard">
+            <div class="shot-img-wrap">
+              <img src="assets/screenshots/dashboard-dark.png" alt="Home Dashboard Dark Mode" loading="lazy" onerror="this.src='https://raw.githubusercontent.com/CodeByArnob/HisabMate/main/docs/screenshots/dashboard-dark.png'" />
+            </div>
+            <h3>Home Dashboard (Dark Mode)</h3>
+            <p>Obsidian carbon theme (#0A0D14) with layered slate containers and luminous semantic financial accents.</p>
+          </article>
+
+          <article class="shot-card" data-shot-category="wallets">
+            <div class="shot-img-wrap">
+              <img src="assets/screenshots/multi-currency-fx.png" alt="Multi-Currency and Offline FX Converter" loading="lazy" onerror="this.src='https://raw.githubusercontent.com/CodeByArnob/HisabMate/main/docs/screenshots/multi-currency-fx.png'" />
+            </div>
+            <h3>Currencies &amp; Offline FX Converter</h3>
+            <p>Real-time cross-currency conversion and editable offline ISO 4217 exchange rate table.</p>
+          </article>
+
+          <article class="shot-card" data-shot-category="wallets">
+            <div class="shot-img-wrap">
+              <img src="assets/screenshots/accounts-wallets.png" alt="Accounts and Wallets" loading="lazy" onerror="this.src='https://raw.githubusercontent.com/CodeByArnob/HisabMate/main/docs/screenshots/accounts-wallets.png'" />
+            </div>
+            <h3>Accounts, Cards &amp; MFS Wallets</h3>
+            <p>Manage BRAC/City Bank cards, bKash/Nagad wallets, Wise USD accounts, and cash in native currencies.</p>
+          </article>
+
+          <article class="shot-card" data-shot-category="wallets">
+            <div class="shot-img-wrap">
+              <img src="assets/screenshots/wallet-details-analytics.png" alt="Category Wallet Details and Daily Curve" loading="lazy" onerror="this.src='https://raw.githubusercontent.com/CodeByArnob/HisabMate/main/docs/screenshots/wallet-details-analytics.png'" />
+            </div>
+            <h3>Category Wallet &amp; Spend Curve</h3>
+            <p>Interactive daily spending curve with date callouts, budget utilization, and filtered transaction feed.</p>
+          </article>
+
+          <article class="shot-card" data-shot-category="planning">
+            <div class="shot-img-wrap">
+              <img src="assets/screenshots/budget-management.png" alt="Budget Management" loading="lazy" onerror="this.src='https://raw.githubusercontent.com/CodeByArnob/HisabMate/main/docs/screenshots/budget-management.png'" />
+            </div>
+            <h3>Multi-Period Budget Control</h3>
+            <p>Daily, Weekly, Monthly, Yearly, and Custom budgets with configurable 50%–100% alert thresholds.</p>
+          </article>
+
+          <article class="shot-card" data-shot-category="system">
+            <div class="shot-img-wrap">
+              <img src="assets/screenshots/financial-reports.png" alt="Spend Analysis and Financial Reports" loading="lazy" onerror="this.src='https://raw.githubusercontent.com/CodeByArnob/HisabMate/main/docs/screenshots/financial-reports.png'" />
+            </div>
+            <h3>Spend Analysis &amp; Cashflow</h3>
+            <p>Multi-segment category share breakdown, smart category insights, and 6-month income vs. expense bars.</p>
+          </article>
+
+          <article class="shot-card" data-shot-category="planning">
+            <div class="shot-img-wrap">
+              <img src="assets/screenshots/savings-goals.png" alt="Savings Goals" loading="lazy" onerror="this.src='https://raw.githubusercontent.com/CodeByArnob/HisabMate/main/docs/screenshots/savings-goals.png'" />
+            </div>
+            <h3>Savings Goals &amp; Milestones</h3>
+            <p>Dedicated target pots with progress badges, deadline tracking, and one-tap savings contributions.</p>
+          </article>
+
+          <article class="shot-card" data-shot-category="planning">
+            <div class="shot-img-wrap">
+              <img src="assets/screenshots/debt-management.png" alt="Debt and Loan Ledger" loading="lazy" onerror="this.src='https://raw.githubusercontent.com/CodeByArnob/HisabMate/main/docs/screenshots/debt-management.png'" />
+            </div>
+            <h3>Debt &amp; Loan Ledger</h3>
+            <p>Track receivables (Lent) and payables (Borrowed) with partial settlement history and due dates.</p>
+          </article>
+
+          <article class="shot-card" data-shot-category="system">
+            <div class="shot-img-wrap">
+              <img src="assets/screenshots/bills-notifications.png" alt="Scheduled Reminders and Alerts" loading="lazy" onerror="this.src='https://raw.githubusercontent.com/CodeByArnob/HisabMate/main/docs/screenshots/bills-notifications.png'" />
+            </div>
+            <h3>Currency-Aware Local Reminders</h3>
+            <p>Scheduled local AlarmManager notifications displaying native currency amounts and base equivalents.</p>
+          </article>
+
+          <article class="shot-card" data-shot-category="system">
+            <div class="shot-img-wrap">
+              <img src="assets/screenshots/settings-security.png" alt="Settings, Security and Backup" loading="lazy" onerror="this.src='https://raw.githubusercontent.com/CodeByArnob/HisabMate/main/docs/screenshots/settings-security.png'" />
+            </div>
+            <h3>Security, Backup &amp; Portability</h3>
+            <p>PIN &amp; biometric app lock, JSON backup/restore, CSV spreadsheet export/import, and PDF statements.</p>
+          </article>
+
+          <article class="shot-card" data-shot-category="system">
+            <div class="shot-img-wrap">
+              <img src="assets/screenshots/onboarding-overview.png" alt="Interactive 7-Step Onboarding" loading="lazy" onerror="this.src='https://raw.githubusercontent.com/CodeByArnob/HisabMate/main/docs/screenshots/onboarding-overview.png'" />
+            </div>
+            <h3>Interactive 7-Step Onboarding</h3>
+            <p>Interactive fintech walkthrough with live multi-currency preview, OCR receipt simulator, and localization setup.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Key Features -->
+    <section id="features">
+      <div class="container">
+        <div class="section-header">
+          <h2>Engineered for Complete Financial Control</h2>
+          <p>Every screen and data flow in HisabMate is built with real Room SQLite persistence, authentic ISO 4217 currency math, and responsive Material 3 components.</p>
+        </div>
+
+        <div class="feature-grid">
+          <div class="feature-card">
+            <div class="feature-icon">৳/$</div>
+            <h3>True Multi-Currency Architecture</h3>
+            <p>Every account, transaction, budget, recurring bill, debt record, and savings goal stores its original ISO 4217 currency code and amount while consolidating into your chosen base currency.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🏦</div>
+            <h3>Bank, Card &amp; MFS Presets</h3>
+            <p>Purpose-built presets for Bangladeshi &amp; global rails including bKash, Nagad, Rocket, BRAC/City Bank cards, Wise USD, Revolut EUR, and physical cash wallets.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3>Multi-Period Smart Budgets</h3>
+            <p>Configure Daily, Weekly, Monthly, Yearly, or Custom date-range budgets in any currency with customizable 50%–100% alert thresholds.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🔔</div>
+            <h3>Local AlarmManager Reminders</h3>
+            <p>Four dedicated Android notification channels for bills, budgets, debts, and goal milestones—automatically rescheduled across device reboots.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🤝</div>
+            <h3>Debt Ledger &amp; Savings Pots</h3>
+            <p>Track money lent and borrowed with partial repayment logs alongside visual savings goals with milestone progress indicators.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🔒</div>
+            <h3>100% Offline Privacy &amp; Export</h3>
+            <p>No cloud accounts, no ads, and no telemetry. Protect your session with a 4-digit PIN lock and export your data anytime via JSON, CSV, or PDF.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Supported Currencies -->
+    <section id="currencies">
+      <div class="container">
+        <div class="section-header">
+          <h2>14 Supported ISO 4217 Currencies</h2>
+          <p>Authentic regional symbols, accurate decimal precision (0, 2, or 3 decimals), and optional South Asian (Lakh/Crore) or International digit grouping.</p>
+        </div>
+
+        <div class="currency-grid">
+          <div class="currency-pill"><div class="curr-symbol">৳</div><div class="curr-meta"><strong>BDT</strong><span>Bangladeshi Taka</span></div></div>
+          <div class="currency-pill"><div class="curr-symbol">$</div><div class="curr-meta"><strong>USD</strong><span>US Dollar</span></div></div>
+          <div class="currency-pill"><div class="curr-symbol">€</div><div class="curr-meta"><strong>EUR</strong><span>Euro</span></div></div>
+          <div class="currency-pill"><div class="curr-symbol">£</div><div class="curr-meta"><strong>GBP</strong><span>British Pound</span></div></div>
+          <div class="currency-pill"><div class="curr-symbol">₹</div><div class="curr-meta"><strong>INR</strong><span>Indian Rupee</span></div></div>
+          <div class="currency-pill"><div class="curr-symbol">¥</div><div class="curr-meta"><strong>JPY</strong><span>Japanese Yen</span></div></div>
+          <div class="currency-pill"><div class="curr-symbol">¥</div><div class="curr-meta"><strong>CNY</strong><span>Chinese Yuan</span></div></div>
+          <div class="currency-pill"><div class="curr-symbol">ر.س</div><div class="curr-meta"><strong>SAR</strong><span>Saudi Riyal</span></div></div>
+          <div class="currency-pill"><div class="curr-symbol">د.إ</div><div class="curr-meta"><strong>AED</strong><span>UAE Dirham</span></div></div>
+          <div class="currency-pill"><div class="curr-symbol">CA$</div><div class="curr-meta"><strong>CAD</strong><span>Canadian Dollar</span></div></div>
+          <div class="currency-pill"><div class="curr-symbol">A$</div><div class="curr-meta"><strong>AUD</strong><span>Australian Dollar</span></div></div>
+          <div class="currency-pill"><div class="curr-symbol">S$</div><div class="curr-meta"><strong>SGD</strong><span>Singapore Dollar</span></div></div>
+          <div class="currency-pill"><div class="curr-symbol">RM</div><div class="curr-meta"><strong>MYR</strong><span>Malaysian Ringgit</span></div></div>
+          <div class="currency-pill"><div class="curr-symbol">د.ك</div><div class="curr-meta"><strong>KWD</strong><span>Kuwaiti Dinar</span></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Architecture & Build Section -->
+    <section id="architecture">
+      <div class="container arch-grid">
+        <div class="arch-panel">
+          <h3>Architecture &amp; Technical Stack</h3>
+          <p>Built from the ground up with modern Android engineering standards:</p>
+          <ul class="arch-list">
+            <li><span class="check-dot">✓</span> <span><strong>UI Layer:</strong> 100% Jetpack Compose with Material 3 &amp; centralized <code>HisabTheme</code> Light/Dark semantic tokens.</span></li>
+            <li><span class="check-dot">✓</span> <span><strong>State Management:</strong> Unidirectional MVVM via <code>HisabViewModel</code> &amp; lifecycle-aware <code>StateFlow</code> pipelines.</span></li>
+            <li><span class="check-dot">✓</span> <span><strong>Persistence:</strong> AndroidX Room SQLite v5 with 10 relational entities &amp; reactive Kotlin Flow DAOs.</span></li>
+            <li><span class="check-dot">✓</span> <span><strong>Verification:</strong> Automated Robolectric JVM unit &amp; Compose UI test suite with Native Graphics screenshot validation.</span></li>
+          </ul>
+        </div>
+
+        <div class="arch-panel" id="build">
+          <h3>Build, Test &amp; Release Setup</h3>
+          <p>Clone the repository and run the full test suite or assemble the APK locally:</p>
+          <pre class="code-box"><code>git clone https://github.com/CodeByArnob/HisabMate.git
+cd HisabMate
+cp .env.example .env
+
+# Run Robolectric Unit &amp; UI Tests
+gradle :app:testDebugUnitTest
+
+# Build Debug APK
+gradle :app:assembleDebug</code></pre>
+          <p style="margin-top: 14px; font-size: 0.88rem; color: var(--text-muted);">
+            Application ID: <code>com.aistudio.hisabmate.fntkbd</code> • Version: <code>1.0.0 (1)</code> • SDK: <code>minSdk 24 / targetSdk 36</code>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq">
+      <div class="container">
+        <div class="section-header">
+          <h2>Frequently Asked Questions</h2>
+          <p>Everything you need to know about privacy, multi-currency accounting, and building HisabMate.</p>
+        </div>
+
+        <div class="faq-list">
+          <details class="faq-item" open>
+            <summary>Does HisabMate send any financial data to external servers?</summary>
+            <p>No. HisabMate does not even request the Android <code>INTERNET</code> permission. All accounts, transactions, budgets, exchange rates, and reminders are stored strictly on-device in Room SQLite.</p>
+          </details>
+
+          <details class="faq-item">
+            <summary>How does multi-currency conversion work when offline?</summary>
+            <p>HisabMate ships with verified baseline exchange rates for 14 major ISO 4217 currencies anchored to BDT and allows you to customize any exchange rate manually in the Currencies &amp; FX Rates screen. Changing your base currency dynamically recalculates all dashboard totals while keeping every transaction's original currency intact.</p>
+          </details>
+
+          <details class="faq-item">
+            <summary>How can I back up or migrate my financial records to a new phone?</summary>
+            <p>Open <strong>Profile &amp; Settings → Data Portability</strong> to export a complete JSON backup or CSV spreadsheet of your transactions, which can be restored on any device running HisabMate.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div>
+        <strong>HisabMate v1.0.0</strong> — Open-Source Global Personal Finance Manager for Android. Released under the MIT License.
+      </div>
+      <div class="footer-links">
+        <a href="https://github.com/CodeByArnob/HisabMate" target="_blank" rel="noopener">GitHub Repo</a>
+        <a href="https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.0" target="_blank" rel="noopener">Release v1.0.0</a>
+        <a href="https://github.com/CodeByArnob/HisabMate/issues" target="_blank" rel="noopener">Report Issue</a>
+        <a href="https://github.com/CodeByArnob/HisabMate/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
