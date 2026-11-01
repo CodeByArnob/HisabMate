@@ -389,27 +389,31 @@ fun CurrencyManagementScreen(
 
         // 3. Exchange Rate Table Header
         item {
-            Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(5.dp)
+            ) {
+                Text(
+                    text = "ISO 4217 Exchange Rates",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.inkPrimary
+                )
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = colors.containerInteractive,
+                    border = BorderStroke(1.dp, colors.borderSubtle)
                 ) {
                     Text(
-                        text = "ISO 4217 Exchange Rates",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = colors.inkPrimary
-                    )
-                    Text(
-                        text = "Updated ${CurrencyFormatter.formatDateShort(uiState.lastRateUpdateMillis)}",
-                        style = MaterialTheme.typography.labelMedium,
+                        text = "Last updated • ${CurrencyFormatter.formatDateShort(uiState.lastRateUpdateMillis)}",
+                        style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.SemiBold,
-                        color = colors.inkSecondary
+                        color = colors.inkSecondary,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                     )
                 }
                 Text(
-                    text = "Offline-first cached & manual rates. Tap any currency row to set a custom exchange rate.",
+                    text = "Offline-first cached and manual rates. Tap any currency row to set a custom exchange rate.",
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Medium,
                     color = colors.inkSecondary
