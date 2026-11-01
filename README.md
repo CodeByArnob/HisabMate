@@ -37,7 +37,7 @@ Every financial record is persisted in its native ISO 4217 currency with offline
 | **HisabMate-v1.0.5-release.apk** | `.apk` | `1.0.5 (versionCode 6)` | [Download APK directly](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.5/HisabMate-v1.0.5-release.apk) |
 | **HisabMate-v1.0.5-release.aab** | `.aab` | `1.0.5` | [View GitHub Release assets](https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.5) |
 
-**Important installation note:** This release uses a temporary CI-generated signing key because the original production keystore was not supplied. Android will not install it as an in-place update over an app signed with a different key. Export a JSON backup from your current app before uninstalling it; uninstalling clears local data. Install v1.0.5 and restore that backup. Future compatible updates require one persistent signing key.
+**Important installation note:** This APK uses a temporary CI-generated signing key that is not retained. Android will not install it as an in-place update over an app signed with a different key. Export a JSON backup from your current app before uninstalling it; uninstalling clears local data. Install v1.0.5 and restore that backup. Because the temporary key is not retained, a future APK signed with a different key will also require backup, uninstall and reinstall. Configure one persistent signing key before the next release for seamless updates after that signing transition.
 
 ## Application Screenshots
 
