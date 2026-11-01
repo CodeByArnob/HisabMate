@@ -96,6 +96,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -377,6 +378,7 @@ private fun FintechAccountCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(
+                        modifier = Modifier.weight(1f),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
@@ -394,20 +396,26 @@ private fun FintechAccountCard(
                                 modifier = Modifier.size(21.dp)
                             )
                         }
-                        Column {
+                        Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = account.name,
                                 style = MaterialTheme.typography.titleMedium,
                                 fontSize = 17.5.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color.White
+                                color = Color.White,
+                                maxLines = 1,
+                                softWrap = false,
+                                overflow = TextOverflow.Ellipsis
                             )
                             Text(
                                 text = account.maskedNumber,
                                 style = MaterialTheme.typography.bodySmall,
                                 fontSize = 13.5.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color.White.copy(alpha = 0.94f)
+                                color = Color.White.copy(alpha = 0.94f),
+                                maxLines = 1,
+                                softWrap = false,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
                     }
@@ -420,6 +428,8 @@ private fun FintechAccountCard(
                             Text(
                                 text = account.currencyCode,
                                 style = MaterialTheme.typography.labelSmall,
+                                maxLines = 1,
+                                softWrap = false,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White,
@@ -433,6 +443,8 @@ private fun FintechAccountCard(
                             Text(
                                 text = account.type,
                                 style = MaterialTheme.typography.labelSmall,
+                                maxLines = 1,
+                                softWrap = false,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White,
@@ -462,7 +474,10 @@ private fun FintechAccountCard(
                     fontFamily = FontFamily.Default,
                     fontWeight = FontWeight.Bold,
                     fontSize = 25.sp,
-                    color = Color.White
+                    color = Color.White,
+                    maxLines = 1,
+                    softWrap = false,
+                    overflow = TextOverflow.Ellipsis
                 )
 
                 if (isForeign && !isBalanceHidden) {
@@ -479,7 +494,10 @@ private fun FintechAccountCard(
                         style = MaterialTheme.typography.labelMedium,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = Color.White,
+                        maxLines = 1,
+                        softWrap = false,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }
@@ -1329,29 +1347,29 @@ fun ProfileAndSettingsScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Row(
+                Column(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Button(
                         onClick = onOpenCurrencyPicker,
                         shape = RoundedCornerShape(14.dp),
                         modifier = Modifier
-                            .weight(1f)
-                            .height(44.dp)
+                            .fillMaxWidth()
+                            .heightIn(min = 50.dp)
                             .testTag("btn_settings_change_currency")
                     ) {
-                        Text("Change Currency", fontWeight = FontWeight.Bold)
+                        Text("Change Base Currency", fontWeight = FontWeight.Bold, maxLines = 1)
                     }
                     OutlinedButton(
                         onClick = onOpenCurrencyManager,
                         shape = RoundedCornerShape(14.dp),
                         modifier = Modifier
-                            .weight(1f)
-                            .height(44.dp)
+                            .fillMaxWidth()
+                            .heightIn(min = 50.dp)
                             .testTag("btn_settings_fx_manager")
                     ) {
-                        Text("FX Rates & Converter", fontWeight = FontWeight.Bold)
+                        Text("FX Rates & Converter", fontWeight = FontWeight.Bold, maxLines = 1)
                     }
                 }
             }
