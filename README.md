@@ -2,11 +2,11 @@
 
 **Offline-first personal finance and multi-currency wealth management application for Android.**
 
-> 🚀 **Latest Release: v1.0.3** (Android 7.0–16, API 24–36)  
-> 📥 **[Download Latest APK — HisabMate-v1.0.3-release.apk (11.1 MB)](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.3/HisabMate-v1.0.3-release.apk)** • 🌐 **[Live Project Website](https://codebyarnob.github.io/HisabMate/)**
+> 🚀 **Latest source update: v1.0.4** (versionCode 5)  
+> ⚠️ **Production APK publication is pending signing-key configuration.** The CI release build is verification-only and must not be installed as an update over the existing production app. • 🌐 **[Live Project Website](https://codebyarnob.github.io/HisabMate/)**
 
-[![Release](https://img.shields.io/badge/Release-v1.0.3-10B981?style=flat-square&logo=github)](https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.3)
-[![Download APK](https://img.shields.io/badge/Download-APK%20v1.0.3-7C5CFF?style=flat-square&logo=android)](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.3/HisabMate-v1.0.3-release.apk)
+[![Source Update](https://img.shields.io/badge/Source-v1.0.4-10B981?style=flat-square&logo=github)](https://github.com/CodeByArnob/HisabMate/commit/e187aa1427979e88908d2d80423db12be1efcbed)
+[![APK Status](https://img.shields.io/badge/APK-pending%20signing-F59E0B?style=flat-square&logo=android)](https://github.com/CodeByArnob/HisabMate/actions/runs/41307567081)
 [![Android CI](https://img.shields.io/github/actions/workflow/status/CodeByArnob/HisabMate/android-ci.yml?branch=main&style=flat-square&logo=android&label=Android%20CI)](https://github.com/CodeByArnob/HisabMate/actions/workflows/android-ci.yml)
 [![Platform](https://img.shields.io/badge/Android-API%2024%E2%80%9336-3DDC84?style=flat-square&logo=android)](https://developer.android.com)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
@@ -20,7 +20,7 @@
 
 ## Overview
 
-HisabMate (`com.aistudio.hisabmate.fntkbd`) is an open-source, offline-first personal finance and expense management application engineered for Android using **Kotlin**, **Jetpack Compose (Material 3)**, and **Room SQLite v6**.
+HisabMate (`com.aistudio.hisabmate.fntkbd`) is an open-source, offline-first personal finance and expense management application engineered for Android using **Kotlin**, **Jetpack Compose (Material 3)**, and **Room SQLite v7**.
 
 Designed for individuals, professionals, and households managing finances across multiple rails and regional boundaries, HisabMate brings together bank accounts, credit cards, mobile financial services (bKash, Nagad, Rocket), international multi-currency vaults (Wise, Revolut), multi-period budgets, debt ledgers, and recurring obligations into a single cohesive interface.
 
@@ -30,13 +30,13 @@ Every financial record is persisted in its native ISO 4217 currency with offline
 
 ## Release Download
 
-The official production APK is compiled from verified source via Gradle `:app:assembleRelease`, signed with APK Signature Scheme v2, and verified against the local Robolectric test suite.
+**HisabMate v1.0.4 source updates are merged into `main`.** The Android CI workflow successfully built and verified the Release APK/AAB, but no persistent production upload-signing key is configured yet. The generated CI signing key is temporary, so that APK is **not a safe update** for users with the existing production-signed app and is not suitable for Play Store upload.
 
-| Package | Format | File Size | Target Architecture | Download |
-| :--- | :---: | :---: | :--- | :--- |
-| **HisabMate-v1.0.3-release.apk** | `.apk` | `11.1 MB` | Direct installation on Android 7.0 to 16 (`API 24–36`) | [Download APK (v1.0.3)](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.3/HisabMate-v1.0.3-release.apk) |
+- **Current source commit:** [e187aa1](https://github.com/CodeByArnob/HisabMate/commit/e187aa1427979e88908d2d80423db12be1efcbed)
+- **Successful CI build and artifacts:** [GitHub Actions run #16](https://github.com/CodeByArnob/HisabMate/actions/runs/41307567081)
+- **APK publication:** Pending configuration of the original production signing keystore and credentials in GitHub Actions Secrets.
 
-- **APK SHA-256**: `e5caf443917c780350bf399aa885f81700b7138774508d547985aa09808a765f`
+Do not install the temporary CI Release APK over the existing app. Once the original signing key is configured, the workflow can produce a compatible production update.
 
 ---
 
@@ -166,7 +166,7 @@ app/src/main/java/com/example
 
 - **Language**: Kotlin 2.x
 - **UI Framework**: Jetpack Compose (Material Design 3)
-- **Local Persistence**: Room SQLite (Schema Version 6 with Indexed Queries)
+- **Local Persistence**: Room SQLite (Schema Version 7 with Indexed Queries)
 - **Asynchronous Execution**: Kotlin Coroutines & Reactive `StateFlow`
 - **Compiler Symbol Processing**: KSP
 - **Target SDK**: Android 16 (API 36)
@@ -244,7 +244,7 @@ Automated test verification is managed via **Robolectric** local JVM tests in `a
 
 | Version | Date | Key Capabilities | Official Download |
 | :--- | :--- | :--- | :--- |
-| **v1.0.3** | 2026-10-31 | Production Single-Page ISO A4 (`595 × 842 pt`) Executive PDF Financial Statement engine, refined Light Mode slate depth (`#CFD8E6` / `#DFE6F0`), 14 ISO 4217 currencies with offline FX, multi-rail wallets, budgets, savings goals, debt ledger, and Room SQLite v6 persistence. | [HisabMate-v1.0.3-release.apk](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.3/HisabMate-v1.0.3-release.apk) |
+| **v1.0.3** | 2026-10-31 | Production Single-Page ISO A4 (`595 × 842 pt`) Executive PDF Financial Statement engine, refined Light Mode slate depth (`#CFD8E6` / `#DFE6F0`), 14 ISO 4217 currencies with offline FX, multi-rail wallets, budgets, savings goals, debt ledger, and Room SQLite v7 persistence. | [HisabMate-v1.0.3-release.apk](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.3/HisabMate-v1.0.3-release.apk) |
 
 ---
 
