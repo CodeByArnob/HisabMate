@@ -1,0 +1,20 @@
+name: Normalize GitHub Release Title
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/normalize-release-title.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  rename-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set release title to the concise app version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release edit v1.0.6 --repo ${{ github.repository }} --title "HisabMate v1.0.6"
