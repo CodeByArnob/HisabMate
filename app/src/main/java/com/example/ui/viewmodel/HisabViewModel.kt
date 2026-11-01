@@ -687,12 +687,13 @@ class HisabViewModel(
         isRecurring: Boolean = false,
         receiptUri: String = "",
         splitDetails: String = "",
-        isFavorite: Boolean = false
+        isFavorite: Boolean = false,
+        context: Context? = null
     ) {
         val editing = _editingTransaction.value
         viewModelScope.launch {
             if (editing != null) {
-                repository.editTransaction(
+                val savedTransaction = repository.editTransaction(
                     oldTx = editing,
                     title = title,
                     merchant = merchant,
@@ -709,9 +710,9 @@ class HisabViewModel(
                     isFavorite = isFavorite
                 )
                 closeAddTransactionModal()
-                showSnackbar("Updated '${title.trim()}' (${currencyCode.uppercase()})")
+                publishTransactionNotification(context, savedTransaction, isUpdate = true)
             } else {
-                repository.addTransaction(
+                val savedTransaction = repository.addTransaction(
                     title = title,
                     merchant = merchant,
                     amount = amount,
@@ -727,9 +728,49 @@ class HisabViewModel(
                     isFavorite = isFavorite
                 )
                 closeAddTransactionModal()
-                showSnackbar("${type.lowercase().replaceFirstChar { it.uppercase() }} (${currencyCode.uppercase()}) saved to ${account.name}")
+                publishTransactionNotification(context, savedTransaction, isUpdate = false)
             }
         }
+    }
+
+    private suspend fun publishTransactionNotification(
+        context: Context?,
+        transaction: TransactionEntity,
+        isUpdate: Boolean
+    ) {
+        val state = uiState.value
+        val payload = HisabNotificationManager.buildTransactionNotificationPayload(
+            transaction = transaction,
+            isUpdate = isUpdate,
+            useSouthAsianGrouping = state.useSouthAsianGrouping
+        )
+        repository.insertAppNotification(
+            AppNotificationEntity(
+                title = payload.title,
+                message = payload.body,
+                categoryTag = payload.categoryTag,
+                timestamp = System.currentTimeMillis(),
+                isRead = false,
+                accentColorHex = transaction.categoryColorHex
+            )
+        )
+
+        val postedToSystem = context?.let {
+            HisabNotificationManager.postSystemNotification(
+                context = it,
+                payload = payload,
+                soundEnabled = state.soundEnabled,
+                vibrationEnabled = state.vibrationEnabled
+            )
+        } ?: false
+
+        showSnackbar(
+            if (postedToSystem) {
+                "${payload.title}: ${payload.primaryFormattedAmount} • Notification sent"
+            } else {
+                "${payload.title}: ${payload.primaryFormattedAmount} • Saved in Notifications. Enable Android notifications in Profile & Settings for pop-ups."
+            }
+        )
     }
 
     fun toggleTransactionFavorite(tx: TransactionEntity) {
