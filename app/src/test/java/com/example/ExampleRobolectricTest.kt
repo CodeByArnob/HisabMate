@@ -81,7 +81,7 @@ class ExampleRobolectricTest {
         database = Room.inMemoryDatabaseBuilder(context, HisabDatabase::class.java)
             .allowMainThreadQueries()
             .build()
-        repository = HisabRepository(database.hisabDao())
+        repository = HisabRepository(database)
     }
 
     @After

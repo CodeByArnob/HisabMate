@@ -2091,7 +2091,6 @@ fun ProfileAndSettingsScreen(
     if (showPinSetupDialog) {
         PinSetupDialog(
             isAppLockEnabled = uiState.isAppLockEnabled,
-            currentPin = uiState.appPinCode,
             biometricEnabled = uiState.biometricEnabled,
             onDismiss = { showPinSetupDialog = false },
             onSave = onConfigureAppLock
