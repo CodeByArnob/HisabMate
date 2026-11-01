@@ -1,8 +1,13 @@
 package com.example
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedContent
@@ -25,6 +30,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -114,6 +121,24 @@ fun HisabMateAppRoot() {
     }
 
     val snackbarHostState = remember { SnackbarHostState() }
+
+    // Request notification permission in context, on the first completed transaction save.
+    // The transaction is still saved if the user declines; it remains in the in-app center.
+    val notificationPermissionPrefs = remember(context) {
+        context.getSharedPreferences("hisabmate_permission_state", 0)
+    }
+    var hasRequestedTransactionNotifications by remember {
+        mutableStateOf(notificationPermissionPrefs.getBoolean("transaction_notifications_requested", false))
+    }
+    var pendingTransactionSave by remember { mutableStateOf<(() -> Unit)?>(null) }
+    val transactionNotificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) {
+        val pendingSave = pendingTransactionSave
+        pendingTransactionSave = null
+        pendingSave?.invoke()
+    }
+
     LaunchedEffect(snackbarMessage) {
         snackbarMessage?.let { msg ->
             snackbarHostState.showSnackbar(msg)
@@ -518,22 +543,41 @@ fun HisabMateAppRoot() {
                     accounts = uiState.accounts,
                     onDismiss = viewModel::closeAddTransactionModal,
                     onSaveTransaction = { title, merchant, amount, currencyCode, type, category, account, toAccount, note, isRecurring, receiptUri, splitDetails, isFavorite ->
-                        viewModel.addTransaction(
-                            title = title,
-                            merchant = merchant,
-                            amount = amount,
-                            currencyCode = currencyCode,
-                            type = type,
-                            category = category,
-                            account = account,
-                            toAccount = toAccount,
-                            note = note,
-                            isRecurring = isRecurring,
-                            receiptUri = receiptUri,
-                            splitDetails = splitDetails,
-                            isFavorite = isFavorite,
-                            context = context
-                        )
+                        val saveTransaction = {
+                            viewModel.addTransaction(
+                                title = title,
+                                merchant = merchant,
+                                amount = amount,
+                                currencyCode = currencyCode,
+                                type = type,
+                                category = category,
+                                account = account,
+                                toAccount = toAccount,
+                                note = note,
+                                isRecurring = isRecurring,
+                                receiptUri = receiptUri,
+                                splitDetails = splitDetails,
+                                isFavorite = isFavorite,
+                                context = context
+                            )
+                        }
+
+                        val needsFirstPermissionRequest =
+                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                                !HisabNotificationManager.hasNotificationPermission(context) &&
+                                !hasRequestedTransactionNotifications
+
+                        if (needsFirstPermissionRequest) {
+                            pendingTransactionSave = saveTransaction
+                            hasRequestedTransactionNotifications = true
+                            notificationPermissionPrefs.edit()
+                                .putBoolean("transaction_notifications_requested", true)
+                                .apply()
+                            viewModel.showSnackbar("Allow notifications to receive a receipt after this transaction.")
+                            transactionNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        } else {
+                            saveTransaction()
+                        }
                     }
                 )
             }
