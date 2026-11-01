@@ -302,7 +302,7 @@ class HisabViewModel(
             val catTxs = expenseTransactions.filter { it.categoryId == cat.id }
             val spentInBase = catTxs.sumOf { tx ->
                 CurrencyFormatter.convert(tx.amount, tx.currencyCode, baseCurrency, ratesMap)
-            } * monthFactor
+            }
             val budgetInBase = CurrencyFormatter.convert(
                 amount = cat.monthlyBudget,
                 fromCurrency = cat.budgetCurrencyCode,

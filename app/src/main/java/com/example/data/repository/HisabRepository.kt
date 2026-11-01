@@ -944,7 +944,11 @@ class HisabRepository(private val database: HisabDatabase) {
     // =========================================================================
 
     suspend fun exportBackupJson(): String = withContext(Dispatchers.IO) {
-        fun array(block: JSONArray.() -> Unit) = JSONArray().apply(block)
+        suspend fun array(block: suspend JSONArray.() -> Unit): JSONArray {
+            val result = JSONArray()
+            result.block()
+            return result
+        }
         val prefs = dao.getUserPreferencesOnce() ?: UserPreferencesEntity()
         val root = JSONObject().apply {
             put("version", 7)
