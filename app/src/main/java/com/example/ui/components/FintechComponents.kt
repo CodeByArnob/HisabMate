@@ -145,7 +145,7 @@ fun HisabHeaderSurface(
     Surface(
         color = colors.cardSurface,
         shape = shape,
-        shadowElevation = if (colors.isDark) 4.dp else 3.dp,
+        shadowElevation = if (colors.isDark) 5.dp else 5.dp,
         border = BorderStroke(1.dp, colors.borderStrong),
         modifier = modifier
             .fillMaxWidth()
@@ -180,7 +180,7 @@ fun HisabSectionCard(
             onClick = onClick,
             color = colors.cardSurface,
             shape = shape,
-            shadowElevation = if (colors.isDark) 3.5.dp else shadowElevation,
+            shadowElevation = if (colors.isDark) 5.dp else maxOf(shadowElevation, 4.dp),
             border = BorderStroke(1.1.dp, colors.borderStrong),
             modifier = modifier.fillMaxWidth()
         ) {
@@ -226,7 +226,8 @@ fun HisabBalanceHeroCard(
     val backgroundBrush = if (colors.isDark) {
         Brush.verticalGradient(
             colors = listOf(
-                Color(0xFF1B2332),
+                Color(0xFF25314A),
+                Color(0xFF192438),
                 Color(0xFF141923)
             )
         )
@@ -234,7 +235,8 @@ fun HisabBalanceHeroCard(
         Brush.verticalGradient(
             colors = listOf(
                 Color(0xFFFFFFFF),
-                Color(0xFFF4F7FB)
+                Color(0xFFF3F0FF),
+                Color(0xFFEEF8FC)
             )
         )
     }
@@ -242,8 +244,8 @@ fun HisabBalanceHeroCard(
     Surface(
         shape = shape,
         color = Color.Transparent,
-        shadowElevation = if (colors.isDark) 4.5.dp else 4.dp,
-        border = BorderStroke(1.2.dp, colors.borderStrong),
+        shadowElevation = if (colors.isDark) 8.dp else 7.dp,
+        border = BorderStroke(1.2.dp, if (colors.isDark) colors.borderStrong else MaterialTheme.colorScheme.primary.copy(alpha = 0.24f)),
         modifier = modifier.fillMaxWidth()
     ) {
         Box(
