@@ -22,6 +22,7 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.example.data.local.HisabDatabase
 import com.example.data.local.SeedDataGenerator
+import com.example.data.local.TransactionEntity
 import com.example.data.repository.HisabRepository
 import com.example.ui.components.FloatingFintechDock
 import com.example.ui.screens.AccountsScreen
@@ -155,10 +156,57 @@ class ExampleRobolectricTest {
         val budgetChannel = nm.getNotificationChannel(HisabNotificationManager.CHANNEL_BUDGET_ALERTS)
         val debtChannel = nm.getNotificationChannel(HisabNotificationManager.CHANNEL_DEBT_REMINDERS)
         val goalChannel = nm.getNotificationChannel(HisabNotificationManager.CHANNEL_GOAL_MILESTONES)
+        val transactionChannel = nm.getNotificationChannel(HisabNotificationManager.CHANNEL_TRANSACTION_UPDATES)
         assertNotNull(billChannel)
         assertNotNull(budgetChannel)
         assertNotNull(debtChannel)
         assertNotNull(goalChannel)
+        assertNotNull(transactionChannel)
+    }
+
+    @Test
+    fun `transaction notification identifies expense income and transfer details in their original currency`() {
+        val base = TransactionEntity(
+            id = 42,
+            title = "Weekly groceries",
+            merchant = "Agora",
+            amount = 4850.50,
+            currencyCode = "BDT",
+            type = "EXPENSE",
+            categoryId = 4,
+            categoryName = "Groceries",
+            categoryColorHex = 0xFF6844D8L,
+            categoryIconKey = "GROCERIES",
+            accountId = 2,
+            accountLabel = "Paid with bKash",
+            timestamp = System.currentTimeMillis()
+        )
+
+        val expense = HisabNotificationManager.buildTransactionNotificationPayload(base)
+        assertEquals("Expense recorded", expense.title)
+        assertEquals(HisabNotificationManager.CHANNEL_TRANSACTION_UPDATES, expense.channelId)
+        assertEquals("TRANSACTION", expense.categoryTag)
+        assertTrue(expense.body.contains("Weekly groceries"))
+        assertTrue(expense.body.contains("Groceries"))
+        assertTrue(expense.body.contains("Paid with bKash"))
+        assertTrue(expense.primaryFormattedAmount.contains("৳"))
+        assertEquals(60_042, expense.notificationId)
+
+        val income = HisabNotificationManager.buildTransactionNotificationPayload(
+            base.copy(type = "INCOME", title = "Monthly salary", categoryName = "Salary")
+        )
+        assertEquals("Income received", income.title)
+        assertTrue(income.body.contains("Monthly salary"))
+
+        val transfer = HisabNotificationManager.buildTransactionNotificationPayload(
+            base.copy(type = "TRANSFER", title = "Savings move", accountLabel = "BRAC Bank → Savings")
+        )
+        assertEquals("Transfer completed", transfer.title)
+        assertTrue(transfer.body.contains("Savings move"))
+        assertTrue(transfer.body.contains("BRAC Bank → Savings"))
+
+        val edited = HisabNotificationManager.buildTransactionNotificationPayload(base, isUpdate = true)
+        assertEquals("Expense updated", edited.title)
     }
 
     @Test
