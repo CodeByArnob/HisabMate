@@ -362,12 +362,11 @@ fun SpendAnalysisScreen(
             HisabSectionCard(
                 modifier = Modifier.padding(horizontal = 12.dp)
             ) {
-                Row(
+                Column(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Column {
+                    Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
                         Text(
                             text = "6-Month Cashflow Trend",
                             style = MaterialTheme.typography.titleMedium,
@@ -381,12 +380,12 @@ fun SpendAnalysisScreen(
                             color = colors.inkSecondary
                         )
                     }
-
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(18.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        LegendDot(color = Color(0xFF0EA568), label = "Income")
+                        LegendDot(color = Color(0xFF087747), label = "Income")
                         LegendDot(color = MaterialTheme.colorScheme.primary, label = "Expense")
                     }
                 }
