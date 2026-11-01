@@ -19,7 +19,7 @@ import com.example.util.CurrencyCatalog
         ExchangeRateEntity::class,
         UserPreferencesEntity::class
     ],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 abstract class HisabDatabase : RoomDatabase() {
@@ -72,6 +72,25 @@ abstract class HisabDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_6_7 = object : androidx.room.migration.Migration(6, 7) {
+            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE transactions ADD COLUMN accountExchangeRateSnapshotToBdt REAL NOT NULL DEFAULT 1.0")
+                db.execSQL("ALTER TABLE transactions ADD COLUMN toAccountExchangeRateSnapshotToBdt REAL NOT NULL DEFAULT 1.0")
+                db.execSQL("ALTER TABLE user_preferences ADD COLUMN appPinHash TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE user_preferences ADD COLUMN appPinSalt TEXT NOT NULL DEFAULT ''")
+                db.execSQL("""
+                    UPDATE transactions SET accountExchangeRateSnapshotToBdt = COALESCE(
+                      (SELECT rateToBdt FROM exchange_rates WHERE UPPER(currencyCode)=UPPER(
+                       (SELECT currencyCode FROM accounts WHERE id=transactions.accountId)) LIMIT 1), 1.0)
+                """.trimIndent())
+                db.execSQL("""
+                    UPDATE transactions SET toAccountExchangeRateSnapshotToBdt = COALESCE(
+                      (SELECT rateToBdt FROM exchange_rates WHERE UPPER(currencyCode)=UPPER(
+                       (SELECT currencyCode FROM accounts WHERE id=transactions.toAccountId)) LIMIT 1), 1.0)
+                """.trimIndent())
+            }
+        }
+
         fun getInstance(context: Context): HisabDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -79,8 +98,7 @@ abstract class HisabDatabase : RoomDatabase() {
                     HisabDatabase::class.java,
                     "hisabmate_finance_db"
                 )
-                    .addMigrations(MIGRATION_5_6)
-                    .fallbackToDestructiveMigration(dropAllTables = true)
+                    .addMigrations(MIGRATION_5_6, MIGRATION_6_7)
                     .build()
                 INSTANCE = instance
                 instance
