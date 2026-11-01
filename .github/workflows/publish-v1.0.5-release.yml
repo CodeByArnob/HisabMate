@@ -1,0 +1,103 @@
+name: Publish HisabMate v1.0.5 APK Release
+
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: write
+
+jobs:
+  build-test-and-publish:
+    if: contains(github.event.head_commit.message, '[publish-v1.0.5]')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Accept Android SDK Licenses
+        run: |
+          yes | "${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.3.1'
+
+      - name: Prepare Environment & Debug Keystore
+        run: |
+          if [ ! -f .env ] && [ -f .env.example ]; then cp .env.example .env; fi
+          if [ ! -f debug.keystore ] && [ -f debug.keystore.base64 ]; then
+            base64 -d debug.keystore.base64 > debug.keystore
+          fi
+
+      - name: Run Unit Tests and Android Lint
+        run: gradle :app:testDebugUnitTest :app:lintDebug --stacktrace
+
+      - name: Create Temporary CI Signing Key
+        shell: bash
+        run: |
+          set -euo pipefail
+          TEMP_KS="${RUNNER_TEMP}/hisabmate-v1.0.5-ci.p12"
+          keytool -genkeypair -v \
+            -keystore "$TEMP_KS" \
+            -storetype PKCS12 \
+            -alias upload \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass "HisabMateCiVerify2026!" \
+            -keypass "HisabMateCiVerify2026!" \
+            -dname "CN=HisabMate CI Release, OU=Engineering, O=CodeByArnob, L=Dhaka, S=Dhaka, C=BD"
+          echo "KEYSTORE_PATH=$TEMP_KS" >> "$GITHUB_ENV"
+          echo "STORE_PASSWORD=HisabMateCiVerify2026!" >> "$GITHUB_ENV"
+          echo "KEY_PASSWORD=HisabMateCiVerify2026!" >> "$GITHUB_ENV"
+
+      - name: Build Release APK and AAB
+        run: gradle :app:assembleRelease :app:bundleRelease --stacktrace
+
+      - name: Package and Verify APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p release-output
+          cp app/build/outputs/apk/release/*.apk release-output/HisabMate-v1.0.5-release.apk
+          cp app/build/outputs/bundle/release/*.aab release-output/HisabMate-v1.0.5-release.aab
+          (cd release-output && sha256sum HisabMate-v1.0.5-release.apk HisabMate-v1.0.5-release.aab > SHA256SUMS.txt)
+          APKSIGNER="$(find "${ANDROID_HOME}/build-tools" -name apksigner | sort -V | tail -n 1)"
+          "$APKSIGNER" verify --verbose release-output/HisabMate-v1.0.5-release.apk
+          "$APKSIGNER" verify --print-certs release-output/HisabMate-v1.0.5-release.apk > release-output/SIGNING-CERTIFICATE.txt
+          rm -f "$KEYSTORE_PATH"
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: hisabmate-v1.0.5-release
+          path: release-output/*
+          if-no-files-found: error
+
+      - name: Publish GitHub Release with APK Asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.5
+          name: HisabMate v1.0.5 — Premium UI & PDF Polish
+          body: |
+            ## HisabMate v1.0.5
+
+            - Responsive UI fixes for account cards, settings actions, FX headings and analytics legends.
+            - Improved category label contrast and dashboard surface depth.
+            - Refined single-page A4 financial statement layout with adaptive text fitting and category allocation summary.
+            - Website and README refreshed for the v1.0.5 release.
+
+            **Signing notice:** This APK was signed with a temporary CI-generated key because no persistent production keystore was supplied. It is a directly downloadable APK, but it cannot update an existing installation signed with a different key. Before installing it, export a JSON backup from the older app, uninstall the older app, then install this APK. Uninstalling removes local app data; restore the backup after installation. Future updates will also require a persistent signing key.
+          files: |
+            release-output/HisabMate-v1.0.5-release.apk
+            release-output/HisabMate-v1.0.5-release.aab
+            release-output/SHA256SUMS.txt
+            release-output/SIGNING-CERTIFICATE.txt
+          make_latest: true
+          fail_on_unmatched_files: true
