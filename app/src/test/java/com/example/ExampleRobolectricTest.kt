@@ -46,6 +46,7 @@ import com.example.ui.viewmodel.ThemePreference
 import com.example.util.CurrencyCatalog
 import com.example.util.CurrencyFormatter
 import com.example.util.HisabNotificationManager
+import com.example.util.PinHasher
 import com.example.util.PdfExporter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -81,7 +82,7 @@ class ExampleRobolectricTest {
         database = Room.inMemoryDatabaseBuilder(context, HisabDatabase::class.java)
             .allowMainThreadQueries()
             .build()
-        repository = HisabRepository(database.hisabDao())
+        repository = HisabRepository(database)
     }
 
     @After
@@ -94,6 +95,57 @@ class ExampleRobolectricTest {
         val appName = context.getString(R.string.app_name)
         assertEquals("HisabMate", appName)
     }
+
+    @Test
+    fun `pin hash uses unique salts and verifies without plaintext storage`() {
+        val first = PinHasher.create("7139")
+        val second = PinHasher.create("7139")
+        assertTrue(first.salt != second.salt)
+        assertTrue(PinHasher.verify("7139", first.salt, first.value))
+        assertTrue(!PinHasher.verify("0000", first.salt, first.value))
+        assertTrue(!PinHasher.verify("7139", second.salt, first.value))
+    }
+
+    @Test
+    fun `editing or deleting an old transaction reverses using captured FX rate`() = runBlocking {
+        repository.ensureSeeded()
+        val source = database.hisabDao().getAccountById(1)!!
+        val expenseCategory = repository.categories.first().first { it.type == "EXPENSE" }
+        val openingBalance = source.balance
+
+        repository.updateExchangeRate("USD", 120.0)
+        repository.addTransaction(
+            title = "FX snapshot regression", merchant = "Test", amount = 10.0,
+            currencyCode = "USD", type = "EXPENSE", category = expenseCategory,
+            account = source, note = "Historical rate regression test"
+        )
+        val afterExpense = database.hisabDao().getAccountById(source.id)!!
+        assertEquals(openingBalance - 1200.0, afterExpense.balance, 0.001)
+
+        repository.updateExchangeRate("USD", 200.0)
+        val tx = repository.transactions.first().first { it.title == "FX snapshot regression" }
+        repository.deleteTransaction(tx)
+        val restored = database.hisabDao().getAccountById(source.id)!!
+        assertEquals(openingBalance, restored.balance, 0.001)
+    }
+
+    @Test
+    fun `full backup restore is atomic and malformed backup does not clear existing transactions`() = runBlocking {
+        repository.ensureSeeded()
+        val before = repository.transactions.first()
+        val backup = repository.exportBackupJson()
+        assertTrue(backup.contains("\"version\": 7"))
+
+        database.hisabDao().clearAllTransactions()
+        assertTrue(repository.restoreBackupJson(backup))
+        assertEquals(before.size, repository.transactions.first().size)
+
+        val restored = repository.transactions.first()
+        assertTrue(!repository.restoreBackupJson("""{"version":7,"transactions":[]}"""))
+        assertEquals(restored.size, repository.transactions.first().size)
+    }
+
+
 
     @Test
     fun `notification channels are registered on initialization`() {

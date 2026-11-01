@@ -1,5 +1,7 @@
 package com.example.util
 
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -212,9 +214,10 @@ object CurrencyCatalog {
     private val byCode: Map<String, CurrencyMetadata> =
         supportedCurrencies.associateBy { it.code.uppercase(Locale.US) }
 
-    fun getMetadata(code: String): CurrencyMetadata {
-        return byCode[code.uppercase(Locale.US)] ?: supportedCurrencies.first()
-    }
+    fun isSupported(code: String): Boolean = byCode.containsKey(code.uppercase(Locale.US))
+
+    fun getMetadata(code: String): CurrencyMetadata =
+        byCode[code.uppercase(Locale.US)] ?: throw IllegalArgumentException("Unsupported currency code: $code")
 }
 
 object CurrencyFormatter {
@@ -233,14 +236,31 @@ object CurrencyFormatter {
         val toCode = toCurrency.uppercase(Locale.US)
         if (fromCode == toCode) return amount
 
-        val fromRateToBdt = ratesToBdt[fromCode]
-            ?: CurrencyCatalog.getMetadata(fromCode).defaultRateToBdt
-        val toRateToBdt = (ratesToBdt[toCode]
-            ?: CurrencyCatalog.getMetadata(toCode).defaultRateToBdt).coerceAtLeast(0.000001)
-
-        val amountInBdt = amount * fromRateToBdt
-        return amountInBdt / toRateToBdt
+        require(amount.isFinite()) { "Amount must be finite" }
+        val fromRateToBdt = ratesToBdt[fromCode] ?: CurrencyCatalog.getMetadata(fromCode).defaultRateToBdt
+        val toRateToBdt = ratesToBdt[toCode] ?: CurrencyCatalog.getMetadata(toCode).defaultRateToBdt
+        require(fromRateToBdt.isFinite() && fromRateToBdt > 0.0) { "Invalid $fromCode exchange rate" }
+        require(toRateToBdt.isFinite() && toRateToBdt > 0.0) { "Invalid $toCode exchange rate" }
+        return BigDecimal.valueOf(amount).multiply(BigDecimal.valueOf(fromRateToBdt))
+            .divide(BigDecimal.valueOf(toRateToBdt), CurrencyCatalog.getMetadata(toCode).decimalDigits, RoundingMode.HALF_UP)
+            .toDouble()
     }
+
+    fun convertWithSnapshots(amount: Double, fromRateToBdt: Double, toRateToBdt: Double, toCurrency: String): Double {
+        require(amount.isFinite() && fromRateToBdt.isFinite() && fromRateToBdt > 0.0)
+        require(toRateToBdt.isFinite() && toRateToBdt > 0.0)
+        return BigDecimal.valueOf(amount).multiply(BigDecimal.valueOf(fromRateToBdt))
+            .divide(BigDecimal.valueOf(toRateToBdt), CurrencyCatalog.getMetadata(toCurrency).decimalDigits, RoundingMode.HALF_UP)
+            .toDouble()
+    }
+
+    fun addMoney(balance: Double, delta: Double, currencyCode: String): Double =
+        BigDecimal.valueOf(balance).add(BigDecimal.valueOf(delta))
+            .setScale(CurrencyCatalog.getMetadata(currencyCode).decimalDigits, RoundingMode.HALF_UP).toDouble()
+
+    fun subtractMoney(balance: Double, delta: Double, currencyCode: String): Double =
+        BigDecimal.valueOf(balance).subtract(BigDecimal.valueOf(delta))
+            .setScale(CurrencyCatalog.getMetadata(currencyCode).decimalDigits, RoundingMode.HALF_UP).toDouble()
 
     /**
      * Returns how many units of [toCurrency] equal 1 unit of [fromCurrency].
@@ -250,7 +270,14 @@ object CurrencyFormatter {
         toCurrency: String,
         ratesToBdt: Map<String, Double>
     ): Double {
-        return convert(1.0, fromCurrency, toCurrency, ratesToBdt)
+        val from = fromCurrency.uppercase(Locale.US)
+        val to = toCurrency.uppercase(Locale.US)
+        val fromRate = ratesToBdt[from] ?: CurrencyCatalog.getMetadata(from).defaultRateToBdt
+        val toRate = ratesToBdt[to] ?: CurrencyCatalog.getMetadata(to).defaultRateToBdt
+        require(fromRate.isFinite() && fromRate > 0.0 && toRate.isFinite() && toRate > 0.0)
+        return BigDecimal.valueOf(fromRate)
+            .divide(BigDecimal.valueOf(toRate), 8, RoundingMode.HALF_UP)
+            .toDouble()
     }
 
     /**

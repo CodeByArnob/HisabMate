@@ -527,13 +527,26 @@ fun TransactionCalendarScreen(
 @Composable
 fun PinLockOverlayScreen(
     biometricEnabled: Boolean,
-    onSubmitPin: (String) -> Boolean,
+    onSubmitPin: (String, (Boolean) -> Unit) -> Unit,
     onBiometricUnlock: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val colors = HisabTheme.colors
     var enteredPin by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var isVerifying by remember { mutableStateOf(false) }
+
+    fun submitPin(value: String) {
+        if (isVerifying) return
+        isVerifying = true
+        onSubmitPin(value) { verified ->
+            isVerifying = false
+            if (!verified) {
+                errorMessage = "Incorrect PIN. Try again."
+                enteredPin = ""
+            }
+        }
+    }
 
     Surface(
         color = colors.canvasBackground,
@@ -640,11 +653,7 @@ fun PinLockOverlayScreen(
                                         val nextPin = enteredPin + digit
                                         enteredPin = nextPin
                                         if (nextPin.length == 4) {
-                                            val ok = onSubmitPin(nextPin)
-                                            if (!ok) {
-                                                errorMessage = "Incorrect PIN. Try again."
-                                                enteredPin = ""
-                                            }
+                                            submitPin(nextPin)
                                         }
                                     }
                                 }
@@ -690,11 +699,7 @@ fun PinLockOverlayScreen(
                                 val nextPin = enteredPin + "0"
                                 enteredPin = nextPin
                                 if (nextPin.length == 4) {
-                                    val ok = onSubmitPin(nextPin)
-                                    if (!ok) {
-                                        errorMessage = "Incorrect PIN. Try again."
-                                        enteredPin = ""
-                                    }
+                                    submitPin(nextPin)
                                 }
                             }
                         }
@@ -756,13 +761,12 @@ private fun PinKeyButton(
 @Composable
 fun PinSetupDialog(
     isAppLockEnabled: Boolean,
-    currentPin: String,
     biometricEnabled: Boolean,
     onDismiss: () -> Unit,
     onSave: (Boolean, String, Boolean) -> Unit
 ) {
     var enabled by remember { mutableStateOf(isAppLockEnabled) }
-    var pinInput by remember { mutableStateOf(currentPin.ifBlank { "1234" }) }
+    var pinInput by remember { mutableStateOf("") }
     var bioEnabled by remember { mutableStateOf(biometricEnabled) }
 
     AlertDialog(
@@ -811,9 +815,9 @@ fun PinSetupDialog(
         },
         confirmButton = {
             Button(
+                enabled = !enabled || pinInput.length == 4,
                 onClick = {
-                    val cleanPin = if (pinInput.length == 4) pinInput else "1234"
-                    onSave(enabled, cleanPin, bioEnabled)
+                    onSave(enabled, if (enabled) pinInput else "", bioEnabled)
                     onDismiss()
                 }
             ) {

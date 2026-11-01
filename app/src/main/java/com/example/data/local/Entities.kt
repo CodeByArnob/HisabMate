@@ -66,6 +66,8 @@ data class TransactionEntity(
     val amount: Double, // Original recorded amount in [currencyCode]
     val currencyCode: String = "BDT",
     val exchangeRateSnapshotToBdt: Double = 1.0,
+    val accountExchangeRateSnapshotToBdt: Double = 1.0,
+    val toAccountExchangeRateSnapshotToBdt: Double = 1.0,
     val type: String, // "EXPENSE", "INCOME", "TRANSFER"
     val categoryId: Int,
     val categoryName: String,
@@ -217,7 +219,10 @@ data class UserPreferencesEntity(
     val themeMode: String = "LIGHT", // "LIGHT", "DARK", "SYSTEM"
     val isBalanceHidden: Boolean = false,
     val isAppLockEnabled: Boolean = false,
+    // Retained only for one-time legacy migration; never return this value to UI state.
     val appPinCode: String = "",
+    val appPinHash: String = "",
+    val appPinSalt: String = "",
     val biometricEnabled: Boolean = false,
     val budgetAlertsEnabled: Boolean = true,
     val billRemindersEnabled: Boolean = true,

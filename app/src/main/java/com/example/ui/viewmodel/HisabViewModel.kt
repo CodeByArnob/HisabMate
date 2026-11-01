@@ -51,11 +51,8 @@ enum class PlanningTab(val label: String) {
     CATEGORIES("Categories")
 }
 
-enum class ReportPeriod(val label: String, val scaleFactor: Double) {
-    DAILY("Daily", 0.08),
-    WEEKLY("Weekly", 0.27),
-    MONTHLY("Monthly", 1.0),
-    YEARLY("Yearly", 11.4)
+enum class ReportPeriod(val label: String) {
+    DAILY("Daily"), WEEKLY("Weekly"), MONTHLY("Monthly"), YEARLY("Yearly")
 }
 
 enum class ThemePreference(val label: String) {
@@ -127,7 +124,7 @@ data class HisabUiState(
     val foreignCurrencyTxCount: Int = 0,
     val lastRateUpdateMillis: Long = System.currentTimeMillis(),
     val isAppLockEnabled: Boolean = false,
-    val appPinCode: String = "",
+    val hasAppPin: Boolean = false,
     val biometricEnabled: Boolean = false,
     val budgetAlertsEnabled: Boolean = true,
     val billRemindersEnabled: Boolean = true,
@@ -263,32 +260,40 @@ class HisabViewModel(
             )
         }
 
-        val expenseTransactions = core.transactions.filter { it.type == "EXPENSE" }
-        val incomeTransactions = core.transactions.filter { it.type == "INCOME" }
-
-        val monthFactor = when (meta.monthOffset) {
-            0 -> 1.0
-            -1 -> 0.91
-            -2 -> 1.07
-            else -> 0.85
+        val monthAnchor = Calendar.getInstance().apply { add(Calendar.MONTH, meta.monthOffset) }
+        val monthStart = (monthAnchor.clone() as Calendar).apply {
+            set(Calendar.DAY_OF_MONTH, 1); set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
         }
+        val monthEnd = (monthStart.clone() as Calendar).apply { add(Calendar.MONTH, 1) }
+        val monthTransactions = core.transactions.filter { it.timestamp >= monthStart.timeInMillis && it.timestamp < monthEnd.timeInMillis }
+        val expenseTransactions = monthTransactions.filter { it.type == "EXPENSE" }
+        val incomeTransactions = monthTransactions.filter { it.type == "INCOME" }
+        val rawExpenseInBase = expenseTransactions.sumOf { CurrencyFormatter.convert(it.amount, it.currencyCode, baseCurrency, ratesMap) }
+        val rawIncomeInBase = incomeTransactions.sumOf { CurrencyFormatter.convert(it.amount, it.currencyCode, baseCurrency, ratesMap) }
 
-        val rawExpenseInBase = expenseTransactions.sumOf { tx ->
-            CurrencyFormatter.convert(tx.amount, tx.currencyCode, baseCurrency, ratesMap)
-        } * monthFactor
-
-        val rawIncomeInBase = incomeTransactions.sumOf { tx ->
-            CurrencyFormatter.convert(tx.amount, tx.currencyCode, baseCurrency, ratesMap)
-        } * monthFactor
-
-        val periodScale = reportPeriod.scaleFactor
-        val periodIncomeInBase = rawIncomeInBase * periodScale
-        val periodExpenseInBase = rawExpenseInBase * periodScale
-
-        val netSavingsInBase = (rawIncomeInBase - rawExpenseInBase).coerceAtLeast(0.0)
-        val savingsRate = if (rawIncomeInBase > 0.0) {
-            ((netSavingsInBase / rawIncomeInBase) * 100).toInt().coerceIn(0, 100)
-        } else 0
+        val periodStart = (monthAnchor.clone() as Calendar).apply {
+            set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+            when (reportPeriod) {
+                ReportPeriod.DAILY -> Unit
+                ReportPeriod.WEEKLY -> add(Calendar.DAY_OF_MONTH, -((get(Calendar.DAY_OF_WEEK) - Calendar.MONDAY + 7) % 7))
+                ReportPeriod.MONTHLY -> set(Calendar.DAY_OF_MONTH, 1)
+                ReportPeriod.YEARLY -> set(Calendar.DAY_OF_YEAR, 1)
+            }
+        }
+        val periodEnd = (periodStart.clone() as Calendar).apply {
+            when (reportPeriod) {
+                ReportPeriod.DAILY -> add(Calendar.DAY_OF_MONTH, 1)
+                ReportPeriod.WEEKLY -> add(Calendar.DAY_OF_MONTH, 7)
+                ReportPeriod.MONTHLY -> add(Calendar.MONTH, 1)
+                ReportPeriod.YEARLY -> add(Calendar.YEAR, 1)
+            }
+        }
+        val periodTransactions = core.transactions.filter { it.timestamp >= periodStart.timeInMillis && it.timestamp < periodEnd.timeInMillis }
+        val periodIncomeInBase = periodTransactions.filter { it.type == "INCOME" }.sumOf { CurrencyFormatter.convert(it.amount, it.currencyCode, baseCurrency, ratesMap) }
+        val periodExpenseInBase = periodTransactions.filter { it.type == "EXPENSE" }.sumOf { CurrencyFormatter.convert(it.amount, it.currencyCode, baseCurrency, ratesMap) }
+        val netSavingsInBase = rawIncomeInBase - rawExpenseInBase
+        val savingsRate = if (rawIncomeInBase > 0.0) ((netSavingsInBase / rawIncomeInBase) * 100).toInt().coerceIn(-100, 100) else 0
 
         val expenseCats = core.categories.filter { it.type == "EXPENSE" }
         val totalCategorySpend = rawExpenseInBase.coerceAtLeast(0.01)
@@ -297,7 +302,7 @@ class HisabViewModel(
             val catTxs = expenseTransactions.filter { it.categoryId == cat.id }
             val spentInBase = catTxs.sumOf { tx ->
                 CurrencyFormatter.convert(tx.amount, tx.currencyCode, baseCurrency, ratesMap)
-            } * monthFactor
+            }
             val budgetInBase = CurrencyFormatter.convert(
                 amount = cat.monthlyBudget,
                 fromCurrency = cat.budgetCurrencyCode,
@@ -363,7 +368,7 @@ class HisabViewModel(
             foreignCurrencyTxCount = foreignTxCount,
             lastRateUpdateMillis = latestRateTime,
             isAppLockEnabled = meta.prefs.isAppLockEnabled,
-            appPinCode = meta.prefs.appPinCode,
+            hasAppPin = meta.prefs.appPinHash.isNotBlank() || meta.prefs.appPinCode.isNotBlank(),
             biometricEnabled = meta.prefs.biometricEnabled,
             budgetAlertsEnabled = meta.prefs.budgetAlertsEnabled,
             billRemindersEnabled = meta.prefs.billRemindersEnabled,
@@ -435,7 +440,7 @@ class HisabViewModel(
     }
 
     fun lockSessionNow() {
-        if (uiState.value.isAppLockEnabled && uiState.value.appPinCode.isNotBlank()) {
+        if (uiState.value.isAppLockEnabled && uiState.value.hasAppPin) {
             _isSessionUnlocked.value = false
         } else {
             showSnackbar("Configure a 4-digit PIN in Settings first to lock the app")
@@ -444,17 +449,18 @@ class HisabViewModel(
 
     fun configureAppLock(enabled: Boolean, pinCode: String, biometric: Boolean) {
         viewModelScope.launch {
-            repository.updateUserPreferences {
-                it.copy(
-                    isAppLockEnabled = enabled,
-                    appPinCode = pinCode,
-                    biometricEnabled = biometric
-                )
-            }
-            _isSessionUnlocked.value = true
-            val status = if (enabled) "enabled (PIN: ••••)" else "disabled"
-            showSnackbar("App PIN & Biometric Lock $status")
+            runCatching { repository.configureAppLock(enabled, pinCode, biometric) }
+                .onSuccess {
+                    _isSessionUnlocked.value = true
+                    showSnackbar(if (enabled) "App PIN Lock enabled" else "App Lock disabled")
+                    if (enabled && biometric) showSnackbar("Biometric unlock is not configured yet. PIN lock remains active.")
+                }
+                .onFailure { showSnackbar(it.message ?: "Could not update app lock") }
         }
+    }
+
+    fun verifyAppPin(pinCode: String, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch { onResult(repository.verifyAppPin(pinCode)) }
     }
 
     fun updateNotificationPrefs(budgetAlerts: Boolean, billReminders: Boolean) {

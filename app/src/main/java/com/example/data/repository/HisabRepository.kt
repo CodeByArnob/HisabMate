@@ -6,6 +6,7 @@ import com.example.data.local.CategoryEntity
 import com.example.data.local.DebtRecordEntity
 import com.example.data.local.ExchangeRateEntity
 import com.example.data.local.HisabDao
+import com.example.data.local.HisabDatabase
 import com.example.data.local.RecurringPaymentEntity
 import com.example.data.local.SavingsGoalEntity
 import com.example.data.local.ScheduledReminderEntity
@@ -16,13 +17,17 @@ import com.example.util.CurrencyCatalog
 import com.example.util.CurrencyFormatter
 import com.example.util.HisabHaptics
 import com.example.util.HisabNotificationManager
+import com.example.util.PinHasher
+import androidx.room.withTransaction
+import java.util.Calendar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 
-class HisabRepository(private val dao: HisabDao) {
+class HisabRepository(private val database: HisabDatabase) {
+    private val dao = database.hisabDao()
 
     val accounts: Flow<List<AccountEntity>> = dao.getAllAccounts()
     val categories: Flow<List<CategoryEntity>> = dao.getAllCategories()
@@ -44,7 +49,12 @@ class HisabRepository(private val dao: HisabDao) {
                 dao.insertExchangeRates(missing)
             }
         }
-        val currentPrefs = dao.getUserPreferencesOnce()
+        var currentPrefs = dao.getUserPreferencesOnce()
+        if (currentPrefs != null && currentPrefs.appPinCode.isNotBlank() && currentPrefs.appPinHash.isBlank()) {
+            val hashedPin = PinHasher.create(currentPrefs.appPinCode)
+            currentPrefs = currentPrefs.copy(appPinCode = "", appPinHash = hashedPin.value, appPinSalt = hashedPin.salt)
+            dao.insertUserPreferences(currentPrefs)
+        }
         if (currentPrefs == null) {
             val defaultPrefs = UserPreferencesEntity(
                 id = 1,
@@ -150,7 +160,15 @@ class HisabRepository(private val dao: HisabDao) {
     private suspend fun seedAllDefaultData() {
         dao.insertAccounts(SeedDataGenerator.initialAccounts())
         dao.insertCategories(SeedDataGenerator.initialCategories())
-        dao.insertTransactions(SeedDataGenerator.initialTransactions())
+        val rates = getRateMap()
+        val accountRates = dao.getAllAccountsOnce().associate { it.id to rateFor(it.currencyCode, rates) }
+        val seededTransactions = SeedDataGenerator.initialTransactions().map { tx ->
+            tx.copy(
+                accountExchangeRateSnapshotToBdt = accountRates[tx.accountId] ?: 1.0,
+                toAccountExchangeRateSnapshotToBdt = tx.toAccountId?.let { accountRates[it] } ?: 1.0
+            )
+        }
+        dao.insertTransactions(seededTransactions)
         dao.insertRecurringPayments(SeedDataGenerator.initialRecurringPayments())
         dao.insertDebtRecords(SeedDataGenerator.initialDebts())
         dao.insertSavingsGoals(SeedDataGenerator.initialGoals())
@@ -171,6 +189,36 @@ class HisabRepository(private val dao: HisabDao) {
         val updated = transform(current)
         HisabHaptics.isHapticsEnabled = updated.hapticsEnabled
         dao.insertUserPreferences(updated)
+    }
+
+    suspend fun configureAppLock(enabled: Boolean, pinCode: String, biometric: Boolean) = withContext(Dispatchers.IO) {
+        val current = dao.getUserPreferencesOnce() ?: UserPreferencesEntity()
+        if (enabled) {
+            val hash = PinHasher.create(pinCode)
+            dao.insertUserPreferences(current.copy(
+                isAppLockEnabled = true, appPinCode = "", appPinHash = hash.value,
+                appPinSalt = hash.salt, biometricEnabled = false
+            ))
+        } else {
+            dao.insertUserPreferences(current.copy(
+                isAppLockEnabled = false, appPinCode = "", appPinHash = "",
+                appPinSalt = "", biometricEnabled = false
+            ))
+        }
+    }
+
+    suspend fun verifyAppPin(pinCode: String): Boolean = withContext(Dispatchers.IO) {
+        if (pinCode.length != 4 || !pinCode.all(Char::isDigit)) return@withContext false
+        val prefs = dao.getUserPreferencesOnce() ?: return@withContext false
+        if (prefs.appPinHash.isNotBlank() && prefs.appPinSalt.isNotBlank()) {
+            return@withContext PinHasher.verify(pinCode, prefs.appPinSalt, prefs.appPinHash)
+        }
+        if (prefs.appPinCode.isNotBlank() && prefs.appPinCode == pinCode) {
+            val hash = PinHasher.create(pinCode)
+            dao.insertUserPreferences(prefs.copy(appPinCode = "", appPinHash = hash.value, appPinSalt = hash.salt))
+            return@withContext true
+        }
+        false
     }
 
     suspend fun updateExchangeRate(
@@ -206,159 +254,146 @@ class HisabRepository(private val dao: HisabDao) {
     }
 
     suspend fun addTransaction(
-        title: String,
-        merchant: String,
-        amount: Double,
-        currencyCode: String,
-        type: String,
-        category: CategoryEntity,
-        account: AccountEntity,
-        toAccount: AccountEntity? = null,
-        timestamp: Long = System.currentTimeMillis(),
-        note: String = "",
-        isRecurring: Boolean = false,
-        receiptUri: String = "",
-        splitDetails: String = "",
-        isFavorite: Boolean = false
+        title: String, merchant: String, amount: Double, currencyCode: String, type: String,
+        category: CategoryEntity, account: AccountEntity, toAccount: AccountEntity? = null,
+        timestamp: Long = System.currentTimeMillis(), note: String = "", isRecurring: Boolean = false,
+        receiptUri: String = "", splitDetails: String = "", isFavorite: Boolean = false
     ) {
-        val ratesMap = getRateMap()
-        val rateToBdt = ratesMap[currencyCode.uppercase()]
-            ?: CurrencyCatalog.getMetadata(currencyCode).defaultRateToBdt
-
+        validateTransaction(amount, currencyCode, type, account.id, toAccount?.id)
+        val source = dao.getAccountById(account.id) ?: error("Selected source account no longer exists")
+        val target = if (type == "TRANSFER") dao.getAccountById(toAccount!!.id)
+            ?: error("Selected destination account no longer exists") else null
+        val rates = getRateMap()
         val label = when {
-            type == "TRANSFER" && toAccount != null -> "${account.name} → ${toAccount.name}"
-            account.type == "MFS" -> "Paid with ${account.name.substringBefore(" ")}"
-            else -> account.maskedNumber
+            target != null -> "${source.name} → ${target.name}"
+            source.type == "MFS" -> "Paid with ${source.name.substringBefore(" ")}"
+            else -> source.maskedNumber
         }
-
         val tx = TransactionEntity(
-            title = title.trim(),
-            merchant = merchant.trim().ifEmpty { category.name },
-            amount = amount,
-            currencyCode = currencyCode.uppercase(),
-            exchangeRateSnapshotToBdt = rateToBdt,
-            type = type,
-            categoryId = category.id,
+            title = title.trim(), merchant = merchant.trim().ifEmpty { category.name },
+            amount = amount, currencyCode = currencyCode.uppercase(),
+            exchangeRateSnapshotToBdt = rateFor(currencyCode, rates),
+            accountExchangeRateSnapshotToBdt = rateFor(source.currencyCode, rates),
+            toAccountExchangeRateSnapshotToBdt = target?.let { rateFor(it.currencyCode, rates) } ?: 1.0,
+            type = type, categoryId = category.id,
             categoryName = if (type == "TRANSFER") "Transfer" else category.name,
             categoryColorHex = if (type == "TRANSFER") 0xFF1D9BF0L else category.colorHex,
             categoryIconKey = if (type == "TRANSFER") "TRANSFER" else category.iconKey,
-            accountId = account.id,
-            accountLabel = label,
-            toAccountId = toAccount?.id,
-            timestamp = timestamp,
-            note = note.trim(),
-            isRecurring = isRecurring,
-            receiptUri = receiptUri.trim(),
-            splitDetails = splitDetails.trim(),
-            isFavorite = isFavorite
+            accountId = source.id, accountLabel = label, toAccountId = target?.id,
+            timestamp = timestamp, note = note.trim(), isRecurring = isRecurring,
+            receiptUri = receiptUri.trim(), splitDetails = splitDetails.trim(), isFavorite = isFavorite
         )
-        dao.insertTransaction(tx)
-
-        applyAccountDeltaForTransaction(tx, ratesMap, reverse = false)
-
-        if (type == "EXPENSE" && category.monthlyBudget > 0) {
-            checkAndRecordBudgetThresholdAlert(category, ratesMap)
+        database.withTransaction {
+            dao.insertTransaction(tx)
+            applyAccountDeltaForTransaction(tx, reverse = false)
+            if (type == "EXPENSE" && category.monthlyBudget > 0.0) checkAndRecordBudgetThresholdAlert(category, rates, timestamp)
         }
     }
 
-    private suspend fun checkAndRecordBudgetThresholdAlert(
-        category: CategoryEntity,
-        ratesMap: Map<String, Double>
-    ) {
-        val prefs = dao.getUserPreferencesOnce() ?: UserPreferencesEntity()
-        if (!prefs.budgetAlertsEnabled) return
+    private fun validateTransaction(amount: Double, currencyCode: String, type: String, sourceId: Int, targetId: Int?) {
+        require(amount.isFinite() && amount > 0.0) { "Transaction amount must be greater than zero" }
+        require(CurrencyCatalog.isSupported(currencyCode)) { "Unsupported currency: $currencyCode" }
+        require(type in setOf("EXPENSE", "INCOME", "TRANSFER")) { "Invalid transaction type" }
+        if (type == "TRANSFER") {
+            require(targetId != null && targetId != sourceId) { "Select a different destination account" }
+        } else require(targetId == null) { "Only transfers can have a destination account" }
+    }
 
-        val budgetCurrency = category.budgetCurrencyCode.uppercase()
-        val catExpenses = dao.getAllTransactionsOnce().filter { it.type == "EXPENSE" && it.categoryId == category.id }
-        val totalSpentInBudgetCurrency = catExpenses.sumOf { tx ->
-            CurrencyFormatter.convert(tx.amount, tx.currencyCode, budgetCurrency, ratesMap)
+    private fun rateFor(currency: String, rates: Map<String, Double>): Double {
+        require(CurrencyCatalog.isSupported(currency)) { "Unsupported currency: $currency" }
+        val value = rates[currency.uppercase()] ?: CurrencyCatalog.getMetadata(currency).defaultRateToBdt
+        require(value.isFinite() && value > 0.0) { "Invalid exchange rate for $currency" }
+        return value
+    }
+
+    private fun budgetBounds(category: CategoryEntity, timestamp: Long): Pair<Long, Long> {
+        val start = Calendar.getInstance().apply {
+            timeInMillis = timestamp
+            set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
         }
-        val pct = if (category.monthlyBudget > 0) {
-            ((totalSpentInBudgetCurrency / category.monthlyBudget) * 100.0).toInt()
-        } else 0
-
-        val threshold = category.alertThresholdPercent.coerceIn(50, 100)
-        if (pct >= threshold) {
-            val spentFormatted = CurrencyFormatter.formatCurrency(
-                amount = totalSpentInBudgetCurrency,
-                currencyCode = budgetCurrency,
-                useSouthAsianGrouping = prefs.useSouthAsianGrouping,
-                includeCodeSuffix = true
-            )
-            val limitFormatted = CurrencyFormatter.formatCurrency(
-                amount = category.monthlyBudget,
-                currencyCode = budgetCurrency,
-                useSouthAsianGrouping = prefs.useSouthAsianGrouping,
-                includeCodeSuffix = true
-            )
-            val statusTitle = if (pct >= 100) {
-                "${category.name} Budget Exceeded ($pct%)"
-            } else {
-                "${category.name} Reached $pct% of ${category.budgetPeriod} Budget"
+        if (category.budgetPeriod.equals("CUSTOM", true)) {
+            start.timeInMillis = category.startDateMillis.takeIf { it > 0L } ?: timestamp
+            start.set(Calendar.HOUR_OF_DAY, 0); start.set(Calendar.MINUTE, 0); start.set(Calendar.SECOND, 0); start.set(Calendar.MILLISECOND, 0)
+            val end = Calendar.getInstance().apply {
+                timeInMillis = category.endDateMillis.takeIf { it >= start.timeInMillis } ?: timestamp
+                set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+                add(Calendar.DAY_OF_MONTH, 1)
             }
-            dao.insertNotification(
-                AppNotificationEntity(
-                    title = statusTitle,
-                    message = "Spent $spentFormatted of your $limitFormatted ${category.budgetPeriod.lowercase()} limit.",
-                    categoryTag = "BUDGET",
-                    timestamp = System.currentTimeMillis(),
-                    isRead = false,
-                    accentColorHex = category.colorHex
-                )
-            )
+            return start.timeInMillis to end.timeInMillis
         }
+        when (category.budgetPeriod.uppercase()) {
+            "DAILY" -> Unit
+            "WEEKLY" -> start.add(Calendar.DAY_OF_MONTH, -((start.get(Calendar.DAY_OF_WEEK) - Calendar.MONDAY + 7) % 7))
+            "YEARLY" -> start.set(Calendar.DAY_OF_YEAR, 1)
+            else -> start.set(Calendar.DAY_OF_MONTH, 1)
+        }
+        val end = (start.clone() as Calendar)
+        when (category.budgetPeriod.uppercase()) {
+            "DAILY" -> end.add(Calendar.DAY_OF_MONTH, 1)
+            "WEEKLY" -> end.add(Calendar.DAY_OF_MONTH, 7)
+            "YEARLY" -> end.add(Calendar.YEAR, 1)
+            else -> end.add(Calendar.MONTH, 1)
+        }
+        return start.timeInMillis to end.timeInMillis
+    }
+
+    private suspend fun checkAndRecordBudgetThresholdAlert(category: CategoryEntity, rates: Map<String, Double>, timestamp: Long) {
+        val prefs = dao.getUserPreferencesOnce() ?: UserPreferencesEntity()
+        if (!prefs.budgetAlertsEnabled || category.monthlyBudget <= 0.0) return
+        val (start, end) = budgetBounds(category, timestamp)
+        val currency = category.budgetCurrencyCode.uppercase()
+        val spent = dao.getAllTransactionsOnce().asSequence().filter {
+            it.type == "EXPENSE" && it.categoryId == category.id && it.timestamp >= start && it.timestamp < end
+        }.sumOf { CurrencyFormatter.convert(it.amount, it.currencyCode, currency, rates) }
+        val threshold = category.alertThresholdPercent.coerceIn(50, 100)
+        val percent = (spent / category.monthlyBudget * 100.0).toInt()
+        if (percent < threshold) return
+        val title = "${category.name} Budget Alert (${threshold}%)"
+        if (dao.countBudgetNotifications(title, start, end) > 0) return
+        val spentText = CurrencyFormatter.formatCurrency(spent, currency, prefs.useSouthAsianGrouping, includeCodeSuffix = true)
+        val limitText = CurrencyFormatter.formatCurrency(category.monthlyBudget, currency, prefs.useSouthAsianGrouping, includeCodeSuffix = true)
+        dao.insertNotification(AppNotificationEntity(
+            title = title,
+            message = "Spent $spentText of your $limitText ${category.budgetPeriod.lowercase()} limit ($percent%).",
+            categoryTag = "BUDGET", timestamp = System.currentTimeMillis(), isRead = false, accentColorHex = category.colorHex
+        ))
     }
 
     suspend fun editTransaction(
-        oldTx: TransactionEntity,
-        title: String,
-        merchant: String,
-        amount: Double,
-        currencyCode: String,
-        type: String,
-        category: CategoryEntity,
-        account: AccountEntity,
-        toAccount: AccountEntity? = null,
-        note: String = "",
-        isRecurring: Boolean = false,
-        receiptUri: String = "",
-        splitDetails: String = "",
+        oldTx: TransactionEntity, title: String, merchant: String, amount: Double, currencyCode: String,
+        type: String, category: CategoryEntity, account: AccountEntity, toAccount: AccountEntity? = null,
+        note: String = "", isRecurring: Boolean = false, receiptUri: String = "", splitDetails: String = "",
         isFavorite: Boolean = false
     ) {
-        val ratesMap = getRateMap()
-        applyAccountDeltaForTransaction(oldTx, ratesMap, reverse = true)
-
-        val rateToBdt = ratesMap[currencyCode.uppercase()]
-            ?: CurrencyCatalog.getMetadata(currencyCode).defaultRateToBdt
-
-        val label = when {
-            type == "TRANSFER" && toAccount != null -> "${account.name} → ${toAccount.name}"
-            account.type == "MFS" -> "Paid with ${account.name.substringBefore(" ")}"
-            else -> account.maskedNumber
-        }
-
-        val updatedTx = oldTx.copy(
-            title = title.trim(),
-            merchant = merchant.trim().ifEmpty { category.name },
-            amount = amount,
-            currencyCode = currencyCode.uppercase(),
-            exchangeRateSnapshotToBdt = rateToBdt,
-            type = type,
-            categoryId = category.id,
+        validateTransaction(amount, currencyCode, type, account.id, toAccount?.id)
+        val source = dao.getAccountById(account.id) ?: error("Selected source account no longer exists")
+        val target = if (type == "TRANSFER") dao.getAccountById(toAccount!!.id)
+            ?: error("Selected destination account no longer exists") else null
+        val rates = getRateMap()
+        val updated = oldTx.copy(
+            title = title.trim(), merchant = merchant.trim().ifEmpty { category.name }, amount = amount,
+            currencyCode = currencyCode.uppercase(), exchangeRateSnapshotToBdt = rateFor(currencyCode, rates),
+            accountExchangeRateSnapshotToBdt = rateFor(source.currencyCode, rates),
+            toAccountExchangeRateSnapshotToBdt = target?.let { rateFor(it.currencyCode, rates) } ?: 1.0,
+            type = type, categoryId = category.id,
             categoryName = if (type == "TRANSFER") "Transfer" else category.name,
             categoryColorHex = if (type == "TRANSFER") 0xFF1D9BF0L else category.colorHex,
             categoryIconKey = if (type == "TRANSFER") "TRANSFER" else category.iconKey,
-            accountId = account.id,
-            accountLabel = label,
-            toAccountId = toAccount?.id,
-            note = note.trim(),
-            isRecurring = isRecurring,
-            receiptUri = receiptUri.trim(),
-            splitDetails = splitDetails.trim(),
-            isFavorite = isFavorite
+            accountId = source.id,
+            accountLabel = when {
+                target != null -> "${source.name} → ${target.name}"
+                source.type == "MFS" -> "Paid with ${source.name.substringBefore(" ")}"
+                else -> source.maskedNumber
+            },
+            toAccountId = target?.id, note = note.trim(), isRecurring = isRecurring,
+            receiptUri = receiptUri.trim(), splitDetails = splitDetails.trim(), isFavorite = isFavorite
         )
-        dao.updateTransaction(updatedTx)
-        applyAccountDeltaForTransaction(updatedTx, ratesMap, reverse = false)
+        database.withTransaction {
+            applyAccountDeltaForTransaction(oldTx, reverse = true)
+            dao.updateTransaction(updated)
+            applyAccountDeltaForTransaction(updated, reverse = false)
+            if (type == "EXPENSE" && category.monthlyBudget > 0.0) checkAndRecordBudgetThresholdAlert(category, rates, updated.timestamp)
+        }
     }
 
     suspend fun toggleTransactionFavorite(tx: TransactionEntity): TransactionEntity {
@@ -368,55 +403,32 @@ class HisabRepository(private val dao: HisabDao) {
     }
 
     suspend fun deleteTransaction(transaction: TransactionEntity) {
-        val ratesMap = getRateMap()
-        dao.deleteTransactionById(transaction.id)
-        applyAccountDeltaForTransaction(transaction, ratesMap, reverse = true)
+        database.withTransaction {
+            applyAccountDeltaForTransaction(transaction, reverse = true)
+            dao.deleteTransactionById(transaction.id)
+        }
     }
 
-    private suspend fun applyAccountDeltaForTransaction(
-        tx: TransactionEntity,
-        ratesMap: Map<String, Double>,
-        reverse: Boolean
-    ) {
-        val currentAcc = dao.getAccountById(tx.accountId)
-        if (currentAcc != null) {
-            val deltaInAccCurrency = CurrencyFormatter.convert(
-                amount = tx.amount,
-                fromCurrency = tx.currencyCode,
-                toCurrency = currentAcc.currencyCode,
-                ratesToBdt = ratesMap
-            )
-            when (tx.type) {
-                "EXPENSE" -> {
-                    val newBal = if (reverse) currentAcc.balance + deltaInAccCurrency
-                    else (currentAcc.balance - deltaInAccCurrency).coerceAtLeast(0.0)
-                    dao.updateAccount(currentAcc.copy(balance = newBal))
-                }
-                "INCOME" -> {
-                    val newBal = if (reverse) (currentAcc.balance - deltaInAccCurrency).coerceAtLeast(0.0)
-                    else currentAcc.balance + deltaInAccCurrency
-                    dao.updateAccount(currentAcc.copy(balance = newBal))
-                }
-                "TRANSFER" -> {
-                    val newSourceBal = if (reverse) currentAcc.balance + deltaInAccCurrency
-                    else (currentAcc.balance - deltaInAccCurrency).coerceAtLeast(0.0)
-                    dao.updateAccount(currentAcc.copy(balance = newSourceBal))
-
-                    tx.toAccountId?.let { targetId ->
-                        dao.getAccountById(targetId)?.let { targetAcc ->
-                            val targetDelta = CurrencyFormatter.convert(
-                                amount = tx.amount,
-                                fromCurrency = tx.currencyCode,
-                                toCurrency = targetAcc.currencyCode,
-                                ratesToBdt = ratesMap
-                            )
-                            val newTargetBal = if (reverse) (targetAcc.balance - targetDelta).coerceAtLeast(0.0)
-                            else targetAcc.balance + targetDelta
-                            dao.updateAccount(targetAcc.copy(balance = newTargetBal))
-                        }
-                    }
-                }
-            }
+    private suspend fun applyAccountDeltaForTransaction(tx: TransactionEntity, reverse: Boolean) {
+        val source = dao.getAccountById(tx.accountId) ?: return
+        val sourceDelta = if (tx.currencyCode.equals(source.currencyCode, true)) tx.amount else
+            CurrencyFormatter.convertWithSnapshots(tx.amount, tx.exchangeRateSnapshotToBdt, tx.accountExchangeRateSnapshotToBdt, source.currencyCode)
+        val sourceBalance = when (tx.type) {
+            "EXPENSE", "TRANSFER" -> if (reverse) CurrencyFormatter.addMoney(source.balance, sourceDelta, source.currencyCode)
+                else CurrencyFormatter.subtractMoney(source.balance, sourceDelta, source.currencyCode)
+            "INCOME" -> if (reverse) CurrencyFormatter.subtractMoney(source.balance, sourceDelta, source.currencyCode)
+                else CurrencyFormatter.addMoney(source.balance, sourceDelta, source.currencyCode)
+            else -> source.balance
+        }
+        dao.updateAccount(source.copy(balance = sourceBalance))
+        if (tx.type == "TRANSFER") {
+            val targetId = tx.toAccountId ?: return
+            val target = dao.getAccountById(targetId) ?: return
+            val delta = if (tx.currencyCode.equals(target.currencyCode, true)) tx.amount else
+                CurrencyFormatter.convertWithSnapshots(tx.amount, tx.exchangeRateSnapshotToBdt, tx.toAccountExchangeRateSnapshotToBdt, target.currencyCode)
+            val balance = if (reverse) CurrencyFormatter.subtractMoney(target.balance, delta, target.currencyCode)
+                else CurrencyFormatter.addMoney(target.balance, delta, target.currencyCode)
+            dao.updateAccount(target.copy(balance = balance))
         }
     }
 
@@ -932,102 +944,298 @@ class HisabRepository(private val dao: HisabDao) {
     // =========================================================================
 
     suspend fun exportBackupJson(): String = withContext(Dispatchers.IO) {
-        val root = JSONObject()
-        root.put("version", 6)
-        root.put("exportedAt", System.currentTimeMillis())
-
+        suspend fun array(block: suspend JSONArray.() -> Unit): JSONArray {
+            val result = JSONArray()
+            result.block()
+            return result
+        }
         val prefs = dao.getUserPreferencesOnce() ?: UserPreferencesEntity()
-        val prefsObj = JSONObject().apply {
-            put("baseCurrencyCode", prefs.baseCurrencyCode)
-            put("useSouthAsianGrouping", prefs.useSouthAsianGrouping)
-            put("themeMode", prefs.themeMode)
+        val root = JSONObject().apply {
+            put("version", 7)
+            put("exportedAt", System.currentTimeMillis())
+            put("preferences", JSONObject().apply {
+                put("baseCurrencyCode", prefs.baseCurrencyCode)
+                put("useSouthAsianGrouping", prefs.useSouthAsianGrouping)
+                put("themeMode", prefs.themeMode)
+                put("languageCode", prefs.languageCode)
+                put("regionCode", prefs.regionCode)
+                put("hasCompletedOnboarding", prefs.hasCompletedOnboarding)
+                put("isBalanceHidden", prefs.isBalanceHidden)
+                put("budgetAlertsEnabled", prefs.budgetAlertsEnabled)
+                put("billRemindersEnabled", prefs.billRemindersEnabled)
+                put("debtRemindersEnabled", prefs.debtRemindersEnabled)
+                put("goalMilestonesEnabled", prefs.goalMilestonesEnabled)
+                put("soundEnabled", prefs.soundEnabled)
+                put("vibrationEnabled", prefs.vibrationEnabled)
+                put("quietHoursEnabled", prefs.quietHoursEnabled)
+                put("quietHoursStartHour", prefs.quietHoursStartHour)
+                put("quietHoursEndHour", prefs.quietHoursEndHour)
+                put("reminderLeadTimeDays", prefs.reminderLeadTimeDays)
+                put("hapticsEnabled", prefs.hapticsEnabled)
+            })
         }
-        root.put("preferences", prefsObj)
-
-        val accountsArr = JSONArray()
-        dao.getAllAccountsOnce().forEach { acc ->
-            accountsArr.put(
-                JSONObject().apply {
-                    put("id", acc.id)
-                    put("name", acc.name)
-                    put("type", acc.type)
-                    put("balance", acc.balance)
-                    put("currencyCode", acc.currencyCode)
-                    put("maskedNumber", acc.maskedNumber)
-                    put("colorHex", acc.colorHex)
-                    put("iconKey", acc.iconKey)
-                    put("isPrimary", acc.isPrimary)
-                    put("isDemo", acc.isDemo)
-                }
-            )
-        }
-        root.put("accounts", accountsArr)
-
-        val txsArr = JSONArray()
-        dao.getAllTransactionsOnce().forEach { tx ->
-            txsArr.put(
-                JSONObject().apply {
-                    put("title", tx.title)
-                    put("merchant", tx.merchant)
-                    put("amount", tx.amount)
-                    put("currencyCode", tx.currencyCode)
-                    put("exchangeRateSnapshotToBdt", tx.exchangeRateSnapshotToBdt)
-                    put("type", tx.type)
-                    put("categoryId", tx.categoryId)
-                    put("categoryName", tx.categoryName)
-                    put("categoryColorHex", tx.categoryColorHex)
-                    put("categoryIconKey", tx.categoryIconKey)
-                    put("accountId", tx.accountId)
-                    put("accountLabel", tx.accountLabel)
-                    put("timestamp", tx.timestamp)
-                    put("note", tx.note)
-                    put("isRecurring", tx.isRecurring)
-                    put("receiptUri", tx.receiptUri)
-                    put("splitDetails", tx.splitDetails)
-                    put("isFavorite", tx.isFavorite)
-                    put("isDemo", tx.isDemo)
-                }
-            )
-        }
-        root.put("transactions", txsArr)
+        root.put("accounts", array {
+            dao.getAllAccountsOnce().forEach { x -> put(JSONObject().apply {
+                put("id", x.id); put("name", x.name); put("type", x.type); put("balance", x.balance)
+                put("currencyCode", x.currencyCode); put("maskedNumber", x.maskedNumber)
+                put("colorHex", x.colorHex); put("iconKey", x.iconKey); put("isPrimary", x.isPrimary); put("isDemo", x.isDemo)
+            }) }
+        })
+        root.put("categories", array {
+            dao.getAllCategoriesOnce().forEach { x -> put(JSONObject().apply {
+                put("id", x.id); put("name", x.name); put("type", x.type); put("monthlyBudget", x.monthlyBudget)
+                put("budgetCurrencyCode", x.budgetCurrencyCode); put("budgetPeriod", x.budgetPeriod)
+                put("alertThresholdPercent", x.alertThresholdPercent); put("startDateMillis", x.startDateMillis)
+                put("endDateMillis", x.endDateMillis); put("colorHex", x.colorHex); put("iconKey", x.iconKey)
+                put("isQuickAction", x.isQuickAction); put("isDemo", x.isDemo)
+            }) }
+        })
+        root.put("transactions", array {
+            dao.getAllTransactionsOnce().forEach { x -> put(JSONObject().apply {
+                put("id", x.id); put("title", x.title); put("merchant", x.merchant); put("amount", x.amount)
+                put("currencyCode", x.currencyCode); put("exchangeRateSnapshotToBdt", x.exchangeRateSnapshotToBdt)
+                put("accountExchangeRateSnapshotToBdt", x.accountExchangeRateSnapshotToBdt)
+                put("toAccountExchangeRateSnapshotToBdt", x.toAccountExchangeRateSnapshotToBdt)
+                put("type", x.type); put("categoryId", x.categoryId); put("categoryName", x.categoryName)
+                put("categoryColorHex", x.categoryColorHex); put("categoryIconKey", x.categoryIconKey)
+                put("accountId", x.accountId); put("accountLabel", x.accountLabel)
+                if (x.toAccountId != null) put("toAccountId", x.toAccountId)
+                put("timestamp", x.timestamp); put("note", x.note); put("isRecurring", x.isRecurring)
+                put("receiptUri", x.receiptUri); put("splitDetails", x.splitDetails)
+                put("isFavorite", x.isFavorite); put("isDemo", x.isDemo)
+            }) }
+        })
+        root.put("recurringPayments", array {
+            dao.getAllRecurringPaymentsOnce().forEach { x -> put(JSONObject().apply {
+                put("id", x.id); put("title", x.title); put("provider", x.provider); put("amount", x.amount)
+                put("currencyCode", x.currencyCode); put("transactionType", x.transactionType); put("frequency", x.frequency)
+                put("nextDueDateMillis", x.nextDueDateMillis); put("categoryId", x.categoryId); put("categoryName", x.categoryName)
+                put("colorHex", x.colorHex); put("iconKey", x.iconKey); put("autoPay", x.autoPay); put("isDemo", x.isDemo)
+            }) }
+        })
+        root.put("debts", array {
+            dao.getAllDebtRecordsOnce().forEach { x -> put(JSONObject().apply {
+                put("id", x.id); put("personName", x.personName); put("relationOrNote", x.relationOrNote)
+                put("totalAmount", x.totalAmount); put("settledAmount", x.settledAmount); put("currencyCode", x.currencyCode)
+                put("type", x.type); put("dueDateMillis", x.dueDateMillis); put("phoneOrTag", x.phoneOrTag)
+                put("colorHex", x.colorHex); put("repaymentHistory", x.repaymentHistory); put("isDemo", x.isDemo)
+            }) }
+        })
+        root.put("goals", array {
+            dao.getAllSavingsGoalsOnce().forEach { x -> put(JSONObject().apply {
+                put("id", x.id); put("title", x.title); put("subtitle", x.subtitle)
+                put("targetAmount", x.targetAmount); put("savedAmount", x.savedAmount); put("currencyCode", x.currencyCode)
+                put("deadlineMillis", x.deadlineMillis); put("colorHex", x.colorHex); put("iconKey", x.iconKey); put("isDemo", x.isDemo)
+            }) }
+        })
+        root.put("notifications", array {
+            dao.getAllNotificationsOnce().forEach { x -> put(JSONObject().apply {
+                put("id", x.id); put("title", x.title); put("message", x.message); put("categoryTag", x.categoryTag)
+                put("timestamp", x.timestamp); put("isRead", x.isRead); put("accentColorHex", x.accentColorHex); put("isDemo", x.isDemo)
+            }) }
+        })
+        root.put("scheduledReminders", array {
+            dao.getAllScheduledRemindersOnce().forEach { x -> put(JSONObject().apply {
+                put("id", x.id); put("notificationId", x.notificationId); put("sourceType", x.sourceType)
+                put("sourceId", x.sourceId); put("title", x.title); put("subtitle", x.subtitle); put("amount", x.amount)
+                put("currencyCode", x.currencyCode); put("triggerTimeMillis", x.triggerTimeMillis)
+                put("frequency", x.frequency); put("leadTimeDays", x.leadTimeDays); put("isEnabled", x.isEnabled)
+                put("lastNotifiedMillis", x.lastNotifiedMillis); put("accentColorHex", x.accentColorHex); put("isDemo", x.isDemo)
+            }) }
+        })
+        root.put("exchangeRates", array {
+            dao.getExchangeRatesList().forEach { x -> put(JSONObject().apply {
+                put("currencyCode", x.currencyCode); put("rateToBdt", x.rateToBdt)
+                put("lastUpdatedMillis", x.lastUpdatedMillis); put("sourceLabel", x.sourceLabel); put("isCustomRate", x.isCustomRate)
+            }) }
+        })
         root.toString(2)
     }
 
     suspend fun restoreBackupJson(jsonString: String): Boolean = withContext(Dispatchers.IO) {
         try {
             val root = JSONObject(jsonString)
-            val txsArr = root.optJSONArray("transactions") ?: return@withContext false
-            val importedTxs = mutableListOf<TransactionEntity>()
-            for (i in 0 until txsArr.length()) {
-                val obj = txsArr.getJSONObject(i)
-                importedTxs.add(
-                    TransactionEntity(
-                        title = obj.optString("title", "Restored Entry"),
-                        merchant = obj.optString("merchant", "General"),
-                        amount = obj.optDouble("amount", 0.0),
-                        currencyCode = obj.optString("currencyCode", "BDT"),
-                        exchangeRateSnapshotToBdt = obj.optDouble("exchangeRateSnapshotToBdt", 1.0),
-                        type = obj.optString("type", "EXPENSE"),
-                        categoryId = obj.optInt("categoryId", 1),
-                        categoryName = obj.optString("categoryName", "Groceries"),
-                        categoryColorHex = obj.optLong("categoryColorHex", 0xFF7C5CFFL),
-                        categoryIconKey = obj.optString("categoryIconKey", "GROCERIES"),
-                        accountId = obj.optInt("accountId", 1),
-                        accountLabel = obj.optString("accountLabel", "Card •••• 4821"),
-                        timestamp = obj.optLong("timestamp", System.currentTimeMillis()),
-                        note = obj.optString("note", ""),
-                        isRecurring = obj.optBoolean("isRecurring", false),
-                        receiptUri = obj.optString("receiptUri", ""),
-                        splitDetails = obj.optString("splitDetails", ""),
-                        isFavorite = obj.optBoolean("isFavorite", false),
-                        isDemo = obj.optBoolean("isDemo", false)
-                    )
+            val version = root.optInt("version", 0)
+            if (version !in 6..7) return@withContext false
+            val accountsJson = root.optJSONArray("accounts") ?: return@withContext false
+            val txJson = root.optJSONArray("transactions") ?: return@withContext false
+            val accounts = mutableListOf<AccountEntity>()
+            for (i in 0 until accountsJson.length()) {
+                val o = accountsJson.getJSONObject(i)
+                val currency = o.optString("currencyCode", "BDT").uppercase()
+                val balance = o.optDouble("balance", Double.NaN)
+                if (!CurrencyCatalog.isSupported(currency) || !balance.isFinite()) return@withContext false
+                accounts += AccountEntity(
+                    id = o.optInt("id", 0), name = o.optString("name"), type = o.optString("type", "CASH"),
+                    balance = balance, currencyCode = currency, maskedNumber = o.optString("maskedNumber", ""),
+                    colorHex = o.optLong("colorHex", 0xFF059669L), iconKey = o.optString("iconKey", "CASH"),
+                    isPrimary = o.optBoolean("isPrimary"), isDemo = o.optBoolean("isDemo")
                 )
             }
-            if (importedTxs.isNotEmpty()) {
-                dao.clearAllTransactions()
-                dao.insertTransactions(importedTxs)
+            if (accounts.isEmpty() || accounts.map { it.id }.toSet().size != accounts.size) return@withContext false
+            val accountById = accounts.associateBy { it.id }
+            val currentRates = getRateMap()
+            val transactions = mutableListOf<TransactionEntity>()
+            for (i in 0 until txJson.length()) {
+                val o = txJson.getJSONObject(i)
+                val currency = o.optString("currencyCode", "BDT").uppercase()
+                val type = o.optString("type", "EXPENSE").uppercase()
+                val amount = o.optDouble("amount", Double.NaN)
+                val accountId = o.optInt("accountId", -1)
+                if (!CurrencyCatalog.isSupported(currency) || !amount.isFinite() || amount <= 0.0) return@withContext false
+                if (accountId !in accountById || type !in setOf("EXPENSE", "INCOME", "TRANSFER")) return@withContext false
+                val targetId = if (o.has("toAccountId")) o.optInt("toAccountId") else null
+                if (type == "TRANSFER" && (version < 7 || targetId == null || targetId !in accountById || targetId == accountId)) return@withContext false
+                val sourceCurrency = accountById.getValue(accountId).currencyCode
+                val targetCurrency = targetId?.let { accountById.getValue(it).currencyCode }
+                val txRate = o.optDouble("exchangeRateSnapshotToBdt", rateFor(currency, currentRates))
+                val sourceRate = o.optDouble("accountExchangeRateSnapshotToBdt", rateFor(sourceCurrency, currentRates))
+                val targetRate = targetCurrency?.let { o.optDouble("toAccountExchangeRateSnapshotToBdt", rateFor(it, currentRates)) } ?: 1.0
+                if (listOf(txRate, sourceRate, targetRate).any { !it.isFinite() || it <= 0.0 }) return@withContext false
+                transactions += TransactionEntity(
+                    id = if (version >= 7) o.optInt("id", 0) else 0,
+                    title = o.optString("title", "Restored Entry"), merchant = o.optString("merchant", "General"),
+                    amount = amount, currencyCode = currency, exchangeRateSnapshotToBdt = txRate,
+                    accountExchangeRateSnapshotToBdt = sourceRate, toAccountExchangeRateSnapshotToBdt = targetRate,
+                    type = type, categoryId = o.optInt("categoryId", 1), categoryName = o.optString("categoryName", "General"),
+                    categoryColorHex = o.optLong("categoryColorHex", 0xFF7C5CFFL), categoryIconKey = o.optString("categoryIconKey", "GROCERIES"),
+                    accountId = accountId, accountLabel = o.optString("accountLabel", "Restored account"), toAccountId = targetId,
+                    timestamp = o.optLong("timestamp", System.currentTimeMillis()), note = o.optString("note", ""),
+                    isRecurring = o.optBoolean("isRecurring"), receiptUri = o.optString("receiptUri", ""),
+                    splitDetails = o.optString("splitDetails", ""), isFavorite = o.optBoolean("isFavorite"), isDemo = o.optBoolean("isDemo")
+                )
             }
+
+            if (version == 6) {
+                // Old backups omit destination IDs for transfers. Those are rejected above;
+                // other v6 backups restore account balances + transactions without deleting other modules.
+                database.withTransaction {
+                    dao.clearAllTransactions()
+                    dao.clearAllAccounts()
+                    dao.insertAccounts(accounts)
+                    dao.insertTransactions(transactions)
+                }
+                return@withContext true
+            }
+
+            val categoriesJson = root.optJSONArray("categories") ?: return@withContext false
+            val recurringJson = root.optJSONArray("recurringPayments") ?: return@withContext false
+            val debtsJson = root.optJSONArray("debts") ?: return@withContext false
+            val goalsJson = root.optJSONArray("goals") ?: return@withContext false
+            val notificationsJson = root.optJSONArray("notifications") ?: return@withContext false
+            val remindersJson = root.optJSONArray("scheduledReminders") ?: return@withContext false
+            val ratesJson = root.optJSONArray("exchangeRates") ?: return@withContext false
+
+            val categories = (0 until categoriesJson.length()).map { i ->
+                val o = categoriesJson.getJSONObject(i)
+                val currency = o.optString("budgetCurrencyCode", "BDT").uppercase()
+                if (!CurrencyCatalog.isSupported(currency)) return@withContext false
+                CategoryEntity(
+                    id=o.optInt("id",0), name=o.optString("name"), type=o.optString("type","EXPENSE"),
+                    monthlyBudget=o.optDouble("monthlyBudget",0.0), budgetCurrencyCode=currency,
+                    budgetPeriod=o.optString("budgetPeriod","MONTHLY"), alertThresholdPercent=o.optInt("alertThresholdPercent",80).coerceIn(50,100),
+                    startDateMillis=o.optLong("startDateMillis"), endDateMillis=o.optLong("endDateMillis"),
+                    colorHex=o.optLong("colorHex",0xFF6D4AFFL), iconKey=o.optString("iconKey","GROCERIES"),
+                    isQuickAction=o.optBoolean("isQuickAction",true), isDemo=o.optBoolean("isDemo")
+                )
+            }
+            val recurring = (0 until recurringJson.length()).map { i ->
+                val o=recurringJson.getJSONObject(i); val c=o.optString("currencyCode","BDT").uppercase()
+                val amount=o.optDouble("amount",Double.NaN)
+                if (!CurrencyCatalog.isSupported(c) || !amount.isFinite()) return@withContext false
+                RecurringPaymentEntity(
+                    id=o.optInt("id",0),title=o.optString("title"),provider=o.optString("provider"),amount=amount,currencyCode=c,
+                    transactionType=o.optString("transactionType","EXPENSE"),frequency=o.optString("frequency","ONCE"),
+                    nextDueDateMillis=o.optLong("nextDueDateMillis"),categoryId=o.optInt("categoryId"),
+                    categoryName=o.optString("categoryName"),colorHex=o.optLong("colorHex",0xFF6D4AFFL),
+                    iconKey=o.optString("iconKey","BILL"),autoPay=o.optBoolean("autoPay",true),isDemo=o.optBoolean("isDemo")
+                )
+            }
+            val debts = (0 until debtsJson.length()).map { i ->
+                val o=debtsJson.getJSONObject(i); val c=o.optString("currencyCode","BDT").uppercase()
+                if (!CurrencyCatalog.isSupported(c)) return@withContext false
+                DebtRecordEntity(
+                    id=o.optInt("id",0),personName=o.optString("personName"),relationOrNote=o.optString("relationOrNote",""),
+                    totalAmount=o.optDouble("totalAmount",0.0),settledAmount=o.optDouble("settledAmount",0.0),currencyCode=c,
+                    type=o.optString("type","LENT"),dueDateMillis=o.optLong("dueDateMillis"),phoneOrTag=o.optString("phoneOrTag",""),
+                    colorHex=o.optLong("colorHex",0xFF6D4AFFL),repaymentHistory=o.optString("repaymentHistory",""),isDemo=o.optBoolean("isDemo")
+                )
+            }
+            val goals = (0 until goalsJson.length()).map { i ->
+                val o=goalsJson.getJSONObject(i); val c=o.optString("currencyCode","BDT").uppercase()
+                if (!CurrencyCatalog.isSupported(c)) return@withContext false
+                SavingsGoalEntity(
+                    id=o.optInt("id",0),title=o.optString("title"),subtitle=o.optString("subtitle",""),
+                    targetAmount=o.optDouble("targetAmount",0.0),savedAmount=o.optDouble("savedAmount",0.0),currencyCode=c,
+                    deadlineMillis=o.optLong("deadlineMillis"),colorHex=o.optLong("colorHex",0xFF6D4AFFL),
+                    iconKey=o.optString("iconKey","GOAL"),isDemo=o.optBoolean("isDemo")
+                )
+            }
+            val notifications = (0 until notificationsJson.length()).map { i ->
+                val o=notificationsJson.getJSONObject(i)
+                AppNotificationEntity(
+                    id=o.optInt("id",0),title=o.optString("title"),message=o.optString("message"),
+                    categoryTag=o.optString("categoryTag","INSIGHT"),timestamp=o.optLong("timestamp"),isRead=o.optBoolean("isRead"),
+                    accentColorHex=o.optLong("accentColorHex",0xFF6D4AFFL),isDemo=o.optBoolean("isDemo")
+                )
+            }
+            val reminders = (0 until remindersJson.length()).map { i ->
+                val o=remindersJson.getJSONObject(i); val c=o.optString("currencyCode","BDT").uppercase()
+                val amount=o.optDouble("amount",Double.NaN)
+                if (!CurrencyCatalog.isSupported(c) || !amount.isFinite()) return@withContext false
+                ScheduledReminderEntity(
+                    id=o.optInt("id",0),notificationId=o.optInt("notificationId"),sourceType=o.optString("sourceType","CUSTOM"),
+                    sourceId=o.optInt("sourceId"),title=o.optString("title"),subtitle=o.optString("subtitle",""),
+                    amount=amount,currencyCode=c,triggerTimeMillis=o.optLong("triggerTimeMillis"),
+                    frequency=o.optString("frequency","ONCE"),leadTimeDays=o.optInt("leadTimeDays",1),
+                    isEnabled=o.optBoolean("isEnabled",true),lastNotifiedMillis=o.optLong("lastNotifiedMillis"),
+                    accentColorHex=o.optLong("accentColorHex",0xFF6D4AFFL),isDemo=o.optBoolean("isDemo")
+                )
+            }
+            val exchangeRates = (0 until ratesJson.length()).map { i ->
+                val o=ratesJson.getJSONObject(i); val c=o.optString("currencyCode","").uppercase()
+                val rate=o.optDouble("rateToBdt",Double.NaN)
+                if (!CurrencyCatalog.isSupported(c) || !rate.isFinite() || rate<=0.0) return@withContext false
+                ExchangeRateEntity(
+                    currencyCode=c,rateToBdt=rate,lastUpdatedMillis=o.optLong("lastUpdatedMillis"),
+                    sourceLabel=o.optString("sourceLabel","Restored backup"),isCustomRate=o.optBoolean("isCustomRate")
+                )
+            }
+            val preferenceJson=root.optJSONObject("preferences") ?: JSONObject()
+            val current=dao.getUserPreferencesOnce() ?: UserPreferencesEntity()
+            val restoredBaseCurrency = preferenceJson.optString("baseCurrencyCode", current.baseCurrencyCode).uppercase()
+            if (!CurrencyCatalog.isSupported(restoredBaseCurrency)) return@withContext false
+            val restored=current.copy(
+                baseCurrencyCode=restoredBaseCurrency,
+                useSouthAsianGrouping=preferenceJson.optBoolean("useSouthAsianGrouping",current.useSouthAsianGrouping),
+                themeMode=preferenceJson.optString("themeMode",current.themeMode),
+                languageCode=preferenceJson.optString("languageCode",current.languageCode),
+                regionCode=preferenceJson.optString("regionCode",current.regionCode),
+                hasCompletedOnboarding=preferenceJson.optBoolean("hasCompletedOnboarding",current.hasCompletedOnboarding),
+                isBalanceHidden=preferenceJson.optBoolean("isBalanceHidden",current.isBalanceHidden),
+                budgetAlertsEnabled=preferenceJson.optBoolean("budgetAlertsEnabled",current.budgetAlertsEnabled),
+                billRemindersEnabled=preferenceJson.optBoolean("billRemindersEnabled",current.billRemindersEnabled),
+                debtRemindersEnabled=preferenceJson.optBoolean("debtRemindersEnabled",current.debtRemindersEnabled),
+                goalMilestonesEnabled=preferenceJson.optBoolean("goalMilestonesEnabled",current.goalMilestonesEnabled),
+                soundEnabled=preferenceJson.optBoolean("soundEnabled",current.soundEnabled),
+                vibrationEnabled=preferenceJson.optBoolean("vibrationEnabled",current.vibrationEnabled),
+                quietHoursEnabled=preferenceJson.optBoolean("quietHoursEnabled",current.quietHoursEnabled),
+                quietHoursStartHour=preferenceJson.optInt("quietHoursStartHour",current.quietHoursStartHour),
+                quietHoursEndHour=preferenceJson.optInt("quietHoursEndHour",current.quietHoursEndHour),
+                reminderLeadTimeDays=preferenceJson.optInt("reminderLeadTimeDays",current.reminderLeadTimeDays),
+                hapticsEnabled=preferenceJson.optBoolean("hapticsEnabled",current.hapticsEnabled)
+            )
+
+            database.withTransaction {
+                dao.clearAllTransactions(); dao.clearAllAccounts(); dao.clearAllCategories()
+                dao.clearAllRecurring(); dao.clearAllDebts(); dao.clearAllGoals()
+                dao.clearAllNotifications(); dao.clearAllScheduledReminders(); dao.clearAllExchangeRates()
+                dao.insertAccounts(accounts); dao.insertCategories(categories); dao.insertTransactions(transactions)
+                dao.insertRecurringPayments(recurring); dao.insertDebtRecords(debts); dao.insertSavingsGoals(goals)
+                dao.insertNotifications(notifications); dao.insertScheduledReminders(reminders); dao.insertExchangeRates(exchangeRates)
+                dao.insertUserPreferences(restored)
+            }
+            HisabHaptics.isHapticsEnabled = restored.hapticsEnabled
             true
         } catch (_: Exception) {
             false

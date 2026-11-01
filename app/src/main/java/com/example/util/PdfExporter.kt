@@ -116,15 +116,11 @@ object PdfExporter {
         }
 
         try {
-            val contentUri = try {
-                FileProvider.getUriForFile(
-                    context,
-                    "${context.packageName}.fileprovider",
-                    internalFile
-                )
-            } catch (_: Throwable) {
-                Uri.fromFile(internalFile)
-            }
+            val contentUri = FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                internalFile
+            )
 
             var publicPath: String = internalFile.absolutePath
 

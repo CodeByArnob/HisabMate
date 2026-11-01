@@ -131,11 +131,21 @@ interface HisabDao {
     @Query("SELECT * FROM app_notifications ORDER BY timestamp DESC")
     fun getAllNotifications(): Flow<List<AppNotificationEntity>>
 
+    @Query("SELECT * FROM app_notifications ORDER BY timestamp DESC")
+    suspend fun getAllNotificationsOnce(): List<AppNotificationEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertNotifications(items: List<AppNotificationEntity>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertNotification(item: AppNotificationEntity): Long
+
+    @Query("""
+        SELECT COUNT(*) FROM app_notifications
+        WHERE categoryTag = 'BUDGET' AND title = :title
+          AND timestamp >= :startMillis AND timestamp < :endMillis
+    """)
+    suspend fun countBudgetNotifications(title: String, startMillis: Long, endMillis: Long): Int
 
     @Query("UPDATE app_notifications SET isRead = 1")
     suspend fun markAllNotificationsRead()
