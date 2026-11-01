@@ -131,6 +131,9 @@ interface HisabDao {
     @Query("SELECT * FROM app_notifications ORDER BY timestamp DESC")
     fun getAllNotifications(): Flow<List<AppNotificationEntity>>
 
+    @Query("SELECT * FROM app_notifications ORDER BY timestamp DESC")
+    suspend fun getAllNotificationsOnce(): List<AppNotificationEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertNotifications(items: List<AppNotificationEntity>)
 
