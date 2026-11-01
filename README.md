@@ -333,7 +333,7 @@ Never commit keystores, signing passwords, API keys or other secrets to the repo
 The Android CI workflow runs the automated test suite, Android Lint and build verification for debug and release packages.
 
 - [Android CI workflow](https://github.com/CodeByArnob/HisabMate/actions/workflows/android-ci.yml)
-- [Latest successful v1.0.6 release build](https://github.com/CodeByArnob/HisabMate/actions/runs/41315740240)
+- [Latest successful v1.0.6 release build](https://github.com/CodeByArnob/HisabMate/actions/runs/41317032709)
 - [All workflow runs](https://github.com/CodeByArnob/HisabMate/actions)
 
 ---
@@ -365,5 +365,3 @@ HisabMate is distributed under the [MIT License](LICENSE).
 [Download](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.6/HisabMate-v1.0.6-release.apk) · [Website](https://codebyarnob.github.io/HisabMate/) · [Report an issue](https://github.com/CodeByArnob/HisabMate/issues)
 
 </div>
-
-<!-- v1.0.6 release automation trigger -->
