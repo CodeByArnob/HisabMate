@@ -86,6 +86,28 @@ class ExampleUnitTest {
     }
 
     @Test
+    fun decimalLedgerArithmeticAvoidsBinaryFloatingPointArtifacts() {
+        assertEquals(0.30, CurrencyFormatter.addMoney(0.10, 0.20, "BDT"), 0.0)
+        assertEquals(0.10, CurrencyFormatter.subtractMoney(0.30, 0.20, "BDT"), 0.0)
+    }
+
+    @Test
+    fun snapshotConversionDoesNotUseTheLiveExchangeRateTable() {
+        val converted = CurrencyFormatter.convertWithSnapshots(
+            amount = 10.0,
+            fromRateToBdt = 120.0,
+            toRateToBdt = 1.0,
+            toCurrency = "BDT"
+        )
+        assertEquals(1200.0, converted, 0.0)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun unsupportedCurrencyCodeIsRejectedInsteadOfSilentlyBecomingBdt() {
+        CurrencyCatalog.getMetadata("XYZ")
+    }
+
+    @Test
     fun currencyFormatting_respectsGroupingDecimalsSpacingAndNegativeValues() {
         val bdtFormatted = CurrencyFormatter.formatCurrency(
             amount = 248650.5,

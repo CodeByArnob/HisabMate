@@ -191,7 +191,7 @@ class HisabRepository(private val database: HisabDatabase) {
         dao.insertUserPreferences(updated)
     }
 
-    suspend fun configureAppLock(enabled: Boolean, pinCode: String, biometric: Boolean) {
+    suspend fun configureAppLock(enabled: Boolean, pinCode: String, biometric: Boolean) = withContext(Dispatchers.IO) {
         val current = dao.getUserPreferencesOnce() ?: UserPreferencesEntity()
         if (enabled) {
             val hash = PinHasher.create(pinCode)
@@ -1199,8 +1199,10 @@ class HisabRepository(private val database: HisabDatabase) {
             }
             val preferenceJson=root.optJSONObject("preferences") ?: JSONObject()
             val current=dao.getUserPreferencesOnce() ?: UserPreferencesEntity()
+            val restoredBaseCurrency = preferenceJson.optString("baseCurrencyCode", current.baseCurrencyCode).uppercase()
+            if (!CurrencyCatalog.isSupported(restoredBaseCurrency)) return@withContext false
             val restored=current.copy(
-                baseCurrencyCode=preferenceJson.optString("baseCurrencyCode",current.baseCurrencyCode),
+                baseCurrencyCode=restoredBaseCurrency,
                 useSouthAsianGrouping=preferenceJson.optBoolean("useSouthAsianGrouping",current.useSouthAsianGrouping),
                 themeMode=preferenceJson.optString("themeMode",current.themeMode),
                 languageCode=preferenceJson.optString("languageCode",current.languageCode),

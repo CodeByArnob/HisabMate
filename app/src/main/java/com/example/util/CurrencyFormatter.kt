@@ -270,7 +270,14 @@ object CurrencyFormatter {
         toCurrency: String,
         ratesToBdt: Map<String, Double>
     ): Double {
-        return convert(1.0, fromCurrency, toCurrency, ratesToBdt)
+        val from = fromCurrency.uppercase(Locale.US)
+        val to = toCurrency.uppercase(Locale.US)
+        val fromRate = ratesToBdt[from] ?: CurrencyCatalog.getMetadata(from).defaultRateToBdt
+        val toRate = ratesToBdt[to] ?: CurrencyCatalog.getMetadata(to).defaultRateToBdt
+        require(fromRate.isFinite() && fromRate > 0.0 && toRate.isFinite() && toRate > 0.0)
+        return BigDecimal.valueOf(fromRate)
+            .divide(BigDecimal.valueOf(toRate), 8, RoundingMode.HALF_UP)
+            .toDouble()
     }
 
     /**
