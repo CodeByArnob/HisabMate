@@ -244,7 +244,7 @@ Automated test verification is managed via **Robolectric** local JVM tests in `a
 
 | Version | Date | Key Capabilities | Official Download |
 | :--- | :--- | :--- | :--- |
-| **v1.0.3** | 2026-10-31 | Production Single-Page ISO A4 (`595 × 842 pt`) Executive PDF Financial Statement engine, refined Light Mode slate depth (`#CFD8E6` / `#DFE6F0`), 14 ISO 4217 currencies with offline FX, multi-rail wallets, budgets, savings goals, debt ledger, and Room SQLite v7 persistence. | [HisabMate-v1.0.3-release.apk](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.3/HisabMate-v1.0.3-release.apk) |
+| **v1.0.3** | 2026-10-31 | Production Single-Page ISO A4 (`595 × 842 pt`) Executive PDF Financial Statement engine, refined Light Mode slate depth (`#CFD8E6` / `#DFE6F0`), 14 ISO 4217 currencies with offline FX, multi-rail wallets, budgets, savings goals, debt ledger, and Room SQLite v7 persistence. | [Previous release archive](https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.3) |
 
 ---
 
