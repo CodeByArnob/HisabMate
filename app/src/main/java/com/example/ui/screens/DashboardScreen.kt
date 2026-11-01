@@ -228,7 +228,7 @@ fun DashboardScreen(
                         onClick = onToggleBalance,
                         shape = CircleShape,
                         color = colors.containerInteractive,
-                        border = BorderStroke(1.dp, colors.borderStrong),
+                        border = BorderStroke(1.dp, colors.borderSubtle),
                         modifier = Modifier
                             .size(38.dp)
                             .minimumInteractiveComponentSize()
@@ -251,7 +251,7 @@ fun DashboardScreen(
                 Surface(
                     shape = RoundedCornerShape(16.dp),
                     color = colors.containerInteractive,
-                    border = BorderStroke(1.dp, colors.borderStrong),
+                    border = BorderStroke(1.dp, colors.borderSubtle),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
@@ -366,7 +366,7 @@ fun DashboardScreen(
                             onClick = { onNavigate(AppScreen.CALENDAR) },
                             shape = RoundedCornerShape(12.dp),
                             color = colors.containerInteractive,
-                            border = BorderStroke(1.dp, colors.borderStrong),
+                            border = BorderStroke(1.dp, colors.borderSubtle),
                             modifier = Modifier.testTag("btn_open_calendar")
                         ) {
                             Text(
@@ -382,7 +382,7 @@ fun DashboardScreen(
                             onClick = { onOpenPlanningTab(PlanningTab.CATEGORIES) },
                             shape = RoundedCornerShape(12.dp),
                             color = colors.containerInteractive,
-                            border = BorderStroke(1.dp, colors.borderStrong),
+                            border = BorderStroke(1.dp, colors.borderSubtle),
                             modifier = Modifier.testTag("btn_edit_quick_wallets")
                         ) {
                             Text(
@@ -515,7 +515,7 @@ fun DashboardScreen(
                                 onClick = { onOpenAddTransaction(fav.type, fav.categoryId) },
                                 shape = RoundedCornerShape(14.dp),
                                 color = colors.containerInteractive,
-                                border = BorderStroke(1.dp, colors.borderStrong),
+                                border = BorderStroke(1.dp, colors.borderSubtle),
                                 modifier = Modifier.weight(1f)
                             ) {
                                 Column(
@@ -573,7 +573,7 @@ fun DashboardScreen(
                         onClick = { onNavigate(AppScreen.SEARCH) },
                         shape = RoundedCornerShape(12.dp),
                         color = colors.containerInteractive,
-                        border = BorderStroke(1.dp, colors.borderStrong),
+                        border = BorderStroke(1.dp, colors.borderSubtle),
                         modifier = Modifier.testTag("btn_see_all_transactions")
                     ) {
                         Text(
@@ -682,9 +682,9 @@ private fun DashboardModuleChip(
     val palette = getCategoryPalette(colorHex)
     Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(16.dp),
         color = if (colors.isDark) palette.softBgDark else palette.softBgLight,
-        border = BorderStroke(1.2.dp, palette.main.copy(alpha = 0.48f)),
+        border = BorderStroke(1.dp, palette.main.copy(alpha = if (colors.isDark) 0.34f else 0.18f)),
         modifier = modifier.height(66.dp)
     ) {
         Row(
@@ -936,7 +936,7 @@ fun WalletDetailsScreen(
                                 onClick = { onShiftMonth(-1) },
                                 shape = CircleShape,
                                 color = colors.containerInteractive,
-                                border = BorderStroke(1.dp, colors.borderStrong),
+                                border = BorderStroke(1.dp, colors.borderSubtle),
                                 modifier = Modifier
                                     .size(36.dp)
                                     .testTag("btn_prev_month")
@@ -955,7 +955,7 @@ fun WalletDetailsScreen(
                                 enabled = monthOffset < 0,
                                 shape = CircleShape,
                                 color = colors.containerInteractive,
-                                border = BorderStroke(1.dp, colors.borderStrong),
+                                border = BorderStroke(1.dp, colors.borderSubtle),
                                 modifier = Modifier
                                     .size(36.dp)
                                     .testTag("btn_next_month")
@@ -1016,7 +1016,7 @@ fun WalletDetailsScreen(
                     Surface(
                         shape = RoundedCornerShape(24.dp),
                         color = colors.containerInteractive,
-                        border = BorderStroke(1.dp, colors.borderStrong),
+                        border = BorderStroke(1.dp, colors.borderSubtle),
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(48.dp)
