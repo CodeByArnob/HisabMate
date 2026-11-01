@@ -132,7 +132,7 @@ fun resolveCategoryIcon(iconKey: String): ImageVector {
 @Composable
 fun HisabHeaderSurface(
     modifier: Modifier = Modifier,
-    shapeRadius: Dp = 28.dp,
+    shapeRadius: Dp = 24.dp,
     horizontalOuterPadding: Dp = 0.dp,
     content: @Composable ColumnScope.() -> Unit
 ) {
@@ -145,8 +145,8 @@ fun HisabHeaderSurface(
     Surface(
         color = colors.cardSurface,
         shape = shape,
-        shadowElevation = if (colors.isDark) 5.dp else 5.dp,
-        border = BorderStroke(1.dp, colors.borderStrong),
+        shadowElevation = if (colors.isDark) 3.dp else 2.dp,
+        border = BorderStroke(1.dp, colors.borderSubtle),
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = horizontalOuterPadding)
@@ -167,10 +167,10 @@ fun HisabHeaderSurface(
 @Composable
 fun HisabSectionCard(
     modifier: Modifier = Modifier,
-    shapeRadius: Dp = 28.dp,
+    shapeRadius: Dp = 22.dp,
     onClick: (() -> Unit)? = null,
     contentPadding: Dp = 18.dp,
-    shadowElevation: Dp = 3.dp,
+    shadowElevation: Dp = 1.dp,
     content: @Composable ColumnScope.() -> Unit
 ) {
     val colors = HisabTheme.colors
@@ -180,8 +180,8 @@ fun HisabSectionCard(
             onClick = onClick,
             color = colors.cardSurface,
             shape = shape,
-            shadowElevation = if (colors.isDark) 5.dp else maxOf(shadowElevation, 4.dp),
-            border = BorderStroke(1.1.dp, colors.borderStrong),
+            shadowElevation = if (colors.isDark) 2.dp else shadowElevation,
+            border = BorderStroke(1.dp, colors.borderSubtle),
             modifier = modifier.fillMaxWidth()
         ) {
             Column(
@@ -195,8 +195,8 @@ fun HisabSectionCard(
         Surface(
             color = colors.cardSurface,
             shape = shape,
-            shadowElevation = if (colors.isDark) 3.5.dp else shadowElevation,
-            border = BorderStroke(1.1.dp, colors.borderStrong),
+            shadowElevation = if (colors.isDark) 2.dp else shadowElevation,
+            border = BorderStroke(1.dp, colors.borderSubtle),
             modifier = modifier.fillMaxWidth()
         ) {
             Column(
@@ -226,17 +226,17 @@ fun HisabBalanceHeroCard(
     val backgroundBrush = if (colors.isDark) {
         Brush.verticalGradient(
             colors = listOf(
-                Color(0xFF25314A),
-                Color(0xFF192438),
-                Color(0xFF141923)
+                Color(0xFF1B2638),
+                Color(0xFF151E2D),
+                Color(0xFF121A27)
             )
         )
     } else {
         Brush.verticalGradient(
             colors = listOf(
                 Color(0xFFFFFFFF),
-                Color(0xFFF3F0FF),
-                Color(0xFFEEF8FC)
+                Color(0xFFFAFBFD),
+                Color(0xFFF4F7FB)
             )
         )
     }
@@ -244,8 +244,8 @@ fun HisabBalanceHeroCard(
     Surface(
         shape = shape,
         color = Color.Transparent,
-        shadowElevation = if (colors.isDark) 8.dp else 7.dp,
-        border = BorderStroke(1.2.dp, if (colors.isDark) colors.borderStrong else MaterialTheme.colorScheme.primary.copy(alpha = 0.24f)),
+        shadowElevation = if (colors.isDark) 5.dp else 3.dp,
+        border = BorderStroke(1.dp, colors.borderSubtle),
         modifier = modifier.fillMaxWidth()
     ) {
         Box(
@@ -279,7 +279,7 @@ fun BaseCurrencyBadgeButton(
         onClick = onClick,
         shape = RoundedCornerShape(20.dp),
         color = colors.containerInteractive,
-        border = BorderStroke(1.dp, colors.borderStrong),
+        border = BorderStroke(1.dp, colors.borderSubtle),
         modifier = modifier
             .height(38.dp)
             .minimumInteractiveComponentSize()
@@ -418,157 +418,122 @@ fun WalletFolderCard(
     val icon = resolveCategoryIcon(summary.category.iconKey)
     val colors = HisabTheme.colors
     val progressRatio = summary.budgetProgress.coerceIn(0f, 1f)
+    val labelColor = if (colors.isDark) colors.inkPrimary else palette.highContrastTextLight
+    val tintedSurface = if (colors.isDark) palette.softBgDark else palette.softBgLight
 
-    Box(
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(20.dp),
+        color = tintedSurface,
+        border = BorderStroke(1.dp, palette.main.copy(alpha = if (colors.isDark) 0.44f else 0.24f)),
+        shadowElevation = if (colors.isDark) 1.dp else 0.dp,
         modifier = modifier
-            .height(162.dp)
-            .clip(RoundedCornerShape(24.dp))
-            .clickable(onClick = onClick)
+            .height(148.dp)
             .testTag("wallet_folder_${summary.category.id}")
     ) {
-        // Outer Back Rim / Handle Arch
-        Box(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(58.dp)
-                .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                .background(palette.rim)
+                .fillMaxSize()
+                .padding(horizontal = 14.dp, vertical = 13.dp),
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Inner slot cutout strip matching card surface
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp)
-                    .padding(top = 8.dp)
-                    .height(18.dp)
-                    .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
-                    .background(colors.cardSurface)
-            )
-        }
-
-        // Front Pocket Body (Crisp vibrant solid color)
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight()
-                .padding(top = 17.dp)
-                .clip(RoundedCornerShape(22.dp))
-                .background(palette.main)
-                .padding(horizontal = 15.dp, vertical = 13.dp)
-        ) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.SpaceBetween
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // Top row: Circular icon + high-contrast percentage indicator pill
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                Box(
+                    modifier = Modifier
+                        .size(38.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(palette.main),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.24f))
-                            .border(1.dp, Color.White.copy(alpha = 0.34f), CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = summary.category.name,
-                            tint = Color.White,
-                            modifier = Modifier.size(19.dp)
-                        )
-                    }
-
-                    if (summary.budgetLimitInBase > 0) {
-                        val pct = (summary.budgetProgress * 100).toInt().coerceAtMost(999)
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(50))
-                                .background(Color.Black.copy(alpha = 0.28f))
-                                .padding(horizontal = 10.dp, vertical = 4.dp)
-                        ) {
-                            Text(
-                                text = "$pct%",
-                                style = MaterialTheme.typography.labelSmall,
-                                fontSize = 11.5.sp,
-                                color = Color.White,
-                                fontWeight = FontWeight.ExtraBold
-                            )
-                        }
-                    }
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = summary.category.name,
+                        tint = Color.White,
+                        modifier = Modifier.size(19.dp)
+                    )
                 }
 
-                // Bottom section: Category Name + Formatted Spending Amount + Progress Indicator
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = summary.category.name,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontSize = 14.5.sp,
-                        lineHeight = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White.copy(alpha = 0.96f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    if (isBalanceHidden) {
-                        val sym = CurrencyCatalog.getMetadata(baseCurrencyCode).symbol
-                        Text(
-                            text = "$sym ••••",
-                            fontFamily = androidx.compose.ui.text.font.FontFamily.Default,
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 19.sp,
-                            color = Color.White,
-                            maxLines = 1
-                        )
-                    } else {
-                        val (sym, whole, dec) = CurrencyFormatter.splitCurrencyParts(
-                            amount = summary.totalSpentInBase,
-                            currencyCode = baseCurrencyCode,
-                            useSouthAsianGrouping = useBangladeshiFormat
-                        )
-                        Row(
-                            verticalAlignment = Alignment.Top,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(
-                                text = sym,
-                                fontFamily = androidx.compose.ui.text.font.FontFamily.Default,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 13.sp,
-                                color = Color.White.copy(alpha = 0.95f),
-                                modifier = Modifier.padding(top = 2.dp, end = 3.dp)
-                            )
-                            Text(
-                                text = "$whole$dec",
-                                fontFamily = SpaceGroteskFontFamily,
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 18.5.sp,
-                                letterSpacing = (-0.4).sp,
-                                color = Color.White,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(7.dp))
-                    // Subtle integrated budget utilization bar
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(4.dp)
-                            .clip(RoundedCornerShape(50))
-                            .background(Color.White.copy(alpha = 0.26f))
+                if (summary.budgetLimitInBase > 0.0) {
+                    Surface(
+                        shape = CircleShape,
+                        color = palette.main.copy(alpha = if (colors.isDark) 0.34f else 0.12f)
                     ) {
+                        Text(
+                            text = "${(summary.budgetProgress * 100).toInt().coerceAtMost(999)}%",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = if (colors.isDark) Color.White else palette.highContrastTextLight,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+                        )
+                    }
+                }
+            }
+
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = summary.category.name,
+                    style = MaterialTheme.typography.labelLarge,
+                    fontSize = 13.5.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = labelColor,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(3.dp))
+                if (isBalanceHidden) {
+                    Text(
+                        text = "${CurrencyCatalog.getMetadata(baseCurrencyCode).symbol} ••••",
+                        fontFamily = SpaceGroteskFontFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        color = labelColor,
+                        maxLines = 1
+                    )
+                } else {
+                    val (symbol, whole, decimal) = CurrencyFormatter.splitCurrencyParts(
+                        amount = summary.totalSpentInBase,
+                        currencyCode = baseCurrencyCode,
+                        useSouthAsianGrouping = useBangladeshiFormat
+                    )
+                    Row(verticalAlignment = Alignment.Top, modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text = symbol,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp,
+                            color = labelColor,
+                            modifier = Modifier.padding(top = 3.dp, end = 3.dp)
+                        )
+                        Text(
+                            text = "$whole$decimal",
+                            fontFamily = SpaceGroteskFontFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp,
+                            letterSpacing = (-0.35).sp,
+                            color = colors.inkPrimary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(9.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(5.dp)
+                        .clip(CircleShape)
+                        .background(palette.main.copy(alpha = if (colors.isDark) 0.30f else 0.16f))
+                ) {
+                    if (summary.budgetLimitInBase > 0.0) {
                         Box(
                             modifier = Modifier
-                                .fillMaxWidth(progressRatio.coerceAtLeast(0.06f))
+                                .fillMaxWidth(progressRatio)
                                 .fillMaxHeight()
-                                .clip(RoundedCornerShape(50))
-                                .background(Color.White)
+                                .clip(CircleShape)
+                                .background(palette.main)
                         )
                     }
                 }
@@ -667,10 +632,10 @@ fun CircularQuickActionButton(
             onClick = onClick,
             shape = RoundedCornerShape(22.dp),
             color = colors.containerInteractive,
-            border = BorderStroke(1.dp, colors.borderStrong),
+            border = BorderStroke(1.dp, colors.borderSubtle),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(44.dp)
+                .height(46.dp)
                 .minimumInteractiveComponentSize()
                 .testTag(testTag)
         ) {
@@ -1273,10 +1238,10 @@ fun FloatingFintechDock(
         Surface(
             shape = RoundedCornerShape(36.dp),
             color = colors.dockBackground,
-            shadowElevation = 16.dp,
-            border = BorderStroke(1.2.dp, if (colors.isDark) Color(0xFF2E3A50) else Color(0xFF334155)),
+            shadowElevation = 12.dp,
+            border = BorderStroke(1.dp, if (colors.isDark) Color(0xFF344158) else Color(0xFF25344B).copy(alpha = 0.70f)),
             modifier = Modifier
-                .height(64.dp)
+                .height(60.dp)
                 .fillMaxWidth()
         ) {
             Row(
@@ -1395,7 +1360,7 @@ fun HeaderCircleIconButton(
             onClick = onClick,
             shape = CircleShape,
             color = colors.containerInteractive,
-            border = BorderStroke(1.dp, colors.borderStrong),
+            border = BorderStroke(1.dp, colors.borderSubtle),
             modifier = Modifier
                 .size(size)
                 .minimumInteractiveComponentSize()
