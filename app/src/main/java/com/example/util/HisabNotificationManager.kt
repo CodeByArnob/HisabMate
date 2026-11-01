@@ -132,8 +132,7 @@ object HisabNotificationManager {
                 NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
                 description = "User-scheduled financial check-ins and custom payment reminders"
-            }
-            ,
+            },
             NotificationChannel(
                 CHANNEL_TRANSACTION_UPDATES,
                 "Transaction Activity",
