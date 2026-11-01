@@ -56,13 +56,13 @@ jobs:
       - name: Package Debug APK for Device Preview
         run: |
           mkdir -p ci-debug-output
-          cp app/build/outputs/apk/debug/*.apk ci-debug-output/HisabMate-v1.0.5-debug.apk
-          (cd ci-debug-output && sha256sum HisabMate-v1.0.5-debug.apk > SHA256SUMS.txt)
+          cp app/build/outputs/apk/debug/*.apk ci-debug-output/HisabMate-v1.0.6-debug.apk
+          (cd ci-debug-output && sha256sum HisabMate-v1.0.6-debug.apk > SHA256SUMS.txt)
 
       - name: Upload Debug APK Preview
         uses: actions/upload-artifact@v4
         with:
-          name: hisabmate-v1.0.5-debug-apk
+          name: hisabmate-v1.0.6-debug-apk
           path: ci-debug-output/*
           if-no-files-found: error
 
@@ -103,14 +103,14 @@ jobs:
           rm -f "$TEMP_KS"
 
           mkdir -p ci-release-outputs
-          cp app/build/outputs/apk/release/*.apk ci-release-outputs/HisabMate-v1.0.5-release.apk
-          cp app/build/outputs/bundle/release/*.aab ci-release-outputs/HisabMate-v1.0.5-release.aab
-          (cd ci-release-outputs && sha256sum HisabMate-v1.0.5-release.apk HisabMate-v1.0.5-release.aab > SHA256SUMS.txt)
+          cp app/build/outputs/apk/release/*.apk ci-release-outputs/HisabMate-v1.0.6-release.apk
+          cp app/build/outputs/bundle/release/*.aab ci-release-outputs/HisabMate-v1.0.6-release.aab
+          (cd ci-release-outputs && sha256sum HisabMate-v1.0.6-release.apk HisabMate-v1.0.6-release.aab > SHA256SUMS.txt)
 
           APKSIGNER=$(find "${ANDROID_HOME}/build-tools" -name "apksigner" | sort -V | tail -n 1)
           AAPT2=$(find "${ANDROID_HOME}/build-tools" -name "aapt2" | sort -V | tail -n 1)
-          "$APKSIGNER" verify --verbose ci-release-outputs/HisabMate-v1.0.5-release.apk
-          "$AAPT2" dump badging ci-release-outputs/HisabMate-v1.0.5-release.apk | head -n 15
+          "$APKSIGNER" verify --verbose ci-release-outputs/HisabMate-v1.0.6-release.apk
+          "$AAPT2" dump badging ci-release-outputs/HisabMate-v1.0.6-release.apk | head -n 15
 
       - name: Upload Unit Test & Lint Reports
         if: always()
