@@ -165,7 +165,7 @@ data class AppNotificationEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val title: String,
     val message: String,
-    val categoryTag: String, // "BUDGET", "BILL", "SECURITY", "INSIGHT", "DEBT", "GOAL", "REMINDER"
+    val categoryTag: String, // "BUDGET", "BILL", "SECURITY", "INSIGHT", "DEBT", "GOAL", "REMINDER", "TRANSACTION"
     val timestamp: Long,
     val isRead: Boolean = false,
     val accentColorHex: Long,
