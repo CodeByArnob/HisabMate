@@ -365,3 +365,5 @@ HisabMate is distributed under the [MIT License](LICENSE).
 [Download](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.6/HisabMate-v1.0.6-release.apk) · [Website](https://codebyarnob.github.io/HisabMate/) · [Report an issue](https://github.com/CodeByArnob/HisabMate/issues)
 
 </div>
+
+<!-- v1.0.6 release automation trigger -->
