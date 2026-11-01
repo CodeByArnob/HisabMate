@@ -213,6 +213,54 @@ object PdfExporter {
         canvas.drawText(text, rightX - width, y, paint)
     }
 
+    private fun drawFittedText(
+        canvas: Canvas,
+        text: String,
+        leftX: Float,
+        y: Float,
+        maxWidth: Float,
+        paint: Paint,
+        minimumTextSize: Float = 6.2f
+    ) {
+        val originalSize = paint.textSize
+        while (paint.measureText(text) > maxWidth && paint.textSize > minimumTextSize) {
+            paint.textSize = (paint.textSize - 0.35f).coerceAtLeast(minimumTextSize)
+        }
+        var visibleText = text
+        if (paint.measureText(visibleText) > maxWidth) {
+            while (visibleText.isNotEmpty() && paint.measureText("$visibleText…") > maxWidth) {
+                visibleText = visibleText.dropLast(1)
+            }
+            visibleText = "$visibleText…"
+        }
+        canvas.drawText(visibleText, leftX, y, paint)
+        paint.textSize = originalSize
+    }
+
+    private fun drawRightAlignedFittedText(
+        canvas: Canvas,
+        text: String,
+        rightX: Float,
+        y: Float,
+        maxWidth: Float,
+        paint: Paint,
+        minimumTextSize: Float = 6.2f
+    ) {
+        val originalSize = paint.textSize
+        while (paint.measureText(text) > maxWidth && paint.textSize > minimumTextSize) {
+            paint.textSize = (paint.textSize - 0.35f).coerceAtLeast(minimumTextSize)
+        }
+        var visibleText = text
+        if (paint.measureText(visibleText) > maxWidth) {
+            while (visibleText.isNotEmpty() && paint.measureText("$visibleText…") > maxWidth) {
+                visibleText = visibleText.dropLast(1)
+            }
+            visibleText = "$visibleText…"
+        }
+        canvas.drawText(visibleText, rightX - paint.measureText(visibleText), y, paint)
+        paint.textSize = originalSize
+    }
+
     /**
      * Draws a complete, bank-grade Single-Page ISO A4 Executive Financial Statement onto [canvas].
      */
@@ -311,7 +359,7 @@ object PdfExporter {
             headerSubPaint
         )
         canvas.drawText(
-            "Package: com.aistudio.hisabmate.fntkbd  •  Storage: Encrypted On-Device Room SQLite v6",
+            "Package: com.aistudio.hisabmate.fntkbd  •  Local Storage: Room SQLite v7",
             MARGIN + 58f,
             79f,
             headerSubPaint
@@ -379,14 +427,14 @@ object PdfExporter {
             KpiSpec(
                 title = "MONTHLY INFLOW",
                 value = formatPdfCurrency(uiState.monthlyIncome, baseCode, useBangladeshiFormat, prefixSign = "+"),
-                subtitle = "Verified Period Credits",
+                subtitle = "Current report period",
                 accentColor = Color.rgb(5, 150, 105),
                 valueColor = Color.rgb(4, 120, 87)
             ),
             KpiSpec(
                 title = "MONTHLY OUTFLOW",
                 value = formatPdfCurrency(uiState.monthlyExpense, baseCode, useBangladeshiFormat, prefixSign = "-"),
-                subtitle = "Verified Period Debits",
+                subtitle = "Current report period",
                 accentColor = Color.rgb(220, 38, 38),
                 valueColor = Color.rgb(185, 28, 28)
             ),
@@ -419,8 +467,8 @@ object PdfExporter {
                 typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
                 textSize = 10.2f
             }
-            canvas.drawText(spec.value.take(20), left + 9f, kpiTop + 34f, valPaint)
-            canvas.drawText(spec.subtitle, left + 9f, kpiTop + 48f, kpiSubPaint)
+            drawFittedText(canvas, spec.value, left + 9f, kpiTop + 34f, kpiWidth - 18f, valPaint)
+            drawFittedText(canvas, spec.subtitle, left + 9f, kpiTop + 48f, kpiWidth - 18f, kpiSubPaint)
         }
 
         // =========================================================================
@@ -512,11 +560,11 @@ object PdfExporter {
 
             if (i < displayedAccounts.size) {
                 val acc = displayedAccounts[i]
-                canvas.drawText(acc.name.take(21), leftPanelLeft + 7f, accY + 13f, cellBoldPaint)
-                canvas.drawText(acc.type.take(9), leftPanelLeft + 128f, accY + 13f, cellRegularPaint)
+                drawFittedText(canvas, acc.name, leftPanelLeft + 7f, accY + 13f, 112f, cellBoldPaint)
+                drawFittedText(canvas, acc.type, leftPanelLeft + 128f, accY + 13f, 100f, cellRegularPaint)
 
                 val nativeFormatted = formatPdfCurrency(acc.balance, acc.currencyCode, useBangladeshiFormat)
-                drawRightAlignedText(canvas, nativeFormatted, leftPanelLeft + 236f, accY + 13f, cellRegularPaint)
+                drawRightAlignedFittedText(canvas, nativeFormatted, leftPanelLeft + 236f, accY + 13f, 104f, cellRegularPaint)
 
                 val converted = CurrencyFormatter.convert(
                     amount = acc.balance,
@@ -525,7 +573,7 @@ object PdfExporter {
                     ratesToBdt = uiState.ratesToBdtMap
                 )
                 val convFormatted = formatPdfCurrency(converted, baseCode, useBangladeshiFormat)
-                drawRightAlignedText(canvas, convFormatted, leftPanelRight - 7f, accY + 13f, cellBoldPaint)
+                drawRightAlignedFittedText(canvas, convFormatted, leftPanelRight - 7f, accY + 13f, 78f, cellBoldPaint)
             } else if (i == maxAccountRows - 1 && accounts.size > maxAccountRows) {
                 val remainingAccs = accounts.drop(maxAccountRows - 1)
                 val remainingSum = remainingAccs.sumOf {
@@ -604,8 +652,8 @@ object PdfExporter {
                 val catName = summary.category.name.take(16)
                 val catAmtStr = "${formatPdfCurrency(summary.totalSpentInBase, baseCode, useBangladeshiFormat)} ($sharePct%)"
 
-                canvas.drawText(catName, rightPanelLeft + 9f, catY, cellBoldPaint)
-                drawRightAlignedText(canvas, catAmtStr, rightPanelRight - 9f, catY, sectionMetaPaint)
+                drawFittedText(canvas, catName, rightPanelLeft + 9f, catY, 78f, cellBoldPaint)
+                drawRightAlignedFittedText(canvas, catAmtStr, rightPanelRight - 9f, catY, 108f, sectionMetaPaint)
 
                 val trackLeft = rightPanelLeft + 9f
                 val trackRight = rightPanelRight - 9f
@@ -636,7 +684,7 @@ object PdfExporter {
         canvas.drawText("03. CHRONOLOGICAL TRANSACTION AUDIT LEDGER", MARGIN, txSectionTitleY, sectionTitlePaint)
         drawRightAlignedText(
             canvas,
-            "Showing latest ${displayedTxs.size} of ${txList.size} verified entries  •  Single-Page A4 Summary",
+            "Latest ${displayedTxs.size} of ${txList.size} recorded entries  •  A4 summary",
             RIGHT_EDGE,
             txSectionTitleY,
             sectionMetaPaint
@@ -696,9 +744,9 @@ object PdfExporter {
                 } else {
                     tx.title
                 }
-                canvas.drawText(rawTitle.take(30), colDescX, txY + 13.5f, cellBoldPaint)
-                canvas.drawText(tx.categoryName.take(15), colCatX, txY + 13.5f, cellRegularPaint)
-                canvas.drawText(tx.accountLabel.take(16), colAccX, txY + 13.5f, cellRegularPaint)
+                drawFittedText(canvas, rawTitle, colDescX, txY + 13.5f, 164f, cellBoldPaint)
+                drawFittedText(canvas, tx.categoryName, colCatX, txY + 13.5f, 80f, cellRegularPaint)
+                drawFittedText(canvas, tx.accountLabel, colAccX, txY + 13.5f, 84f, cellRegularPaint)
 
                 // Type Pill Badge
                 val badgeBgColor: Int
@@ -746,7 +794,7 @@ object PdfExporter {
                     else -> transferAmtPaint
                 }
                 val formattedTxAmt = formatPdfCurrency(tx.amount, tx.currencyCode, useBangladeshiFormat, prefixSign = sign)
-                drawRightAlignedText(canvas, formattedTxAmt, colAmtRightX, txY + 13.5f, amtPaint)
+                drawRightAlignedFittedText(canvas, formattedTxAmt, colAmtRightX, txY + 13.5f, 82f, amtPaint)
             } else if (rowIdx == 0 && displayedTxs.isEmpty()) {
                 canvas.drawText("No transactions recorded in the current ledger.", colDescX, txY + 13.5f, sectionMetaPaint)
             }
@@ -778,13 +826,13 @@ object PdfExporter {
         canvas.drawLine(MARGIN, footerTop, RIGHT_EDGE, footerTop, kpiBorderPaint)
 
         canvas.drawText(
-            "HISABMATE OFFICIAL OFFLINE AUDIT STATEMENT  •  ZERO CLOUD TELEMETRY  •  CRYPTOGRAPHICALLY RECONCILED",
+            "HISABMATE FINANCIAL STATEMENT  •  GENERATED LOCALLY  •  NO CLOUD SYNC",
             MARGIN,
             footerTop + 14f,
             cellBoldPaint
         )
         canvas.drawText(
-            "Generated on-device via HisabMate v1.0.3 (Android API 24–36). All multi-currency balances are converted using stored ISO 4217 FX snapshots.",
+            "Generated on-device via HisabMate v1.0.5. FX conversions use saved ISO 4217 rates; original transaction currencies are retained.",
             MARGIN,
             footerTop + 26f,
             kpiSubPaint
@@ -795,7 +843,7 @@ object PdfExporter {
         canvas.drawRoundRect(stampRect, 4f, 4f, kpiBgPaint)
         canvas.drawRoundRect(stampRect, 4f, 4f, kpiBorderPaint)
         drawRightAlignedText(canvas, "PAGE 1 OF 1  •  ISO A4", RIGHT_EDGE - 8f, footerTop + 16f, cellBoldPaint)
-        drawRightAlignedText(canvas, "VERIFIED SINGLE-PAGE LEDGER", RIGHT_EDGE - 8f, footerTop + 26f, incomeAmtPaint)
+        drawRightAlignedText(canvas, "LOCAL EXPORT • ROOM DB v7", RIGHT_EDGE - 8f, footerTop + 26f, incomeAmtPaint)
     }
 
     /**
@@ -866,7 +914,7 @@ object PdfExporter {
             strokeRectTop(lx, 104f, kpiW, 54f, 0.72f, 0.78f, 0.85f, 0.8f)
             drawTextTop(lx + 8f, 120f, kpiTitles[i], "/F2", 7.5f, 0.28f, 0.33f, 0.41f)
             drawTextTop(lx + 8f, 138f, kpiValues[i].take(22), "/F2", 9.5f, 0.06f, 0.09f, 0.16f)
-            drawTextTop(lx + 8f, 151f, "Verified in $baseCode", "/F1", 7f, 0.39f, 0.45f, 0.55f)
+            drawTextTop(lx + 8f, 151f, "Report currency: $baseCode", "/F1", 7f, 0.39f, 0.45f, 0.55f)
         }
 
         // 3. Accounts Section
@@ -884,17 +932,42 @@ object PdfExporter {
             }
             strokeRectTop(MARGIN, yCursor, CONTENT_WIDTH, 18f, 0.88f, 0.91f, 0.94f, 0.5f)
             val conv = CurrencyFormatter.convert(acc.balance, acc.currencyCode, baseCode, uiState.ratesToBdtMap)
-            drawTextTop(MARGIN + 8f, yCursor + 12.5f, acc.name.take(28), "/F2", 8f)
+            drawTextTop(MARGIN + 8f, yCursor + 12.5f, acc.name.take(24), "/F2", 8f)
             drawTextTop(MARGIN + 200f, yCursor + 12.5f, acc.type.take(14), "/F1", 8f)
             drawTextTop(MARGIN + 310f, yCursor + 12.5f, formatPdfCurrency(acc.balance, acc.currencyCode, useBangladeshiFormat), "/F1", 8f)
             drawTextTop(MARGIN + 435f, yCursor + 12.5f, formatPdfCurrency(conv, baseCode, useBangladeshiFormat), "/F2", 8f)
             yCursor += 18f
         }
 
-        // 4. Transactions Table (Single-Page A4)
-        yCursor += 16f
+        // 4. Compact Top Category Allocation Strip
+        yCursor += 12f
+        drawTextTop(MARGIN, yCursor, "TOP SPENDING CATEGORIES", "/F2", 8.8f, 0.06f, 0.09f, 0.16f)
+        yCursor += 8f
+        val topPdfCategories = uiState.categorySummaries
+            .filter { it.totalSpentInBase > 0.0 }
+            .sortedByDescending { it.totalSpentInBase }
+            .take(4)
+        if (topPdfCategories.isEmpty()) {
+            fillRectTop(MARGIN, yCursor, CONTENT_WIDTH, 22f, 0.957f, 0.969f, 0.984f)
+            drawTextTop(MARGIN + 8f, yCursor + 14f, "No categorized spending recorded in this report period.", "/F1", 8f, 0.28f, 0.33f, 0.41f)
+            yCursor += 26f
+        } else {
+            val categoryGap = 8f
+            val categoryWidth = (CONTENT_WIDTH - categoryGap * 3f) / 4f
+            topPdfCategories.forEachIndexed { index, summary ->
+                val x = MARGIN + index * (categoryWidth + categoryGap)
+                fillRectTop(x, yCursor, categoryWidth, 28f, 0.945f, 0.953f, 0.976f)
+                strokeRectTop(x, yCursor, categoryWidth, 28f, 0.72f, 0.78f, 0.85f, 0.6f)
+                drawTextTop(x + 7f, yCursor + 11f, summary.category.name.take(18), "/F2", 7.2f)
+                drawTextTop(x + 7f, yCursor + 22f, formatPdfCurrency(summary.totalSpentInBase, baseCode, useBangladeshiFormat), "/F2", 7.2f, 0.30f, 0.22f, 0.75f)
+            }
+            yCursor += 33f
+        }
+
+        // 5. Transactions Table (Single-Page A4)
+        yCursor += 8f
         val txList = uiState.transactions
-        val shownTxs = txList.take(19)
+        val shownTxs = txList.take(16)
         drawTextTop(MARGIN, yCursor, "02. CHRONOLOGICAL TRANSACTION AUDIT LEDGER (Showing ${shownTxs.size} of ${txList.size} entries)", "/F2", 9f, 0.06f, 0.09f, 0.16f)
         yCursor += 6f
         fillRectTop(MARGIN, yCursor, CONTENT_WIDTH, 19f, 0.059f, 0.090f, 0.165f)
@@ -927,7 +1000,7 @@ object PdfExporter {
         // Footer
         strokeRectTop(MARGIN, 784f, CONTENT_WIDTH, 32f, 0.72f, 0.78f, 0.85f, 0.8f)
         drawTextTop(MARGIN + 8f, 798f, "HISABMATE OFFICIAL A4 SINGLE-PAGE FINANCIAL STATEMENT  |  ZERO CLOUD TELEMETRY", "/F2", 7.8f)
-        drawTextTop(MARGIN + 8f, 810f, "Reconciled locally against Room SQLite v6  |  PAGE 1 OF 1 (ISO A4 210x297mm)", "/F1", 7.2f, 0.39f, 0.45f, 0.55f)
+        drawTextTop(MARGIN + 8f, 810f, "Reconciled locally against Room SQLite v7  |  PAGE 1 OF 1 (ISO A4 210x297mm)", "/F1", 7.2f, 0.39f, 0.45f, 0.55f)
 
         val contentBytes = stream.toString().toByteArray(Charsets.ISO_8859_1)
 
