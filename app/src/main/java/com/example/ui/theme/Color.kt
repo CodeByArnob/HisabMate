@@ -37,11 +37,11 @@ val CyanTeal = Color(0xFF06B6D4)
 val IndigoDeep = Color(0xFF4338CA)
 
 // Light Mode Eye-Comfort Cool Slate Hierarchy (Eliminates harsh white glare & washed-out look)
-val LightBackground = Color(0xFFCFD8E6)          // Rich muted slate-blue cool-gray tone
-val LightSurface = Color(0xFFDFE6F0)             // Richer card surface (#DFE6F0)
-val LightSurfaceVariant = Color(0xFFD3DCE8)      // Distinct interactive container, inputs & recessed strips
-val LightSurfaceElevated = Color(0xFFEAF0F8)     // Distinct elevated surface / dialogs / hero top layer
-val LightSurfaceHighlight = Color(0xFFC6D2E2)    // Active/pressed container
+val LightBackground = Color(0xFFEEF2F7)          // Rich muted slate-blue cool-gray tone
+val LightSurface = Color(0xFFFAFBFD)             // Richer card surface (#DFE6F0)
+val LightSurfaceVariant = Color(0xFFE8EDF4)      // Distinct interactive container, inputs & recessed strips
+val LightSurfaceElevated = Color(0xFFFFFFFF)     // Distinct elevated surface / dialogs / hero top layer
+val LightSurfaceHighlight = Color(0xFFDCE4EE)    // Active/pressed container
 val LightWarmCream = Color(0xFFF7ECDA)           // Warm amber insight container
 val LightWarmCreamBorder = Color(0xFFD9A006)
 
@@ -49,8 +49,8 @@ val LightWarmCreamBorder = Color(0xFFD9A006)
 val LightInkPrimary = Color(0xFF070E1A)          // Ultra-crisp deepest slate-black primary text
 val LightInkSecondary = Color(0xFF182435)        // Strong dark slate secondary text (never washed out)
 val LightInkTertiary = Color(0xFF2E3D52)         // Clear readable tertiary metadata text
-val LightBorderStrong = Color(0xFFA6B7CC)        // Defined 1.1.dp structural border
-val LightBorderSubtle = Color(0xFFBDCCDE)        // Clean row divider
+val LightBorderStrong = Color(0xFFBECAD8)        // Defined 1.1.dp structural border
+val LightBorderSubtle = Color(0xFFDCE3EC)        // Clean row divider
 
 // Dark Mode Obsidian Hierarchy
 val DarkBackground = Color(0xFF0B0E14)

@@ -211,7 +211,7 @@ fun HisabSectionCard(
 
 /**
  * Prominent Elevated Financial Panel for the Main Balance Card.
- * Uses a subtle surface gradient (Light: #E9F0F8 to #DFE6F0, Dark: #1B2332 to #141923),
+ * Uses a subtle surface gradient (Light: #FFFFFF to #F4F7FB, Dark: #1B2332 to #141923),
  * refined 1.2.dp border, and calibrated elevation for distinctive dimensional depth.
  */
 @Composable
@@ -233,8 +233,8 @@ fun HisabBalanceHeroCard(
     } else {
         Brush.verticalGradient(
             colors = listOf(
-                Color(0xFFE9F0F8),
-                Color(0xFFDFE6F0)
+                Color(0xFFFFFFFF),
+                Color(0xFFF4F7FB)
             )
         )
     }
