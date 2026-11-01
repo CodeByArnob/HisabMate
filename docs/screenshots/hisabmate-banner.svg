@@ -50,7 +50,7 @@
       <animate attributeName="r" values="4;6.5;4" dur="2.2s" repeatCount="indefinite"/>
       <animate attributeName="opacity" values="1;0.45;1" dur="2.2s" repeatCount="indefinite"/>
     </circle>
-    <text x="36" y="22" fill="#E2E8F0" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="12.5" font-weight="700" letter-spacing="0.8">PRODUCTION ANDROID RELEASE • v1.0.3</text>
+    <text x="36" y="22" fill="#E2E8F0" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="12.5" font-weight="700" letter-spacing="0.8">PRODUCTION ANDROID RELEASE • v1.0.5</text>
 
     <!-- App Logo Badge + Title -->
     <g transform="translate(0, 56)">
@@ -80,7 +80,7 @@
       <text x="18" y="72" fill="#64748B" font-family="system-ui, sans-serif" font-size="11">BDT • USD • EUR • GBP • SAR</text>
 
       <rect x="192" y="0" width="176" height="84" rx="16" fill="url(#cardSurface)" stroke="#334155" stroke-width="1.2"/>
-      <text x="210" y="34" fill="#34D399" font-family="system-ui, sans-serif" font-size="24" font-weight="800">Room v6</text>
+      <text x="210" y="34" fill="#34D399" font-family="system-ui, sans-serif" font-size="24" font-weight="800">Room v7</text>
       <text x="210" y="56" fill="#94A3B8" font-family="system-ui, sans-serif" font-size="12.5" font-weight="600">Indexed Schemas</text>
       <text x="210" y="72" fill="#64748B" font-family="system-ui, sans-serif" font-size="11">Reactive Kotlin StateFlow</text>
 
@@ -102,7 +102,7 @@
       <text x="393" y="20" text-anchor="middle" fill="#BAE6FD" font-family="system-ui, sans-serif" font-size="12" font-weight="700">API 24 – 36 Ready</text>
 
       <rect x="476" y="0" width="128" height="32" rx="16" fill="#1E293B" stroke="#475569" stroke-width="1"/>
-      <text x="540" y="20" text-anchor="middle" fill="#E2E8F0" font-family="system-ui, sans-serif" font-size="12" font-weight="700">APK v1.0.3</text>
+      <text x="540" y="20" text-anchor="middle" fill="#E2E8F0" font-family="system-ui, sans-serif" font-size="12" font-weight="700">APK v1.0.5</text>
     </g>
   </g>
 
