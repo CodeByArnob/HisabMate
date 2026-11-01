@@ -174,50 +174,50 @@ data class CategoryColorPair(
 fun getCategoryPalette(colorHex: Long): CategoryColorPair {
     return when (colorHex) {
         0xFF7C5CFFL, 0xFF6D4AFFL, 0xFF845EF7L -> CategoryColorPair(
-            main = Color(0xFF7C5CFF),
-            rim = Color(0xFF5639CC),
+            main = Color(0xFF6844D8),
+            rim = Color(0xFF4B2BAF),
             highContrastTextLight = Color(0xFF4C1D95),
             softBgLight = Color(0xFFE9E3FF),
             softBgDark = Color(0xFF2E1F5E)
         )
         0xFF1D9BF0L, 0xFF0284C7L, 0xFF228BE6L -> CategoryColorPair(
-            main = Color(0xFF1D9BF0),
-            rim = Color(0xFF0E6EB8),
+            main = Color(0xFF0868B2),
+            rim = Color(0xFF07518A),
             highContrastTextLight = Color(0xFF075985),
             softBgLight = Color(0xFFDDF2FF),
             softBgDark = Color(0xFF0C3B5E)
         )
         0xFF0EA568L, 0xFF059669L, 0xFF12B886L -> CategoryColorPair(
-            main = Color(0xFF0EA568),
-            rim = Color(0xFF087447),
+            main = Color(0xFF087747),
+            rim = Color(0xFF065C36),
             highContrastTextLight = Color(0xFF065F46),
             softBgLight = Color(0xFFD1FAE5),
             softBgDark = Color(0xFF064E3B)
         )
         0xFFFF6E1AL, 0xFFEA580CL, 0xFFFD7E14L -> CategoryColorPair(
-            main = Color(0xFFFF6E1A),
-            rim = Color(0xFFCC4E06),
+            main = Color(0xFFC64B08),
+            rim = Color(0xFF983805),
             highContrastTextLight = Color(0xFF9A3412),
             softBgLight = Color(0xFFFFE8D6),
             softBgDark = Color(0xFF4A1D08)
         )
         0xFFEC4899L, 0xFFDB2777L -> CategoryColorPair(
-            main = Color(0xFFEC4899),
-            rim = Color(0xFFBE185D),
+            main = Color(0xFFB91C63),
+            rim = Color(0xFF8E174C),
             highContrastTextLight = Color(0xFF9D174D),
             softBgLight = Color(0xFFFCE7F3),
             softBgDark = Color(0xFF501131)
         )
         0xFFF59E0BL, 0xFFD97706L -> CategoryColorPair(
-            main = Color(0xFFF59E0B),
-            rim = Color(0xFFB45309),
+            main = Color(0xFF925B00),
+            rim = Color(0xFF714600),
             highContrastTextLight = Color(0xFF92400E),
             softBgLight = Color(0xFFFEF3C7),
             softBgDark = Color(0xFF451A03)
         )
         0xFF06B6D4L, 0xFF0891B2L -> CategoryColorPair(
-            main = Color(0xFF06B6D4),
-            rim = Color(0xFF0E7490),
+            main = Color(0xFF0E7490),
+            rim = Color(0xFF0B586D),
             highContrastTextLight = Color(0xFF155E75),
             softBgLight = Color(0xFFCFFAFE),
             softBgDark = Color(0xFF083344)
