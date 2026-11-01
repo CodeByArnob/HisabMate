@@ -1543,9 +1543,9 @@ fun ProfileAndSettingsScreen(
                             )
                             Text(
                                 text = if (hasPostNotificationsPermission) {
-                                    "Offline bill, budget, debt & goal alerts deliver in each item's native currency."
+                                    "Transaction confirmations plus bill, budget, debt and goal alerts are stored locally and can appear as Android notifications."
                                 } else {
-                                    "Enable permission to receive offline bill & budget alerts, or manage in Android Settings."
+                                    "Enable permission for transaction confirmations and scheduled financial alerts. You can change this later in Android Settings."
                                 },
                                 style = MaterialTheme.typography.bodySmall,
                                 color = colors.inkSecondary
