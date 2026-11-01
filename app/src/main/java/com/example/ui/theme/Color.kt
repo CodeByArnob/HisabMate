@@ -36,9 +36,9 @@ val AmberGoldLight = Color(0xFFFEF3C7)
 val CyanTeal = Color(0xFF06B6D4)
 val IndigoDeep = Color(0xFF4338CA)
 
-// Light Mode Eye-Comfort Cool Slate Hierarchy (Eliminates harsh white glare & washed-out look)
-val LightBackground = Color(0xFFEEF2F7)          // Rich muted slate-blue cool-gray tone
-val LightSurface = Color(0xFFFAFBFD)             // Richer card surface (#DFE6F0)
+// Light Mode Neutral Canvas & Soft-White Surface Hierarchy
+val LightBackground = Color(0xFFEEF2F7)          // Neutral, low-glare cool-gray canvas
+val LightSurface = Color(0xFFFAFBFD)             // Soft-white card surface
 val LightSurfaceVariant = Color(0xFFE8EDF4)      // Distinct interactive container, inputs & recessed strips
 val LightSurfaceElevated = Color(0xFFFFFFFF)     // Distinct elevated surface / dialogs / hero top layer
 val LightSurfaceHighlight = Color(0xFFDCE4EE)    // Active/pressed container

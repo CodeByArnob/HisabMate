@@ -161,7 +161,7 @@ fun HisabHeaderSurface(
 }
 
 /**
- * Centralized Section Card with explicit border (`#A6B7CC` in Light, `#2A3449` in Dark)
+ * Centralized Section Card with explicit border (`#BECAD8` in Light, `#2A3449` in Dark)
  * so cards never blend into the background canvas.
  */
 @Composable
