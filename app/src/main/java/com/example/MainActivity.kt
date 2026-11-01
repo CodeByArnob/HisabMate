@@ -517,7 +517,24 @@ fun HisabMateAppRoot() {
                     categories = uiState.categories,
                     accounts = uiState.accounts,
                     onDismiss = viewModel::closeAddTransactionModal,
-                    onSaveTransaction = viewModel::addTransaction
+                    onSaveTransaction = { title, merchant, amount, currencyCode, type, category, account, toAccount, note, isRecurring, receiptUri, splitDetails, isFavorite ->
+                        viewModel.addTransaction(
+                            title = title,
+                            merchant = merchant,
+                            amount = amount,
+                            currencyCode = currencyCode,
+                            type = type,
+                            category = category,
+                            account = account,
+                            toAccount = toAccount,
+                            note = note,
+                            isRecurring = isRecurring,
+                            receiptUri = receiptUri,
+                            splitDetails = splitDetails,
+                            isFavorite = isFavorite,
+                            context = context
+                        )
+                    }
                 )
             }
 
