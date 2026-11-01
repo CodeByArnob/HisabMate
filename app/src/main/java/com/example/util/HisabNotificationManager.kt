@@ -260,7 +260,7 @@ object HisabNotificationManager {
             else -> "Expense recorded"
         }
         val details = when (transaction.type.uppercase()) {
-            "TRANSFER" -> "Moved $formattedAmount • ${transaction.accountLabel}"
+            "TRANSFER" -> "${transaction.title} • Moved $formattedAmount • ${transaction.accountLabel}"
             "INCOME" -> "${transaction.title} • $formattedAmount • ${transaction.categoryName} • ${transaction.accountLabel}"
             else -> "${transaction.title} • $formattedAmount • ${transaction.categoryName} • ${transaction.accountLabel}"
         }
