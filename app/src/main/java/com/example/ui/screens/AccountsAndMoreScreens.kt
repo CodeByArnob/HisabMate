@@ -1393,7 +1393,7 @@ fun ProfileAndSettingsScreen(
                         tint = MaterialTheme.colorScheme.primary
                     )
                     Text(
-                        text = "PIN & Biometric App Lock",
+                        text = "PIN App Lock",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = colors.inkPrimary
@@ -1402,9 +1402,9 @@ fun ProfileAndSettingsScreen(
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
                     text = if (uiState.isAppLockEnabled) {
-                        "App Lock Active (PIN + ${if (uiState.biometricEnabled) "Biometrics Enabled" else "PIN Only"})"
+                        "App Lock Active • PIN required"
                     } else {
-                        "Protect your financial records with a 4-digit PIN and Biometric unlock."
+                        "Protect your financial records with a local 4-digit PIN."
                     },
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.SemiBold,
