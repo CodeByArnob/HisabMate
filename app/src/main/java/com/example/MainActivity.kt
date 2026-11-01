@@ -74,7 +74,7 @@ fun HisabMateAppRoot() {
     val context = LocalContext.current
     val repository = remember {
         val db = HisabDatabase.getInstance(context)
-        HisabRepository(db.hisabDao())
+        HisabRepository(db)
     }
     val viewModel: HisabViewModel = viewModel(
         factory = HisabViewModel.provideFactory(repository)
@@ -486,21 +486,20 @@ fun HisabMateAppRoot() {
                 }
 
                 // PIN & Biometric Security Lock Overlay when enabled and locked
-                if (uiState.isAppLockEnabled && uiState.appPinCode.isNotBlank() && !isSessionUnlocked) {
+                if (uiState.isAppLockEnabled && uiState.hasAppPin && !isSessionUnlocked) {
                     PinLockOverlayScreen(
-                        biometricEnabled = uiState.biometricEnabled,
-                        onSubmitPin = { entered ->
-                            if (entered == uiState.appPinCode) {
-                                viewModel.unlockSession()
-                                viewModel.showSnackbar("Unlocked HisabMate")
-                                true
-                            } else {
-                                false
+                        biometricEnabled = false,
+                        onSubmitPin = { entered, complete ->
+                            viewModel.verifyAppPin(entered) { verified ->
+                                if (verified) {
+                                    viewModel.unlockSession()
+                                    viewModel.showSnackbar("Unlocked HisabMate")
+                                }
+                                complete(verified)
                             }
                         },
                         onBiometricUnlock = {
-                            viewModel.unlockSession()
-                            viewModel.showSnackbar("Biometric verification succeeded")
+                            viewModel.showSnackbar("Biometric authentication is not configured. Use your PIN.")
                         }
                     )
                 }

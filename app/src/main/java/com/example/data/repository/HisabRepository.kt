@@ -6,6 +6,7 @@ import com.example.data.local.CategoryEntity
 import com.example.data.local.DebtRecordEntity
 import com.example.data.local.ExchangeRateEntity
 import com.example.data.local.HisabDao
+import com.example.data.local.HisabDatabase
 import com.example.data.local.RecurringPaymentEntity
 import com.example.data.local.SavingsGoalEntity
 import com.example.data.local.ScheduledReminderEntity
@@ -16,13 +17,17 @@ import com.example.util.CurrencyCatalog
 import com.example.util.CurrencyFormatter
 import com.example.util.HisabHaptics
 import com.example.util.HisabNotificationManager
+import com.example.util.PinHasher
+import androidx.room.withTransaction
+import java.util.Calendar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 
-class HisabRepository(private val dao: HisabDao) {
+class HisabRepository(private val database: HisabDatabase) {
+    private val dao = database.hisabDao()
 
     val accounts: Flow<List<AccountEntity>> = dao.getAllAccounts()
     val categories: Flow<List<CategoryEntity>> = dao.getAllCategories()
@@ -44,7 +49,12 @@ class HisabRepository(private val dao: HisabDao) {
                 dao.insertExchangeRates(missing)
             }
         }
-        val currentPrefs = dao.getUserPreferencesOnce()
+        var currentPrefs = dao.getUserPreferencesOnce()
+        if (currentPrefs != null && currentPrefs.appPinCode.isNotBlank() && currentPrefs.appPinHash.isBlank()) {
+            val hashedPin = PinHasher.create(currentPrefs.appPinCode)
+            currentPrefs = currentPrefs.copy(appPinCode = "", appPinHash = hashedPin.value, appPinSalt = hashedPin.salt)
+            dao.insertUserPreferences(currentPrefs)
+        }
         if (currentPrefs == null) {
             val defaultPrefs = UserPreferencesEntity(
                 id = 1,
@@ -150,7 +160,15 @@ class HisabRepository(private val dao: HisabDao) {
     private suspend fun seedAllDefaultData() {
         dao.insertAccounts(SeedDataGenerator.initialAccounts())
         dao.insertCategories(SeedDataGenerator.initialCategories())
-        dao.insertTransactions(SeedDataGenerator.initialTransactions())
+        val rates = getRateMap()
+        val accountRates = dao.getAllAccountsOnce().associate { it.id to rateFor(it.currencyCode, rates) }
+        val seededTransactions = SeedDataGenerator.initialTransactions().map { tx ->
+            tx.copy(
+                accountExchangeRateSnapshotToBdt = accountRates[tx.accountId] ?: 1.0,
+                toAccountExchangeRateSnapshotToBdt = tx.toAccountId?.let { accountRates[it] } ?: 1.0
+            )
+        }
+        dao.insertTransactions(seededTransactions)
         dao.insertRecurringPayments(SeedDataGenerator.initialRecurringPayments())
         dao.insertDebtRecords(SeedDataGenerator.initialDebts())
         dao.insertSavingsGoals(SeedDataGenerator.initialGoals())
@@ -171,6 +189,36 @@ class HisabRepository(private val dao: HisabDao) {
         val updated = transform(current)
         HisabHaptics.isHapticsEnabled = updated.hapticsEnabled
         dao.insertUserPreferences(updated)
+    }
+
+    suspend fun configureAppLock(enabled: Boolean, pinCode: String, biometric: Boolean) {
+        val current = dao.getUserPreferencesOnce() ?: UserPreferencesEntity()
+        if (enabled) {
+            val hash = PinHasher.create(pinCode)
+            dao.insertUserPreferences(current.copy(
+                isAppLockEnabled = true, appPinCode = "", appPinHash = hash.value,
+                appPinSalt = hash.salt, biometricEnabled = false
+            ))
+        } else {
+            dao.insertUserPreferences(current.copy(
+                isAppLockEnabled = false, appPinCode = "", appPinHash = "",
+                appPinSalt = "", biometricEnabled = false
+            ))
+        }
+    }
+
+    suspend fun verifyAppPin(pinCode: String): Boolean = withContext(Dispatchers.IO) {
+        if (pinCode.length != 4 || !pinCode.all(Char::isDigit)) return@withContext false
+        val prefs = dao.getUserPreferencesOnce() ?: return@withContext false
+        if (prefs.appPinHash.isNotBlank() && prefs.appPinSalt.isNotBlank()) {
+            return@withContext PinHasher.verify(pinCode, prefs.appPinSalt, prefs.appPinHash)
+        }
+        if (prefs.appPinCode.isNotBlank() && prefs.appPinCode == pinCode) {
+            val hash = PinHasher.create(pinCode)
+            dao.insertUserPreferences(prefs.copy(appPinCode = "", appPinHash = hash.value, appPinSalt = hash.salt))
+            return@withContext true
+        }
+        false
     }
 
     suspend fun updateExchangeRate(
@@ -206,159 +254,146 @@ class HisabRepository(private val dao: HisabDao) {
     }
 
     suspend fun addTransaction(
-        title: String,
-        merchant: String,
-        amount: Double,
-        currencyCode: String,
-        type: String,
-        category: CategoryEntity,
-        account: AccountEntity,
-        toAccount: AccountEntity? = null,
-        timestamp: Long = System.currentTimeMillis(),
-        note: String = "",
-        isRecurring: Boolean = false,
-        receiptUri: String = "",
-        splitDetails: String = "",
-        isFavorite: Boolean = false
+        title: String, merchant: String, amount: Double, currencyCode: String, type: String,
+        category: CategoryEntity, account: AccountEntity, toAccount: AccountEntity? = null,
+        timestamp: Long = System.currentTimeMillis(), note: String = "", isRecurring: Boolean = false,
+        receiptUri: String = "", splitDetails: String = "", isFavorite: Boolean = false
     ) {
-        val ratesMap = getRateMap()
-        val rateToBdt = ratesMap[currencyCode.uppercase()]
-            ?: CurrencyCatalog.getMetadata(currencyCode).defaultRateToBdt
-
+        validateTransaction(amount, currencyCode, type, account.id, toAccount?.id)
+        val source = dao.getAccountById(account.id) ?: error("Selected source account no longer exists")
+        val target = if (type == "TRANSFER") dao.getAccountById(toAccount!!.id)
+            ?: error("Selected destination account no longer exists") else null
+        val rates = getRateMap()
         val label = when {
-            type == "TRANSFER" && toAccount != null -> "${account.name} → ${toAccount.name}"
-            account.type == "MFS" -> "Paid with ${account.name.substringBefore(" ")}"
-            else -> account.maskedNumber
+            target != null -> "${source.name} → ${target.name}"
+            source.type == "MFS" -> "Paid with ${source.name.substringBefore(" ")}"
+            else -> source.maskedNumber
         }
-
         val tx = TransactionEntity(
-            title = title.trim(),
-            merchant = merchant.trim().ifEmpty { category.name },
-            amount = amount,
-            currencyCode = currencyCode.uppercase(),
-            exchangeRateSnapshotToBdt = rateToBdt,
-            type = type,
-            categoryId = category.id,
+            title = title.trim(), merchant = merchant.trim().ifEmpty { category.name },
+            amount = amount, currencyCode = currencyCode.uppercase(),
+            exchangeRateSnapshotToBdt = rateFor(currencyCode, rates),
+            accountExchangeRateSnapshotToBdt = rateFor(source.currencyCode, rates),
+            toAccountExchangeRateSnapshotToBdt = target?.let { rateFor(it.currencyCode, rates) } ?: 1.0,
+            type = type, categoryId = category.id,
             categoryName = if (type == "TRANSFER") "Transfer" else category.name,
             categoryColorHex = if (type == "TRANSFER") 0xFF1D9BF0L else category.colorHex,
             categoryIconKey = if (type == "TRANSFER") "TRANSFER" else category.iconKey,
-            accountId = account.id,
-            accountLabel = label,
-            toAccountId = toAccount?.id,
-            timestamp = timestamp,
-            note = note.trim(),
-            isRecurring = isRecurring,
-            receiptUri = receiptUri.trim(),
-            splitDetails = splitDetails.trim(),
-            isFavorite = isFavorite
+            accountId = source.id, accountLabel = label, toAccountId = target?.id,
+            timestamp = timestamp, note = note.trim(), isRecurring = isRecurring,
+            receiptUri = receiptUri.trim(), splitDetails = splitDetails.trim(), isFavorite = isFavorite
         )
-        dao.insertTransaction(tx)
-
-        applyAccountDeltaForTransaction(tx, ratesMap, reverse = false)
-
-        if (type == "EXPENSE" && category.monthlyBudget > 0) {
-            checkAndRecordBudgetThresholdAlert(category, ratesMap)
+        database.withTransaction {
+            dao.insertTransaction(tx)
+            applyAccountDeltaForTransaction(tx, reverse = false)
+            if (type == "EXPENSE" && category.monthlyBudget > 0.0) checkAndRecordBudgetThresholdAlert(category, rates, timestamp)
         }
     }
 
-    private suspend fun checkAndRecordBudgetThresholdAlert(
-        category: CategoryEntity,
-        ratesMap: Map<String, Double>
-    ) {
-        val prefs = dao.getUserPreferencesOnce() ?: UserPreferencesEntity()
-        if (!prefs.budgetAlertsEnabled) return
+    private fun validateTransaction(amount: Double, currencyCode: String, type: String, sourceId: Int, targetId: Int?) {
+        require(amount.isFinite() && amount > 0.0) { "Transaction amount must be greater than zero" }
+        require(CurrencyCatalog.isSupported(currencyCode)) { "Unsupported currency: $currencyCode" }
+        require(type in setOf("EXPENSE", "INCOME", "TRANSFER")) { "Invalid transaction type" }
+        if (type == "TRANSFER") {
+            require(targetId != null && targetId != sourceId) { "Select a different destination account" }
+        } else require(targetId == null) { "Only transfers can have a destination account" }
+    }
 
-        val budgetCurrency = category.budgetCurrencyCode.uppercase()
-        val catExpenses = dao.getAllTransactionsOnce().filter { it.type == "EXPENSE" && it.categoryId == category.id }
-        val totalSpentInBudgetCurrency = catExpenses.sumOf { tx ->
-            CurrencyFormatter.convert(tx.amount, tx.currencyCode, budgetCurrency, ratesMap)
+    private fun rateFor(currency: String, rates: Map<String, Double>): Double {
+        require(CurrencyCatalog.isSupported(currency)) { "Unsupported currency: $currency" }
+        val value = rates[currency.uppercase()] ?: CurrencyCatalog.getMetadata(currency).defaultRateToBdt
+        require(value.isFinite() && value > 0.0) { "Invalid exchange rate for $currency" }
+        return value
+    }
+
+    private fun budgetBounds(category: CategoryEntity, timestamp: Long): Pair<Long, Long> {
+        val start = Calendar.getInstance().apply {
+            timeInMillis = timestamp
+            set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
         }
-        val pct = if (category.monthlyBudget > 0) {
-            ((totalSpentInBudgetCurrency / category.monthlyBudget) * 100.0).toInt()
-        } else 0
-
-        val threshold = category.alertThresholdPercent.coerceIn(50, 100)
-        if (pct >= threshold) {
-            val spentFormatted = CurrencyFormatter.formatCurrency(
-                amount = totalSpentInBudgetCurrency,
-                currencyCode = budgetCurrency,
-                useSouthAsianGrouping = prefs.useSouthAsianGrouping,
-                includeCodeSuffix = true
-            )
-            val limitFormatted = CurrencyFormatter.formatCurrency(
-                amount = category.monthlyBudget,
-                currencyCode = budgetCurrency,
-                useSouthAsianGrouping = prefs.useSouthAsianGrouping,
-                includeCodeSuffix = true
-            )
-            val statusTitle = if (pct >= 100) {
-                "${category.name} Budget Exceeded ($pct%)"
-            } else {
-                "${category.name} Reached $pct% of ${category.budgetPeriod} Budget"
+        if (category.budgetPeriod.equals("CUSTOM", true)) {
+            start.timeInMillis = category.startDateMillis.takeIf { it > 0L } ?: timestamp
+            start.set(Calendar.HOUR_OF_DAY, 0); start.set(Calendar.MINUTE, 0); start.set(Calendar.SECOND, 0); start.set(Calendar.MILLISECOND, 0)
+            val end = Calendar.getInstance().apply {
+                timeInMillis = category.endDateMillis.takeIf { it >= start.timeInMillis } ?: timestamp
+                set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+                add(Calendar.DAY_OF_MONTH, 1)
             }
-            dao.insertNotification(
-                AppNotificationEntity(
-                    title = statusTitle,
-                    message = "Spent $spentFormatted of your $limitFormatted ${category.budgetPeriod.lowercase()} limit.",
-                    categoryTag = "BUDGET",
-                    timestamp = System.currentTimeMillis(),
-                    isRead = false,
-                    accentColorHex = category.colorHex
-                )
-            )
+            return start.timeInMillis to end.timeInMillis
         }
+        when (category.budgetPeriod.uppercase()) {
+            "DAILY" -> Unit
+            "WEEKLY" -> start.add(Calendar.DAY_OF_MONTH, -((start.get(Calendar.DAY_OF_WEEK) - Calendar.MONDAY + 7) % 7))
+            "YEARLY" -> start.set(Calendar.DAY_OF_YEAR, 1)
+            else -> start.set(Calendar.DAY_OF_MONTH, 1)
+        }
+        val end = (start.clone() as Calendar)
+        when (category.budgetPeriod.uppercase()) {
+            "DAILY" -> end.add(Calendar.DAY_OF_MONTH, 1)
+            "WEEKLY" -> end.add(Calendar.DAY_OF_MONTH, 7)
+            "YEARLY" -> end.add(Calendar.YEAR, 1)
+            else -> end.add(Calendar.MONTH, 1)
+        }
+        return start.timeInMillis to end.timeInMillis
+    }
+
+    private suspend fun checkAndRecordBudgetThresholdAlert(category: CategoryEntity, rates: Map<String, Double>, timestamp: Long) {
+        val prefs = dao.getUserPreferencesOnce() ?: UserPreferencesEntity()
+        if (!prefs.budgetAlertsEnabled || category.monthlyBudget <= 0.0) return
+        val (start, end) = budgetBounds(category, timestamp)
+        val currency = category.budgetCurrencyCode.uppercase()
+        val spent = dao.getAllTransactionsOnce().asSequence().filter {
+            it.type == "EXPENSE" && it.categoryId == category.id && it.timestamp >= start && it.timestamp < end
+        }.sumOf { CurrencyFormatter.convert(it.amount, it.currencyCode, currency, rates) }
+        val threshold = category.alertThresholdPercent.coerceIn(50, 100)
+        val percent = (spent / category.monthlyBudget * 100.0).toInt()
+        if (percent < threshold) return
+        val title = "${category.name} Budget Alert (${threshold}%)"
+        if (dao.countBudgetNotifications(title, start, end) > 0) return
+        val spentText = CurrencyFormatter.formatCurrency(spent, currency, prefs.useSouthAsianGrouping, includeCodeSuffix = true)
+        val limitText = CurrencyFormatter.formatCurrency(category.monthlyBudget, currency, prefs.useSouthAsianGrouping, includeCodeSuffix = true)
+        dao.insertNotification(AppNotificationEntity(
+            title = title,
+            message = "Spent $spentText of your $limitText ${category.budgetPeriod.lowercase()} limit ($percent%).",
+            categoryTag = "BUDGET", timestamp = System.currentTimeMillis(), isRead = false, accentColorHex = category.colorHex
+        ))
     }
 
     suspend fun editTransaction(
-        oldTx: TransactionEntity,
-        title: String,
-        merchant: String,
-        amount: Double,
-        currencyCode: String,
-        type: String,
-        category: CategoryEntity,
-        account: AccountEntity,
-        toAccount: AccountEntity? = null,
-        note: String = "",
-        isRecurring: Boolean = false,
-        receiptUri: String = "",
-        splitDetails: String = "",
+        oldTx: TransactionEntity, title: String, merchant: String, amount: Double, currencyCode: String,
+        type: String, category: CategoryEntity, account: AccountEntity, toAccount: AccountEntity? = null,
+        note: String = "", isRecurring: Boolean = false, receiptUri: String = "", splitDetails: String = "",
         isFavorite: Boolean = false
     ) {
-        val ratesMap = getRateMap()
-        applyAccountDeltaForTransaction(oldTx, ratesMap, reverse = true)
-
-        val rateToBdt = ratesMap[currencyCode.uppercase()]
-            ?: CurrencyCatalog.getMetadata(currencyCode).defaultRateToBdt
-
-        val label = when {
-            type == "TRANSFER" && toAccount != null -> "${account.name} → ${toAccount.name}"
-            account.type == "MFS" -> "Paid with ${account.name.substringBefore(" ")}"
-            else -> account.maskedNumber
-        }
-
-        val updatedTx = oldTx.copy(
-            title = title.trim(),
-            merchant = merchant.trim().ifEmpty { category.name },
-            amount = amount,
-            currencyCode = currencyCode.uppercase(),
-            exchangeRateSnapshotToBdt = rateToBdt,
-            type = type,
-            categoryId = category.id,
+        validateTransaction(amount, currencyCode, type, account.id, toAccount?.id)
+        val source = dao.getAccountById(account.id) ?: error("Selected source account no longer exists")
+        val target = if (type == "TRANSFER") dao.getAccountById(toAccount!!.id)
+            ?: error("Selected destination account no longer exists") else null
+        val rates = getRateMap()
+        val updated = oldTx.copy(
+            title = title.trim(), merchant = merchant.trim().ifEmpty { category.name }, amount = amount,
+            currencyCode = currencyCode.uppercase(), exchangeRateSnapshotToBdt = rateFor(currencyCode, rates),
+            accountExchangeRateSnapshotToBdt = rateFor(source.currencyCode, rates),
+            toAccountExchangeRateSnapshotToBdt = target?.let { rateFor(it.currencyCode, rates) } ?: 1.0,
+            type = type, categoryId = category.id,
             categoryName = if (type == "TRANSFER") "Transfer" else category.name,
             categoryColorHex = if (type == "TRANSFER") 0xFF1D9BF0L else category.colorHex,
             categoryIconKey = if (type == "TRANSFER") "TRANSFER" else category.iconKey,
-            accountId = account.id,
-            accountLabel = label,
-            toAccountId = toAccount?.id,
-            note = note.trim(),
-            isRecurring = isRecurring,
-            receiptUri = receiptUri.trim(),
-            splitDetails = splitDetails.trim(),
-            isFavorite = isFavorite
+            accountId = source.id,
+            accountLabel = when {
+                target != null -> "${source.name} → ${target.name}"
+                source.type == "MFS" -> "Paid with ${source.name.substringBefore(" ")}"
+                else -> source.maskedNumber
+            },
+            toAccountId = target?.id, note = note.trim(), isRecurring = isRecurring,
+            receiptUri = receiptUri.trim(), splitDetails = splitDetails.trim(), isFavorite = isFavorite
         )
-        dao.updateTransaction(updatedTx)
-        applyAccountDeltaForTransaction(updatedTx, ratesMap, reverse = false)
+        database.withTransaction {
+            applyAccountDeltaForTransaction(oldTx, reverse = true)
+            dao.updateTransaction(updated)
+            applyAccountDeltaForTransaction(updated, reverse = false)
+            if (type == "EXPENSE" && category.monthlyBudget > 0.0) checkAndRecordBudgetThresholdAlert(category, rates, updated.timestamp)
+        }
     }
 
     suspend fun toggleTransactionFavorite(tx: TransactionEntity): TransactionEntity {
@@ -368,55 +403,32 @@ class HisabRepository(private val dao: HisabDao) {
     }
 
     suspend fun deleteTransaction(transaction: TransactionEntity) {
-        val ratesMap = getRateMap()
-        dao.deleteTransactionById(transaction.id)
-        applyAccountDeltaForTransaction(transaction, ratesMap, reverse = true)
+        database.withTransaction {
+            applyAccountDeltaForTransaction(transaction, reverse = true)
+            dao.deleteTransactionById(transaction.id)
+        }
     }
 
-    private suspend fun applyAccountDeltaForTransaction(
-        tx: TransactionEntity,
-        ratesMap: Map<String, Double>,
-        reverse: Boolean
-    ) {
-        val currentAcc = dao.getAccountById(tx.accountId)
-        if (currentAcc != null) {
-            val deltaInAccCurrency = CurrencyFormatter.convert(
-                amount = tx.amount,
-                fromCurrency = tx.currencyCode,
-                toCurrency = currentAcc.currencyCode,
-                ratesToBdt = ratesMap
-            )
-            when (tx.type) {
-                "EXPENSE" -> {
-                    val newBal = if (reverse) currentAcc.balance + deltaInAccCurrency
-                    else (currentAcc.balance - deltaInAccCurrency).coerceAtLeast(0.0)
-                    dao.updateAccount(currentAcc.copy(balance = newBal))
-                }
-                "INCOME" -> {
-                    val newBal = if (reverse) (currentAcc.balance - deltaInAccCurrency).coerceAtLeast(0.0)
-                    else currentAcc.balance + deltaInAccCurrency
-                    dao.updateAccount(currentAcc.copy(balance = newBal))
-                }
-                "TRANSFER" -> {
-                    val newSourceBal = if (reverse) currentAcc.balance + deltaInAccCurrency
-                    else (currentAcc.balance - deltaInAccCurrency).coerceAtLeast(0.0)
-                    dao.updateAccount(currentAcc.copy(balance = newSourceBal))
-
-                    tx.toAccountId?.let { targetId ->
-                        dao.getAccountById(targetId)?.let { targetAcc ->
-                            val targetDelta = CurrencyFormatter.convert(
-                                amount = tx.amount,
-                                fromCurrency = tx.currencyCode,
-                                toCurrency = targetAcc.currencyCode,
-                                ratesToBdt = ratesMap
-                            )
-                            val newTargetBal = if (reverse) (targetAcc.balance - targetDelta).coerceAtLeast(0.0)
-                            else targetAcc.balance + targetDelta
-                            dao.updateAccount(targetAcc.copy(balance = newTargetBal))
-                        }
-                    }
-                }
-            }
+    private suspend fun applyAccountDeltaForTransaction(tx: TransactionEntity, reverse: Boolean) {
+        val source = dao.getAccountById(tx.accountId) ?: return
+        val sourceDelta = if (tx.currencyCode.equals(source.currencyCode, true)) tx.amount else
+            CurrencyFormatter.convertWithSnapshots(tx.amount, tx.exchangeRateSnapshotToBdt, tx.accountExchangeRateSnapshotToBdt, source.currencyCode)
+        val sourceBalance = when (tx.type) {
+            "EXPENSE", "TRANSFER" -> if (reverse) CurrencyFormatter.addMoney(source.balance, sourceDelta, source.currencyCode)
+                else CurrencyFormatter.subtractMoney(source.balance, sourceDelta, source.currencyCode)
+            "INCOME" -> if (reverse) CurrencyFormatter.subtractMoney(source.balance, sourceDelta, source.currencyCode)
+                else CurrencyFormatter.addMoney(source.balance, sourceDelta, source.currencyCode)
+            else -> source.balance
+        }
+        dao.updateAccount(source.copy(balance = sourceBalance))
+        if (tx.type == "TRANSFER") {
+            val targetId = tx.toAccountId ?: return
+            val target = dao.getAccountById(targetId) ?: return
+            val delta = if (tx.currencyCode.equals(target.currencyCode, true)) tx.amount else
+                CurrencyFormatter.convertWithSnapshots(tx.amount, tx.exchangeRateSnapshotToBdt, tx.toAccountExchangeRateSnapshotToBdt, target.currencyCode)
+            val balance = if (reverse) CurrencyFormatter.subtractMoney(target.balance, delta, target.currencyCode)
+                else CurrencyFormatter.addMoney(target.balance, delta, target.currencyCode)
+            dao.updateAccount(target.copy(balance = balance))
         }
     }
 
