@@ -1543,7 +1543,7 @@ fun ProfileAndSettingsScreen(
                             )
                             Text(
                                 text = if (hasPostNotificationsPermission) {
-                                    "Transaction confirmations plus bill, budget, debt and goal alerts are stored locally and can appear as Android notifications."
+                                    "Transaction confirmations are sent after a successful save. Bill, budget, debt and goal alerts remain available as scheduled local notifications."
                                 } else {
                                     "Enable permission for transaction confirmations and scheduled financial alerts. You can change this later in Android Settings."
                                 },
