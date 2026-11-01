@@ -4,6 +4,7 @@
 
 > 🚀 **Latest source update: v1.0.4** (versionCode 5)  
 > ⚠️ **Production APK publication is pending signing-key configuration.** The CI release build is verification-only and must not be installed as an update over the existing production app. • 🌐 **[Live Project Website](https://codebyarnob.github.io/HisabMate/)**
+> 📥 **[HisabMate v1.0.4 APK download status](https://github.com/CodeByArnob/HisabMate/actions/runs/41307567081)** — the download button will be activated here after the compatible production-signed APK is published.
 
 [![Source Update](https://img.shields.io/badge/Source-v1.0.4-10B981?style=flat-square&logo=github)](https://github.com/CodeByArnob/HisabMate/commit/e187aa1427979e88908d2d80423db12be1efcbed)
 [![APK Status](https://img.shields.io/badge/APK-pending%20signing-F59E0B?style=flat-square&logo=android)](https://github.com/CodeByArnob/HisabMate/actions/runs/41307567081)
