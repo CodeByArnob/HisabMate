@@ -89,14 +89,14 @@ jobs:
           rm -f "$TEMP_KS"
 
           mkdir -p ci-release-outputs
-          cp app/build/outputs/apk/release/*.apk ci-release-outputs/HisabMate-v1.0.0-release.apk
-          cp app/build/outputs/bundle/release/*.aab ci-release-outputs/HisabMate-v1.0.0-release.aab
-          (cd ci-release-outputs && sha256sum HisabMate-v1.0.0-release.apk HisabMate-v1.0.0-release.aab > SHA256SUMS.txt)
+          cp app/build/outputs/apk/release/*.apk ci-release-outputs/HisabMate-v1.0.3-release.apk
+          cp app/build/outputs/bundle/release/*.aab ci-release-outputs/HisabMate-v1.0.3-release.aab
+          (cd ci-release-outputs && sha256sum HisabMate-v1.0.3-release.apk HisabMate-v1.0.3-release.aab > SHA256SUMS.txt)
 
           APKSIGNER=$(find "${ANDROID_HOME}/build-tools" -name "apksigner" | sort -V | tail -n 1)
           AAPT2=$(find "${ANDROID_HOME}/build-tools" -name "aapt2" | sort -V | tail -n 1)
-          "$APKSIGNER" verify --verbose ci-release-outputs/HisabMate-v1.0.0-release.apk
-          "$AAPT2" dump badging ci-release-outputs/HisabMate-v1.0.0-release.apk | head -n 15
+          "$APKSIGNER" verify --verbose ci-release-outputs/HisabMate-v1.0.3-release.apk
+          "$AAPT2" dump badging ci-release-outputs/HisabMate-v1.0.3-release.apk | head -n 15
 
       - name: Upload Unit Test & Lint Reports
         if: always()

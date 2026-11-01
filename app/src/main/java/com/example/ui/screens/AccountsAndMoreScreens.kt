@@ -53,7 +53,7 @@ import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.NotificationsActive
-import androidx.compose.material.icons.filled.OpenInNew
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.Public
@@ -2122,7 +2122,7 @@ fun ProfileAndSettingsScreen(
                     if (res?.isSuccess == true) {
                         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                             Text(
-                                text = "Your official multi-currency financial statement has been generated and verified physically (>0 bytes).",
+                                text = "Your production-ready Single-Page ISO A4 Executive Financial Statement (210 × 297 mm) has been generated and verified.",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = colors.inkPrimary
                             )
@@ -2133,6 +2133,7 @@ fun ProfileAndSettingsScreen(
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                                    Text("• Format: Single-Page ISO A4 (595 × 842 pt)", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold, color = colors.inkPrimary)
                                     Text("• File: ${res.fileName}", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold, color = colors.inkPrimary)
                                     Text("• Size: ${res.fileSizeFormatted} (${res.byteCount} bytes)", style = MaterialTheme.typography.bodySmall, color = colors.inkSecondary)
                                     Text("• Saved To: ${res.filePath}", style = MaterialTheme.typography.bodySmall, color = colors.inkSecondary)
@@ -2156,7 +2157,7 @@ fun ProfileAndSettingsScreen(
                                     }
                                 }
                             ) {
-                                Icon(Icons.Default.OpenInNew, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null, modifier = Modifier.size(16.dp))
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text("Open PDF", fontWeight = FontWeight.Bold)
                             }

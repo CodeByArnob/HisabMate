@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       version_tag:
-        description: 'Release tag (e.g. v1.0.0)'
+        description: 'Release tag (e.g. v1.0.3)'
         required: true
-        default: 'v1.0.0'
+        default: 'v1.0.3'
 
 permissions:
   contents: write
@@ -64,7 +64,7 @@ jobs:
           elif [ -n "${INPUT_TAG}" ]; then
             REL_TAG="${INPUT_TAG}"
           else
-            REL_TAG="v1.0.0"
+            REL_TAG="v1.0.3"
           fi
           echo "release_tag=${REL_TAG}" >> "$GITHUB_OUTPUT"
 
