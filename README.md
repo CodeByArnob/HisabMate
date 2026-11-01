@@ -7,10 +7,10 @@
 **An offline-first Android finance manager built with Kotlin, Jetpack Compose and Room.**
 
 <p>
-  <a href="https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.5/HisabMate-v1.0.5-release.apk">
-    <img src="https://img.shields.io/badge/Download-Latest%20APK%20v1.0.5-6D4AFF?style=for-the-badge&logo=android&logoColor=white" alt="Download HisabMate v1.0.5 APK">
+  <a href="https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.6/HisabMate-v1.0.6-release.apk">
+    <img src="https://img.shields.io/badge/Download-Latest%20APK%20v1.0.6-6D4AFF?style=for-the-badge&logo=android&logoColor=white" alt="Download HisabMate v1.0.6 APK">
   </a>
-  <a href="https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.5">
+  <a href="https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.6">
     <img src="https://img.shields.io/badge/Release-Notes-0F9D78?style=for-the-badge&logo=github&logoColor=white" alt="Release notes">
   </a>
   <a href="https://codebyarnob.github.io/HisabMate/">
@@ -52,7 +52,7 @@ The app is designed around three principles:
 | Project detail | Value |
 |---|---|
 | Application ID | `com.aistudio.hisabmate.fntkbd` |
-| Current release | **v1.0.5** · versionCode 6 |
+| Current release | **v1.0.6** · versionCode 7 |
 | Minimum Android | Android 7.0 · API 24 |
 | Target Android | API 36 |
 | Database | Room · SQLite schema v7 |
@@ -62,23 +62,23 @@ The app is designed around three principles:
 
 <div align="center">
 
-### HisabMate v1.0.5
+### HisabMate v1.0.6
 
 **The latest published Android release**
 
-[**Download the APK**](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.5/HisabMate-v1.0.5-release.apk) · [Release page and other assets](https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.5)
+[**Download the APK**](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.6/HisabMate-v1.0.6-release.apk) · [Release page and other assets](https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.6)
 
 </div>
 
 | File | Description |
 |---|---|
-| `HisabMate-v1.0.5-release.apk` | Android installer |
-| `HisabMate-v1.0.5-release.aab` | Android App Bundle |
+| `HisabMate-v1.0.6-release.apk` | Android installer |
+| `HisabMate-v1.0.6-release.aab` | Android App Bundle |
 | `SHA256SUMS.txt` | SHA-256 checksums |
 | `SIGNING-CERTIFICATE.txt` | APK signing certificate details |
 
 > [!IMPORTANT]
-> **Signing and installation compatibility:** v1.0.5 was signed with a temporary CI-generated key because the original production keystore was not available. That temporary key was not retained. Android will not install this APK as an in-place update over an installation signed with a different key. If you are moving from an older installation, export a JSON backup first, uninstall the old app, install v1.0.5, then restore your backup. Uninstalling clears the app's local data.
+> **Signing and installation compatibility:** v1.0.6 was signed with a temporary CI-generated key because the original production keystore was not available. That temporary key was not retained. Android will not install this APK as an in-place update over an installation signed with a different key. If you are moving from an older installation, export a JSON backup first, uninstall the old app, install v1.0.6, then restore your backup. Uninstalling clears the app's local data.
 >
 > A future APK signed with a different key will also require a backup and reinstall. A persistent signing key must be configured before the next release to establish a stable update path.
 
@@ -110,6 +110,8 @@ The app is designed around three principles:
 - Schedule local reminders for upcoming obligations.
 
 ### Reports and data portability
+- Receive an instant local confirmation after each successfully saved expense, income or transfer, including the transaction name, amount, category and account.
+- Review transaction receipts in the in-app Notification Center; Android 13+ asks for notification permission before the first receipt is posted.
 - Generate a **single-page A4 PDF financial statement**.
 - Export transaction data to CSV.
 - Create and restore JSON backups.
@@ -331,7 +333,7 @@ Never commit keystores, signing passwords, API keys or other secrets to the repo
 The Android CI workflow runs the automated test suite, Android Lint and build verification for debug and release packages.
 
 - [Android CI workflow](https://github.com/CodeByArnob/HisabMate/actions/workflows/android-ci.yml)
-- [Latest successful v1.0.5 release build](https://github.com/CodeByArnob/HisabMate/actions/runs/41311178780)
+- [Latest successful v1.0.6 release build](https://github.com/CodeByArnob/HisabMate/actions/runs/41315740240)
 - [All workflow runs](https://github.com/CodeByArnob/HisabMate/actions)
 
 ---
@@ -360,6 +362,6 @@ HisabMate is distributed under the [MIT License](LICENSE).
 
 **HisabMate** · Built for clarity, control and local-first personal finance.
 
-[Download](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.5/HisabMate-v1.0.5-release.apk) · [Website](https://codebyarnob.github.io/HisabMate/) · [Report an issue](https://github.com/CodeByArnob/HisabMate/issues)
+[Download](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.6/HisabMate-v1.0.6-release.apk) · [Website](https://codebyarnob.github.io/HisabMate/) · [Report an issue](https://github.com/CodeByArnob/HisabMate/issues)
 
 </div>
