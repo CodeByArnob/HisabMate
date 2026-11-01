@@ -258,7 +258,7 @@ class HisabRepository(private val database: HisabDatabase) {
         category: CategoryEntity, account: AccountEntity, toAccount: AccountEntity? = null,
         timestamp: Long = System.currentTimeMillis(), note: String = "", isRecurring: Boolean = false,
         receiptUri: String = "", splitDetails: String = "", isFavorite: Boolean = false
-    ) {
+    ): TransactionEntity {
         validateTransaction(amount, currencyCode, type, account.id, toAccount?.id)
         val source = dao.getAccountById(account.id) ?: error("Selected source account no longer exists")
         val target = if (type == "TRANSFER") dao.getAccountById(toAccount!!.id)
@@ -283,10 +283,14 @@ class HisabRepository(private val database: HisabDatabase) {
             timestamp = timestamp, note = note.trim(), isRecurring = isRecurring,
             receiptUri = receiptUri.trim(), splitDetails = splitDetails.trim(), isFavorite = isFavorite
         )
-        database.withTransaction {
-            dao.insertTransaction(tx)
-            applyAccountDeltaForTransaction(tx, reverse = false)
-            if (type == "EXPENSE" && category.monthlyBudget > 0.0) checkAndRecordBudgetThresholdAlert(category, rates, timestamp)
+        return database.withTransaction {
+            val insertedId = dao.insertTransaction(tx).toInt()
+            val savedTransaction = tx.copy(id = insertedId)
+            applyAccountDeltaForTransaction(savedTransaction, reverse = false)
+            if (type == "EXPENSE" && category.monthlyBudget > 0.0) {
+                checkAndRecordBudgetThresholdAlert(category, rates, timestamp)
+            }
+            savedTransaction
         }
     }
 
@@ -364,7 +368,7 @@ class HisabRepository(private val database: HisabDatabase) {
         type: String, category: CategoryEntity, account: AccountEntity, toAccount: AccountEntity? = null,
         note: String = "", isRecurring: Boolean = false, receiptUri: String = "", splitDetails: String = "",
         isFavorite: Boolean = false
-    ) {
+    ): TransactionEntity {
         validateTransaction(amount, currencyCode, type, account.id, toAccount?.id)
         val source = dao.getAccountById(account.id) ?: error("Selected source account no longer exists")
         val target = if (type == "TRANSFER") dao.getAccountById(toAccount!!.id)
@@ -388,11 +392,14 @@ class HisabRepository(private val database: HisabDatabase) {
             toAccountId = target?.id, note = note.trim(), isRecurring = isRecurring,
             receiptUri = receiptUri.trim(), splitDetails = splitDetails.trim(), isFavorite = isFavorite
         )
-        database.withTransaction {
+        return database.withTransaction {
             applyAccountDeltaForTransaction(oldTx, reverse = true)
             dao.updateTransaction(updated)
             applyAccountDeltaForTransaction(updated, reverse = false)
-            if (type == "EXPENSE" && category.monthlyBudget > 0.0) checkAndRecordBudgetThresholdAlert(category, rates, updated.timestamp)
+            if (type == "EXPENSE" && category.monthlyBudget > 0.0) {
+                checkAndRecordBudgetThresholdAlert(category, rates, updated.timestamp)
+            }
+            updated
         }
     }
 
