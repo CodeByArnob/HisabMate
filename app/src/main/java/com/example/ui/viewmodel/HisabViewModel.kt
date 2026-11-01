@@ -742,7 +742,7 @@ class HisabViewModel(
         val payload = HisabNotificationManager.buildTransactionNotificationPayload(
             transaction = transaction,
             isUpdate = isUpdate,
-            useSouthAsianGrouping = state.useSouthAsianGrouping
+            useSouthAsianGrouping = useBangladeshiFormat.value
         )
         repository.insertAppNotification(
             AppNotificationEntity(
