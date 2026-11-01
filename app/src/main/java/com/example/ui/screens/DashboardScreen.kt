@@ -119,8 +119,8 @@ fun DashboardScreen(
         item {
             HisabBalanceHeroCard(
                 modifier = Modifier.padding(horizontal = 14.dp),
-                shapeRadius = 28.dp,
-                contentPadding = 16.dp
+                shapeRadius = 24.dp,
+                contentPadding = 18.dp
             ) {
                 // Top Action Bar
                 Row(
@@ -343,7 +343,7 @@ fun DashboardScreen(
         item {
             HisabSectionCard(
                 modifier = Modifier.padding(horizontal = 14.dp),
-                shapeRadius = 28.dp,
+                shapeRadius = 22.dp,
                 contentPadding = 18.dp
             ) {
                 Row(
@@ -352,7 +352,7 @@ fun DashboardScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Quick actions",
+                        text = "Budgets & categories",
                         style = MaterialTheme.typography.titleLarge,
                         fontSize = 19.sp,
                         fontWeight = FontWeight.ExtraBold,
@@ -554,7 +554,7 @@ fun DashboardScreen(
         item {
             HisabSectionCard(
                 modifier = Modifier.padding(horizontal = 14.dp),
-                shapeRadius = 28.dp,
+                shapeRadius = 22.dp,
                 contentPadding = 18.dp
             ) {
                 Row(
