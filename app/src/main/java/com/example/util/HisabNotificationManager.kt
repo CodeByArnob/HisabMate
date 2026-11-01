@@ -18,6 +18,7 @@ import com.example.R
 import com.example.data.local.AppNotificationEntity
 import com.example.data.local.HisabDatabase
 import com.example.data.local.ScheduledReminderEntity
+import com.example.data.local.TransactionEntity
 import com.example.data.local.UserPreferencesEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -46,6 +47,7 @@ object HisabNotificationManager {
     const val CHANNEL_DEBT_REMINDERS = "hisab_debt_reminders"
     const val CHANNEL_GOAL_MILESTONES = "hisab_goal_milestones"
     const val CHANNEL_CUSTOM_REMINDERS = "hisab_custom_reminders"
+    const val CHANNEL_TRANSACTION_UPDATES = "hisab_transaction_updates"
 
     const val EXTRA_NOTIFICATION_ID = "extra_notification_id"
     const val EXTRA_SOURCE_TYPE = "extra_source_type"
@@ -130,6 +132,15 @@ object HisabNotificationManager {
                 NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
                 description = "User-scheduled financial check-ins and custom payment reminders"
+            }
+            ,
+            NotificationChannel(
+                CHANNEL_TRANSACTION_UPDATES,
+                "Transaction Activity",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "A confirmation whenever an expense, income or transfer is successfully saved"
+                enableVibration(true)
             }
         )
         channels.forEach { nm.createNotificationChannel(it) }
@@ -219,6 +230,55 @@ object HisabNotificationManager {
             primaryFormattedAmount = primaryFormatted,
             convertedBaseSummary = convertedSummary,
             categoryTag = tag
+        )
+    }
+
+    /**
+     * Builds a local confirmation for a transaction that has already been committed to Room.
+     * Amounts are always displayed in the transaction's original ISO 4217 currency.
+     */
+    fun buildTransactionNotificationPayload(
+        transaction: TransactionEntity,
+        isUpdate: Boolean = false,
+        useSouthAsianGrouping: Boolean = true
+    ): FormattedNotificationPayload {
+        val currencyCode = transaction.currencyCode.uppercase()
+        val formattedAmount = CurrencyFormatter.formatCurrency(
+            amount = transaction.amount,
+            currencyCode = currencyCode,
+            useSouthAsianGrouping = useSouthAsianGrouping,
+            includeCodeSuffix = true
+        )
+        val typeLabel = when (transaction.type.uppercase()) {
+            "INCOME" -> "Income"
+            "TRANSFER" -> "Transfer"
+            else -> "Expense"
+        }
+        val titleText = when {
+            isUpdate -> "$typeLabel updated"
+            transaction.type.equals("INCOME", true) -> "Income received"
+            transaction.type.equals("TRANSFER", true) -> "Transfer completed"
+            else -> "Expense recorded"
+        }
+        val details = when (transaction.type.uppercase()) {
+            "TRANSFER" -> "Moved $formattedAmount • ${transaction.accountLabel}"
+            "INCOME" -> "${transaction.title} • $formattedAmount • ${transaction.categoryName} • ${transaction.accountLabel}"
+            else -> "${transaction.title} • $formattedAmount • ${transaction.categoryName} • ${transaction.accountLabel}"
+        }
+        val summary = if (transaction.merchant.isNotBlank() && transaction.merchant != transaction.title) {
+            "$details • ${transaction.merchant}"
+        } else {
+            details
+        }
+
+        return FormattedNotificationPayload(
+            notificationId = 60_000 + (transaction.id % 1_000_000),
+            channelId = CHANNEL_TRANSACTION_UPDATES,
+            title = titleText,
+            body = summary,
+            primaryFormattedAmount = formattedAmount,
+            convertedBaseSummary = null,
+            categoryTag = "TRANSACTION"
         )
     }
 
