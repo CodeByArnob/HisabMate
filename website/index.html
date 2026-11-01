@@ -24,25 +24,11 @@
   <!-- Lottie Web Animation Engine -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
 
-  <link rel="stylesheet" href="styles.css?v=1.0.5" />
+  <link rel="stylesheet" href="styles.css?v=1.0.6" />
 </head>
 <body>
   <!-- Scroll Progress Indicator -->
   <div id="scroll-progress-bar" aria-hidden="true"></div>
-
-  <!-- Top Direct Release Announcement Banner -->
-  <aside class="top-announcement-banner" role="banner">
-    <div class="container announcement-inner">
-      <div class="announcement-left">
-        <span class="announcement-pill">LATEST RELEASE v1.0.5</span>
-        <span class="announcement-text"><strong>HisabMate v1.0.5 is now available.</strong> Responsive UI polish and a refined executive A4 statement are included.</span>
-      </div>
-      <div class="announcement-actions">
-        <a href="https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.5/HisabMate-v1.0.5-release.apk" class="announcement-link" rel="noopener">Download APK v1.0.5 ↓</a>
-        <a href="https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.5" class="announcement-link-subtle" target="_blank" rel="noopener">Release notes →</a>
-      </div>
-    </div>
-  </aside>
 
   <!-- Sticky Responsive Navigation -->
   <header class="navbar">
@@ -54,7 +40,6 @@
       </a>
 
       <nav class="nav-links" aria-label="Primary Navigation">
-        <a href="#download">Download APK</a>
         <a href="#analytics">Live Analytics</a>
         <a href="#budget-studio">Budgets &amp; Goals</a>
         <a href="#currencies">14 Currencies &amp; FX</a>
@@ -68,9 +53,6 @@
         <button type="button" id="site-theme-toggle" class="site-theme-toggle" aria-label="Toggle Website Light/Dark Theme" title="Switch Website Theme">
           <span id="site-theme-icon" aria-hidden="true">☀️</span>
         </button>
-        <a href="https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.5/HisabMate-v1.0.5-release.apk" class="btn btn-primary" rel="noopener">
-          Download APK v1.0.5
-        </a>
         <a href="https://github.com/CodeByArnob/HisabMate" class="btn btn-outline" target="_blank" rel="noopener">
           GitHub
         </a>
@@ -85,7 +67,6 @@
     <!-- Accessible Mobile Navigation Drawer -->
     <div id="mobile-nav-drawer" class="mobile-drawer" aria-label="Mobile Navigation Drawer">
       <nav class="mobile-drawer-links">
-        <a href="https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.5/HisabMate-v1.0.5-release.apk" class="mobile-nav-link" rel="noopener"><span>Download APK v1.0.5</span><span>→</span></a>
         <a href="#analytics" class="mobile-nav-link"><span>Live Financial Analytics Studio</span><span>→</span></a>
         <a href="#budget-studio" class="mobile-nav-link"><span>Interactive Budgets &amp; Savings Pots</span><span>→</span></a>
         <a href="#currencies" class="mobile-nav-link"><span>14-Currency Offline FX Engine</span><span>→</span></a>
@@ -95,9 +76,6 @@
         <a href="#faq" class="mobile-nav-link"><span>Privacy &amp; Engineering FAQ</span><span>→</span></a>
       </nav>
       <div class="mobile-drawer-cta">
-        <a href="https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.5/HisabMate-v1.0.5-release.apk" class="btn btn-primary" rel="noopener">
-          Download APK v1.0.5
-        </a>
         <a href="https://github.com/CodeByArnob/HisabMate" class="btn btn-outline" target="_blank" rel="noopener">
           Explore GitHub Repository
         </a>
@@ -126,11 +104,11 @@
           </p>
 
           <div class="hero-cta">
-            <a href="https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.5/HisabMate-v1.0.5-release.apk" class="btn btn-primary" rel="noopener">
-              Download Latest APK (v1.0.5)
+            <a href="#features" class="btn btn-primary">
+              Explore Capabilities <span aria-hidden="true">↗</span>
             </a>
-            <a href="https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.5" class="btn btn-outline" target="_blank" rel="noopener">
-              View Release Notes
+            <a href="#screenshots" class="btn btn-outline">
+              Explore App Screens
             </a>
           </div>
 
@@ -445,43 +423,6 @@
             <h3>AlarmManager Reminders</h3>
             <p>Four native Android notification channels for bills, debts, budgets, and savings goals—persisted across device reboots.</p>
           </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Official v1.0.5 Direct APK Release -->
-    <section id="download" class="gsap-section release-section">
-      <div class="container">
-        <div class="section-header">
-          <span class="section-tag">Official GitHub Release • v1.0.5</span>
-          <h2>Download HisabMate for Android</h2>
-          <p>Get the latest APK directly from the official GitHub Release. The refined dashboard, responsive account and settings layouts, and redesigned A4 financial statement are included in this build.</p>
-        </div>
-        <div class="download-grid" style="grid-template-columns: minmax(0, 720px); justify-content: center;">
-          <article class="download-card release-download-card">
-            <div>
-              <span class="download-badge">LATEST • ANDROID APK • v1.0.5</span>
-              <h3 style="margin-top: 12px; font-family: var(--font-display); font-size: 1.45rem;">HisabMate-v1.0.5-release.apk</h3>
-              <p style="color: var(--text-secondary); font-size: 0.92rem; line-height: 1.65; margin: 10px 0 16px;">
-                Premium dashboard surfaces, responsive Settings and Account cards, improved currency and analytics layouts, and an executive A4 financial statement with adaptive text fitting and category allocation.
-              </p>
-              <ul class="download-meta-list">
-                <li><strong>Package ID:</strong> <code>com.aistudio.hisabmate.fntkbd</code></li>
-                <li><strong>Version:</strong> <code>1.0.5 (versionCode 6)</code></li>
-                <li><strong>Compatibility:</strong> Android 7.0+ (API 24–36)</li>
-                <li><strong>Database:</strong> Room SQLite v7 with data-preserving migration</li>
-              </ul>
-              <p class="release-signing-note">Signing notice: this APK uses a temporary CI signing key that is not retained. It cannot update an older installation signed with another key, and a future APK signed with a different key will also require backup, uninstall and reinstall. For seamless future updates, a persistent signing key must be configured before the next release.</p>
-            </div>
-            <div class="release-download-actions">
-              <a href="https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.5/HisabMate-v1.0.5-release.apk" class="btn btn-primary" style="width: 100%;" rel="noopener">
-                Download APK Directly ↓
-              </a>
-              <a href="https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.5" class="btn btn-outline" style="width: 100%;" target="_blank" rel="noopener">
-                View GitHub Release &amp; Checksums
-              </a>
-            </div>
-          </article>
         </div>
       </div>
     </section>
@@ -844,7 +785,7 @@ gradle :app:assembleDebug :app:assembleRelease :app:bundleRelease</code></pre>
 
           <details class="faq-item">
             <summary><span>Where can I download the compiled Android APK?</span><span>+</span></summary>
-            <p>Download <a href="https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.5/HisabMate-v1.0.5-release.apk">HisabMate-v1.0.5-release.apk</a> directly from the official GitHub Release. This build uses a temporary CI signing key and cannot update an older installation signed with a different key.</p>
+            <p>The official v1.0.5 APK is available in the dedicated download section at the bottom of this page. Review the signing and backup notice there before installing.</p>
           </details>
 
           <details class="faq-item">
@@ -859,6 +800,43 @@ gradle :app:assembleDebug :app:assembleRelease :app:bundleRelease</code></pre>
         </div>
       </div>
     </section>
+    <!-- Official v1.0.5 Direct APK Release -->
+    <section id="download" class="gsap-section release-section">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">Official GitHub Release • v1.0.5</span>
+          <h2>Download HisabMate for Android</h2>
+          <p>Get the latest APK directly from the official GitHub Release. The refined dashboard, responsive account and settings layouts, and redesigned A4 financial statement are included in this build.</p>
+        </div>
+        <div class="download-grid" style="grid-template-columns: minmax(0, 720px); justify-content: center;">
+          <article class="download-card release-download-card">
+            <div>
+              <span class="download-badge">LATEST • ANDROID APK • v1.0.5</span>
+              <h3 style="margin-top: 12px; font-family: var(--font-display); font-size: 1.45rem;">HisabMate-v1.0.5-release.apk</h3>
+              <p style="color: var(--text-secondary); font-size: 0.92rem; line-height: 1.65; margin: 10px 0 16px;">
+                Premium dashboard surfaces, responsive Settings and Account cards, improved currency and analytics layouts, and an executive A4 financial statement with adaptive text fitting and category allocation.
+              </p>
+              <ul class="download-meta-list">
+                <li><strong>Package ID:</strong> <code>com.aistudio.hisabmate.fntkbd</code></li>
+                <li><strong>Version:</strong> <code>1.0.5 (versionCode 6)</code></li>
+                <li><strong>Compatibility:</strong> Android 7.0+ (API 24–36)</li>
+                <li><strong>Database:</strong> Room SQLite v7 with data-preserving migration</li>
+              </ul>
+              <p class="release-signing-note">Signing notice: this APK uses a temporary CI signing key that is not retained. It cannot update an older installation signed with another key, and a future APK signed with a different key will also require backup, uninstall and reinstall. For seamless future updates, a persistent signing key must be configured before the next release.</p>
+            </div>
+            <div class="release-download-actions">
+              <a href="https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.5/HisabMate-v1.0.5-release.apk" class="btn btn-primary" style="width: 100%;" rel="noopener">
+                Download APK Directly ↓
+              </a>
+              <a href="https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.5" class="btn btn-outline" style="width: 100%;" target="_blank" rel="noopener">
+                View GitHub Release &amp; Checksums
+              </a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <!-- Lightbox Modal for Screenshot Inspection -->
@@ -879,7 +857,7 @@ gradle :app:assembleDebug :app:assembleRelease :app:bundleRelease</code></pre>
       </div>
       <div class="footer-links">
         <a href="https://github.com/CodeByArnob/HisabMate" target="_blank" rel="noopener">GitHub Repo</a>
-        <a href="https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.5" target="_blank" rel="noopener">Build Status</a>
+        <a href="https://github.com/CodeByArnob/HisabMate/actions" target="_blank" rel="noopener">Build Status</a>
         <a href="https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.5/HisabMate-v1.0.5-release.apk" rel="noopener">Download Latest APK (v1.0.5)</a>
         <a href="https://github.com/CodeByArnob/HisabMate/issues" target="_blank" rel="noopener">Report Issue</a>
         <a href="https://github.com/CodeByArnob/HisabMate/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
@@ -887,6 +865,6 @@ gradle :app:assembleDebug :app:assembleRelease :app:bundleRelease</code></pre>
     </div>
   </footer>
 
-  <script src="script.js?v=1.0.5"></script>
+  <script src="script.js?v=1.0.6"></script>
 </body>
 </html>
