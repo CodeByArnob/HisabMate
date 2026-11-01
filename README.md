@@ -2,12 +2,11 @@
 
 **Offline-first personal finance and multi-currency wealth management application for Android.**
 
-> 🚀 **Latest source update: v1.0.4** (versionCode 5)  
-> ⚠️ **Production APK publication is pending signing-key configuration.** The CI release build is verification-only and must not be installed as an update over the existing production app. • 🌐 **[Live Project Website](https://codebyarnob.github.io/HisabMate/)**
-> 📥 **[HisabMate v1.0.4 APK download status](https://github.com/CodeByArnob/HisabMate/actions/runs/41307567081)** — the download button will be activated here after the compatible production-signed APK is published.
+> 🚀 **Latest Release: v1.0.5** (versionCode 6)  
+> 📥 **[Download Latest APK — HisabMate-v1.0.5-release.apk](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.5/HisabMate-v1.0.5-release.apk)** • 📦 **[GitHub Release & Checksums](https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.5)** • 🌐 **[Live Project Website](https://codebyarnob.github.io/HisabMate/)**
 
-[![Source Update](https://img.shields.io/badge/Source-v1.0.4-10B981?style=flat-square&logo=github)](https://github.com/CodeByArnob/HisabMate/commit/e187aa1427979e88908d2d80423db12be1efcbed)
-[![APK Status](https://img.shields.io/badge/APK-pending%20signing-F59E0B?style=flat-square&logo=android)](https://github.com/CodeByArnob/HisabMate/actions/runs/41307567081)
+[![Release](https://img.shields.io/badge/Release-v1.0.5-10B981?style=flat-square&logo=github)](https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.5)
+[![Download APK](https://img.shields.io/badge/Download-APK%20v1.0.5-7C5CFF?style=flat-square&logo=android)](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.5/HisabMate-v1.0.5-release.apk)
 [![Android CI](https://img.shields.io/github/actions/workflow/status/CodeByArnob/HisabMate/android-ci.yml?branch=main&style=flat-square&logo=android&label=Android%20CI)](https://github.com/CodeByArnob/HisabMate/actions/workflows/android-ci.yml)
 [![Platform](https://img.shields.io/badge/Android-API%2024%E2%80%9336-3DDC84?style=flat-square&logo=android)](https://developer.android.com)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
@@ -15,7 +14,7 @@
 
 ---
 
-![HisabMate Application Banner](docs/screenshots/hisabmate-banner.svg?v=1.0.3)
+![HisabMate Application Banner](docs/screenshots/hisabmate-banner.svg?v=1.0.5)
 
 ---
 
@@ -31,15 +30,14 @@ Every financial record is persisted in its native ISO 4217 currency with offline
 
 ## Release Download
 
-**HisabMate v1.0.4 source updates are merged into `main`.** The Android CI workflow successfully built and verified the Release APK/AAB, but no persistent production upload-signing key is configured yet. The generated CI signing key is temporary, so that APK is **not a safe update** for users with the existing production-signed app and is not suitable for Play Store upload.
+**HisabMate v1.0.5** is published as a direct APK asset on the official GitHub Release page.
 
-- **Current source commit:** [e187aa1](https://github.com/CodeByArnob/HisabMate/commit/e187aa1427979e88908d2d80423db12be1efcbed)
-- **Successful CI build and artifacts:** [GitHub Actions run #16](https://github.com/CodeByArnob/HisabMate/actions/runs/41307567081)
-- **APK publication:** Pending configuration of the original production signing keystore and credentials in GitHub Actions Secrets.
+| Package | Format | Version | Download |
+| :--- | :---: | :---: | :--- |
+| **HisabMate-v1.0.5-release.apk** | `.apk` | `1.0.5 (versionCode 6)` | [Download APK directly](https://github.com/CodeByArnob/HisabMate/releases/download/v1.0.5/HisabMate-v1.0.5-release.apk) |
+| **HisabMate-v1.0.5-release.aab** | `.aab` | `1.0.5` | [View GitHub Release assets](https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.5) |
 
-Do not install the temporary CI Release APK over the existing app. Once the original signing key is configured, the workflow can produce a compatible production update.
-
----
+**Important installation note:** This release uses a temporary CI-generated signing key because the original production keystore was not supplied. Android will not install it as an in-place update over an app signed with a different key. Export a JSON backup from your current app before uninstalling it; uninstalling clears local data. Install v1.0.5 and restore that backup. Future compatible updates require one persistent signing key.
 
 ## Application Screenshots
 
@@ -135,7 +133,7 @@ app/src/main/java/com/example
 │   ├── local
 │   │   ├── Entities.kt                  # 10 Room SQLite entities with query-indexed columns (v6)
 │   │   ├── HisabDao.kt                  # Transactional DAO with reactive Kotlin Flow queries
-│   │   └── HisabDatabase.kt             # Room Database definition and migration handlers (MIGRATION_5_6)
+│   │   └── HisabDatabase.kt             # Room Database definition and migration handlers (MIGRATION_6_7)
 │   └── repository
 │       └── HisabRepository.kt           # Repository layer, FX calculation, backup and CSV export/import
 ├── ui
@@ -234,7 +232,7 @@ app/src/main/java/com/example
 Automated test verification is managed via **Robolectric** local JVM tests in `app/src/test/java/com/example/ExampleRobolectricTest.kt`. All 16 unit and UI tests validate:
 
 - **Permanent Demo Deletion**: Verifies that deleting sample records clears demo markers while preserving real user accounts, and that app restart or database re-open never re-seeds sample data.
-- **Room Migration**: Validates schema transition from version 5 to 6 (`MIGRATION_5_6`) with column additions and indexed queries.
+- **Room Migration**: Validates schema transition from version 5 to 6 (`MIGRATION_6_7`) with column additions and indexed queries.
 - **Physical PDF Generation**: Validates generation of compliant, non-empty multi-page statement files with verified byte counts.
 - **Multi-Currency Math**: Validates ISO 4217 conversions, formatting precision, and South Asian numbering separators.
 - **Notification Scheduling**: Validates local channel creation and AlarmManager broadcast registrations.
@@ -243,11 +241,10 @@ Automated test verification is managed via **Robolectric** local JVM tests in `a
 
 ## Release Information
 
-| Version | Date | Key Capabilities | Official Download |
+| Version | Date | Highlights | Official Release |
 | :--- | :--- | :--- | :--- |
-| **v1.0.3** | 2026-10-31 | Production Single-Page ISO A4 (`595 × 842 pt`) Executive PDF Financial Statement engine, refined Light Mode slate depth (`#CFD8E6` / `#DFE6F0`), 14 ISO 4217 currencies with offline FX, multi-rail wallets, budgets, savings goals, debt ledger, and Room SQLite v7 persistence. | [Previous release archive](https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.3) |
-
----
+| **v1.0.5** | 2026-11-01 | Responsive UI polish, improved category contrast, premium dashboard depth, refined A4 statement typography and allocation summary. | [Latest Release](https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.5) |
+| **v1.0.4** | 2026-11-01 | Financial integrity fixes, secure PIN hashing, Room v7 migration and Light Mode refinement. | [Release archive](https://github.com/CodeByArnob/HisabMate/releases/tag/v1.0.4) |
 
 ## Contributing
 
