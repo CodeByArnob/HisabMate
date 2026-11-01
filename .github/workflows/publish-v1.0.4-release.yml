@@ -1,0 +1,72 @@
+name: Publish HisabMate v1.0.4 APK Release
+
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-publish:
+    if: contains(github.event.head_commit.message, '[publish-v1.0.4]')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.3.1'
+
+      - name: Build release APK with temporary CI signing key
+        shell: bash
+        run: |
+          set -euo pipefail
+          TEMP_KS="${RUNNER_TEMP}/hisabmate-ci-release.p12"
+          keytool -genkeypair -v \
+            -keystore "$TEMP_KS" \
+            -storetype PKCS12 \
+            -alias upload \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass "HisabMateCiVerify2026!" \
+            -keypass "HisabMateCiVerify2026!" \
+            -dname "CN=HisabMate CI Release, OU=Engineering, O=CodeByArnob, L=Dhaka, S=Dhaka, C=BD"
+          export KEYSTORE_PATH="$TEMP_KS"
+          export STORE_PASSWORD="HisabMateCiVerify2026!"
+          export KEY_PASSWORD="HisabMateCiVerify2026!"
+          gradle :app:assembleRelease :app:bundleRelease --stacktrace
+          mkdir -p release-output
+          cp app/build/outputs/apk/release/*.apk release-output/HisabMate-v1.0.4-release.apk
+          cp app/build/outputs/bundle/release/*.aab release-output/HisabMate-v1.0.4-release.aab
+          (cd release-output && sha256sum HisabMate-v1.0.4-release.apk HisabMate-v1.0.4-release.aab > SHA256SUMS.txt)
+          APKSIGNER="$(find "${ANDROID_HOME}/build-tools" -name apksigner | sort -V | tail -n 1)"
+          "$APKSIGNER" verify --verbose release-output/HisabMate-v1.0.4-release.apk
+          rm -f "$TEMP_KS"
+
+      - name: Publish GitHub Release and attach APK
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.4
+          name: HisabMate v1.0.4 — Android APK Release
+          body: |
+            ## HisabMate v1.0.4
+
+            This release contains the updated v1.0.4 Android build.
+
+            **Important signing notice:** This APK was signed with a temporary CI-generated key because no persistent production keystore was supplied. It is directly downloadable and installable as an APK, but Android will not allow it to update an existing installation signed with a different key. Existing users may need to uninstall the old app first; uninstalling can delete local app data, so back up your data before doing so.
+
+            This CI signing key is not retained and cannot be used to sign future compatible updates.
+          files: |
+            release-output/HisabMate-v1.0.4-release.apk
+            release-output/HisabMate-v1.0.4-release.aab
+            release-output/SHA256SUMS.txt
+          make_latest: true
+          fail_on_unmatched_files: true
