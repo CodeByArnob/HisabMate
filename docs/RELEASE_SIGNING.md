@@ -54,3 +54,19 @@ For Google Play distribution, distinguish the Play app-signing key from the uplo
 ## CI artifact policy
 
 The `android-ci.yml` workflow may use a temporary key solely to prove that release variants compile and their APK/AAB signatures are structurally valid. It does not upload or publish those release artifacts. Only the dedicated release workflow can publish downloadable release assets, and it requires the persistent keystore secrets above.
+
+
+## Generated upload-key metadata
+
+The newly generated local keystore uses:
+
+- File name: `upload-keystore.jks` (kept outside the repository)
+- Alias: `upload`
+- Subject: `CN=Arnobrazz, O=CodeByArnob, C=BD`
+- Key: RSA 2048, SHA256withRSA
+- Validity: 10,000 days (2 November 2026 through 20 March 2054)
+- SHA-256 certificate fingerprint: `D9:3D:A9:CF:4E:28:CD:90:4A:C7:95:4C:41:2B:C1:78:38:55:4A:B2:8D:7B:7C:F5:78:D0:C4:91:31:8D:43:A9`
+
+The corresponding **public certificate only** is tracked at [`.github/signing/upload-certificate.pem`](../.github/signing/upload-certificate.pem). The private `.jks` keystore and both passwords must remain outside Git. Configure the locally generated keystore as the Actions secrets listed above.
+
+This is a new signing identity. It does not recover or match the temporary certificate used for the published v1.0.6 artifacts. Do not use it for a production update path until you have confirmed the target distribution channel's signing-key requirements. For an existing Google Play app, check the Play Console app-signing certificate and upload-key enrollment before using this key.
