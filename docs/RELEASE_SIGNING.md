@@ -45,9 +45,9 @@ A release cannot be published until all signing secrets are configured. The work
 
 ## Important v1.0.6 compatibility notice
 
-The published v1.0.6 artifacts were signed using a temporary CI-generated key that was not retained. A newly created keystore will not match that certificate. For sideloaded installations signed with the v1.0.6 temporary key, a future APK signed by a different key cannot be installed as an in-place update.
+The initial v1.0.6 assets were first published using a temporary CI-generated key. On 2 November 2026, the APK and AAB assets on the existing v1.0.6 GitHub Release were rebuilt, verified and replaced using the persistent `upload` keystore documented below. The current downloadable APK is signed with SHA-256 certificate fingerprint `D9:3D:A9:CF:4E:28:CD:90:4A:C7:95:4C:41:2B:C1:78:38:55:4A:B2:8D:7B:7C:F5:78:D0:C4:91:31:8D:43:A9`.
 
-If the original production signing key used by earlier installs exists, recover and validate it before selecting the long-term signing identity. If it cannot be recovered, users may need to export an in-app JSON backup, uninstall the old app, install the new APK, and restore the backup. Uninstalling removes local app data.
+Any copy of v1.0.6 or earlier APKs downloaded before the asset replacement may still be installed with a temporary certificate. Android will not update such an installation in place with the newly signed APK. Export a JSON backup from the installed app, uninstall the old build, install the current GitHub Release APK, then restore the backup. Uninstalling removes local app data. After installing the current re-signed APK, future GitHub APK updates must continue using this same persistent keystore.
 
 For Google Play distribution, distinguish the Play app-signing key from the upload key. The Play Console manages app signing when Play App Signing is enabled; an upload-key reset does not change the app-signing certificate delivered to users.
 
@@ -69,4 +69,4 @@ The newly generated local keystore uses:
 
 The corresponding **public certificate only** is tracked at [`.github/signing/upload-certificate.pem`](../.github/signing/upload-certificate.pem). The private `.jks` keystore and both passwords must remain outside Git. Configure the locally generated keystore as the Actions secrets listed above.
 
-This is a new signing identity. It does not recover or match the temporary certificate used for the published v1.0.6 artifacts. Do not use it for a production update path until you have confirmed the target distribution channel's signing-key requirements. For an existing Google Play app, check the Play Console app-signing certificate and upload-key enrollment before using this key.
+This persistent signing identity is now used by the current v1.0.6 GitHub Release APK/AAB assets. It replaces the temporary certificate used by the first v1.0.6 upload. Keep the private keystore and both passwords securely backed up; losing them would break future in-place update continuity.
