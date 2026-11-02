@@ -1,6 +1,7 @@
 /**
- * HisabMate – World-Class Fintech Experience
- * Powered by GSAP 3.12+, ScrollTrigger, Three.js (r128), and Lottie Web.
+ * HisabMate – responsive fintech product website.
+ * Motion: GSAP / ScrollTrigger / Three.js. Feature icons use inline SVG
+ * so essential interface visuals remain available without third-party CDNs.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
