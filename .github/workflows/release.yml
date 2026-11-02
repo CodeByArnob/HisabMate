@@ -89,7 +89,6 @@ jobs:
           fi
 
           TEMP_KS="${RUNNER_TEMP}/hisabmate-production-upload.p12"
-          trap 'rm -f "$TEMP_KS"' EXIT
           printf '%s' "$UPLOAD_KEYSTORE_BASE64" | base64 --decode > "$TEMP_KS"
           test -s "$TEMP_KS"
           keytool -list -keystore "$TEMP_KS" -storepass "$STORE_PASSWORD" -alias upload >/dev/null
@@ -102,6 +101,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          trap 'rm -f "$KEYSTORE_PATH"' EXIT
           gradle :app:testDebugUnitTest :app:lintDebug :app:lintVitalRelease :app:assembleRelease :app:bundleRelease --stacktrace
 
           REL_TAG="${{ steps.release_config.outputs.release_tag }}"
