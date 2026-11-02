@@ -1,4 +1,4 @@
-name: Normalize GitHub Release Title
+name: Normalize GitHub Release Title and Notes
 
 on:
   push:
@@ -11,10 +11,14 @@ permissions:
   contents: write
 
 jobs:
-  rename-release:
+  update-release-metadata:
     runs-on: ubuntu-latest
     steps:
-      - name: Set release title to the concise app version
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Synchronize v1.0.6 release title and verified notes
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release edit v1.0.6 --repo ${{ github.repository }} --title "HisabMate v1.0.6"
+        run: |
+          gh release edit v1.0.6 --repo "$GITHUB_REPOSITORY" --title "HisabMate v1.0.6" --notes-file docs/releases/v1.0.6.md
