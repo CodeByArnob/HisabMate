@@ -19,7 +19,7 @@
 </p>
 
 <p>
-  <img src="https://img.shields.io/badge/Version-1.0.5-6844D8?style=flat-square" alt="Version 1.0.5">
+  <img src="https://img.shields.io/badge/Version-1.0.6-6844D8?style=flat-square" alt="Version 1.0.6">
   <img src="https://img.shields.io/badge/Android-API%2024%E2%80%9336-3DDC84?style=flat-square&logo=android&logoColor=white" alt="Android API 24 to 36">
   <img src="https://img.shields.io/badge/Kotlin-2.2.10-7F52FF?style=flat-square&logo=kotlin&logoColor=white" alt="Kotlin 2.2.10">
   <img src="https://img.shields.io/badge/Jetpack%20Compose-Material%203-4285F4?style=flat-square" alt="Jetpack Compose Material 3">
@@ -33,7 +33,7 @@
 
 <br>
 
-<img src="docs/screenshots/hisabmate-banner.svg?v=1.0.5" alt="HisabMate — Offline-first personal finance and multi-currency management" width="100%">
+<img src="docs/screenshots/hisabmate-banner.svg?v=1.0.6" alt="HisabMate — Offline-first personal finance and multi-currency management" width="100%">
 
 </div>
 
