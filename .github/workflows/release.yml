@@ -91,6 +91,14 @@ jobs:
           printf '%s' "$UPLOAD_KEYSTORE_BASE64" | base64 --decode > "$TEMP_KS"
           test -s "$TEMP_KS"
           keytool -list -keystore "$TEMP_KS" -storepass "$STORE_PASSWORD" -alias upload >/dev/null
+
+          EXPECTED_CERT_SHA256="d93da9cf4e28cd904ac7954c412bc17838554ab28d7b7cf578d0c491318d43a9"
+          KEYSTORE_CERT_SHA256="$(keytool -list -v -keystore "$TEMP_KS" -storepass "$STORE_PASSWORD" -alias upload | awk -F': ' '/SHA256:/ {gsub(":", "", $2); print tolower($2); exit}')"
+          if [[ "$KEYSTORE_CERT_SHA256" != "$EXPECTED_CERT_SHA256" ]]; then
+            echo "::error::The configured upload keystore certificate does not match the approved HisabMate signing identity."
+            exit 1
+          fi
+
           echo "KEYSTORE_PATH=$TEMP_KS" >> "$GITHUB_ENV"
           echo "STORE_PASSWORD=$STORE_PASSWORD" >> "$GITHUB_ENV"
           echo "KEY_PASSWORD=$KEY_PASSWORD" >> "$GITHUB_ENV"
