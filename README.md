@@ -58,6 +58,10 @@ The app is designed around three principles:
 | Database | Room · SQLite schema v7 |
 | License | MIT |
 
+## Production release signing
+
+Production APK/AAB releases require a persistent upload keystore. CI-only ephemeral signing is verification-only and is never published. See [Production release signing and update compatibility](docs/RELEASE_SIGNING.md) before configuring release secrets or installing a new signed build.
+
 ## Download
 
 <div align="center">

@@ -564,7 +564,13 @@ class HisabRepository(private val database: HisabDatabase) {
         )
     }
 
-    suspend fun deleteAccount(accountId: Int) {
+    suspend fun deleteAccount(accountId: Int) = database.withTransaction {
+        val account = dao.getAccountById(accountId) ?: return@withTransaction
+        require(!account.isPrimary) { "The primary account cannot be deleted" }
+        require(dao.getAccountCount() > 1) { "At least one account must remain" }
+        require(dao.countTransactionsForAccount(accountId) == 0) {
+            "This account has transaction history. Keep it to preserve your financial records."
+        }
         dao.deleteAccountById(accountId)
     }
 

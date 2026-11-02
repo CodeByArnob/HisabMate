@@ -29,6 +29,9 @@ interface HisabDao {
     @Update
     suspend fun updateAccount(account: AccountEntity)
 
+    @Query("SELECT COUNT(*) FROM transactions WHERE accountId = :accountId OR toAccountId = :accountId")
+    suspend fun countTransactionsForAccount(accountId: Int): Int
+
     @Query("DELETE FROM accounts WHERE id = :id")
     suspend fun deleteAccountById(id: Int)
 

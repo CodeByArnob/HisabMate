@@ -10,10 +10,15 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: android-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-and-test:
     name: Build, Lint, Robolectric Test & Release Verification
     runs-on: ubuntu-latest
+    timeout-minutes: 45
 
     steps:
       - name: Checkout Repository
@@ -75,15 +80,22 @@ jobs:
         run: |
           TEMP_KS="${RUNNER_TEMP}/ci-upload-key.jks"
           rm -f "$TEMP_KS"
-          if [ -n "$UPLOAD_KEYSTORE_BASE64" ] && [ -n "$STORE_PASSWORD" ] && [ -n "$KEY_PASSWORD" ]; then
-            echo "Using configured GitHub Actions production upload keystore secret."
-            echo "$UPLOAD_KEYSTORE_BASE64" | base64 -d > "$TEMP_KS"
-            if [ -n "$KEY_ALIAS" ] && [ "$KEY_ALIAS" != "upload" ]; then
-              keytool -changealias -keystore "$TEMP_KS" -storepass "$STORE_PASSWORD" -alias "$KEY_ALIAS" -destalias "upload" -keypass "$KEY_PASSWORD" || true
+          set -euo pipefail
+          if [ -n "$UPLOAD_KEYSTORE_BASE64" ] || [ -n "$STORE_PASSWORD" ] || [ -n "$KEY_PASSWORD" ]; then
+            if [ -z "$UPLOAD_KEYSTORE_BASE64" ] || [ -z "$STORE_PASSWORD" ] || [ -z "$KEY_PASSWORD" ]; then
+              echo "::error::Signing secrets are partially configured. Set all required secrets or leave all unset for verification-only signing."
+              exit 1
             fi
+            if [ -n "$KEY_ALIAS" ] && [ "$KEY_ALIAS" != "upload" ]; then
+              echo "::error::The configured keystore alias must be 'upload' to match app/build.gradle.kts."
+              exit 1
+            fi
+            printf '%s' "$UPLOAD_KEYSTORE_BASE64" | base64 --decode > "$TEMP_KS"
+            keytool -list -keystore "$TEMP_KS" -storepass "$STORE_PASSWORD" -alias upload >/dev/null
             export KEYSTORE_PATH="$TEMP_KS"
+            echo "Using the configured persistent upload keystore for CI verification."
           else
-            echo "Production signing secrets not configured; generating ephemeral CI keystore in RUNNER_TEMP to verify :app:assembleRelease and :app:bundleRelease tasks."
+            echo "No production signing secrets configured; using an ephemeral key for verification only. No release artifact is published by this workflow."
             keytool -genkeypair -v \
               -keystore "$TEMP_KS" \
               -storetype PKCS12 \
@@ -102,15 +114,11 @@ jobs:
           gradle :app:assembleRelease :app:bundleRelease --stacktrace
           rm -f "$TEMP_KS"
 
-          mkdir -p ci-release-outputs
-          cp app/build/outputs/apk/release/*.apk ci-release-outputs/HisabMate-v1.0.6-release.apk
-          cp app/build/outputs/bundle/release/*.aab ci-release-outputs/HisabMate-v1.0.6-release.aab
-          (cd ci-release-outputs && sha256sum HisabMate-v1.0.6-release.apk HisabMate-v1.0.6-release.aab > SHA256SUMS.txt)
-
           APKSIGNER=$(find "${ANDROID_HOME}/build-tools" -name "apksigner" | sort -V | tail -n 1)
           AAPT2=$(find "${ANDROID_HOME}/build-tools" -name "aapt2" | sort -V | tail -n 1)
-          "$APKSIGNER" verify --verbose ci-release-outputs/HisabMate-v1.0.6-release.apk
-          "$AAPT2" dump badging ci-release-outputs/HisabMate-v1.0.6-release.apk | head -n 15
+          "$APKSIGNER" verify --verbose app/build/outputs/apk/release/*.apk
+          "$AAPT2" dump badging app/build/outputs/apk/release/*.apk | head -n 15
+          jarsigner -verify app/build/outputs/bundle/release/*.aab
 
       - name: Upload Unit Test & Lint Reports
         if: always()
@@ -121,8 +129,3 @@ jobs:
             app/build/reports/tests/testDebugUnitTest/
             app/build/reports/lint-results-debug.*
 
-      - name: Upload Release APK & AAB Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: hisabmate-release-artifacts
-          path: ci-release-outputs/*

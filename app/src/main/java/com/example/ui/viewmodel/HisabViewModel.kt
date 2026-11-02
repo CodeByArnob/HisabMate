@@ -876,8 +876,11 @@ class HisabViewModel(
             return
         }
         viewModelScope.launch {
-            repository.deleteAccount(account.id)
-            showSnackbar("Removed account '${account.name}'")
+            runCatching { repository.deleteAccount(account.id) }
+                .onSuccess { showSnackbar("Removed account '${account.name}'") }
+                .onFailure { error ->
+                    showSnackbar(error.message ?: "Unable to remove this account")
+                }
         }
     }
 
