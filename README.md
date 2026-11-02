@@ -86,6 +86,26 @@ Production APK/AAB releases use a persistent upload keystore. The current v1.0.6
 
 ---
 
+## Verify downloaded release files
+
+Before installing a downloaded APK, you can verify that the file matches the published SHA-256 checksum.
+
+**Windows PowerShell:**
+
+```powershell
+Get-FileHash .\HisabMate-v1.0.6-release.apk -Algorithm SHA256
+```
+
+**Linux / macOS:**
+
+```bash
+sha256sum HisabMate-v1.0.6-release.apk
+```
+
+Compare the resulting hash with the corresponding APK entry in `SHA256SUMS.txt` from the same GitHub Release. A matching hash confirms file integrity; it does not independently verify who published the file.
+
+---
+
 ## Features
 
 ### Accounts and wallets
