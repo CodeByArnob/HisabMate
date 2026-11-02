@@ -9,7 +9,6 @@ on:
       version_tag:
         description: 'Release tag (e.g. v1.0.3)'
         required: true
-        default: 'v1.0.6'
 
 permissions:
   contents: write
@@ -125,19 +124,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REL_TAG: ${{ steps.release_config.outputs.release_tag }}
         run: |
-          if gh release view "${REL_TAG}" >/dev/null 2>&1; then
-            gh release upload "${REL_TAG}" \
-              "release-dist/HisabMate-${REL_TAG}-release.apk" \
-              "release-dist/HisabMate-${REL_TAG}-release.aab" \
-              "release-dist/SHA256SUMS.txt" \
-              "release-dist/SIGNING-CERTIFICATE.txt" \
-              --clobber
-          else
-            gh release create "${REL_TAG}" \
-              "release-dist/HisabMate-${REL_TAG}-release.apk" \
-              "release-dist/HisabMate-${REL_TAG}-release.aab" \
-              "release-dist/SHA256SUMS.txt" \
-              "release-dist/SIGNING-CERTIFICATE.txt" \
-              --title "HisabMate ${REL_TAG} — Production Release" \
-              --generate-notes
-          fi
+          gh release create "${REL_TAG}" \
+            "release-dist/HisabMate-${REL_TAG}-release.apk" \
+            "release-dist/HisabMate-${REL_TAG}-release.aab" \
+            "release-dist/SHA256SUMS.txt" \
+            "release-dist/SIGNING-CERTIFICATE.txt" \
+            --title "HisabMate ${REL_TAG} — Production Release" \
+            --generate-notes
