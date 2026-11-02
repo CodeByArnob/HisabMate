@@ -60,7 +60,7 @@ The app is designed around three principles:
 
 ## Production release signing
 
-Production APK/AAB releases require a persistent upload keystore. CI-only ephemeral signing is verification-only and is never published. See [Production release signing and update compatibility](docs/RELEASE_SIGNING.md) before configuring release secrets or installing a new signed build.
+Production APK/AAB releases use a persistent upload keystore. The current v1.0.6 GitHub Release assets were rebuilt and re-signed on 2 November 2026 with the certificate fingerprint documented in [Production release signing and update compatibility](docs/RELEASE_SIGNING.md).
 
 ## Download
 
@@ -82,9 +82,7 @@ Production APK/AAB releases require a persistent upload keystore. CI-only epheme
 | `SIGNING-CERTIFICATE.txt` | APK signing certificate details |
 
 > [!IMPORTANT]
-> **Signing and installation compatibility:** v1.0.6 was signed with a temporary CI-generated key because the original production keystore was not available. That temporary key was not retained. Android will not install this APK as an in-place update over an installation signed with a different key. If you are moving from an older installation, export a JSON backup first, uninstall the old app, install v1.0.6, then restore your backup. Uninstalling clears the app's local data.
->
-> A future APK signed with a different key will also require a backup and reinstall. A persistent signing key must be configured before the next release to establish a stable update path.
+> **Signing and installation compatibility:** The current v1.0.6 APK and AAB assets were rebuilt and re-signed on 2 November 2026 with the persistent upload key whose SHA-256 certificate fingerprint is `D9:3D:A9:CF:4E:28:CD:90:4A:C7:95:4C:41:2B:C1:78:38:55:4A:B2:8D:7B:7C:F5:78:D0:C4:91:31:8D:43:A9`. This is the signing identity intended for future GitHub releases. Copies of v1.0.6 or earlier releases downloaded before this replacement used temporary CI signing keys and cannot be updated in place by the current APK. If one of those older builds is installed, export a JSON backup, uninstall it, install the current APK, then restore the backup. Uninstalling clears local app data.
 
 ---
 
@@ -337,7 +335,7 @@ Never commit keystores, signing passwords, API keys or other secrets to the repo
 The Android CI workflow runs the automated test suite, Android Lint and build verification for debug and release packages.
 
 - [Android CI workflow](https://github.com/CodeByArnob/HisabMate/actions/workflows/android-ci.yml)
-- [Latest successful v1.0.6 release build](https://github.com/CodeByArnob/HisabMate/actions/runs/41317032709)
+- [Verified persistent-signed v1.0.6 release build](https://github.com/CodeByArnob/HisabMate/actions/runs/41391207850)
 - [All workflow runs](https://github.com/CodeByArnob/HisabMate/actions)
 
 ---
