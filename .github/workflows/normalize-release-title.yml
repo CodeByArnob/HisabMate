@@ -12,10 +12,10 @@ permissions:
 
 jobs:
   update-release-metadata:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.1
 
       - name: Synchronize v1.0.6 release title and verified notes
         env:

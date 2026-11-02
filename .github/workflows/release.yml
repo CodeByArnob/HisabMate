@@ -16,15 +16,15 @@ permissions:
 jobs:
   release-artifacts:
     name: Build, Sign & Attach Release APK + AAB
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.1
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5.7.0
         with:
           distribution: 'temurin'
           java-version: '21'
@@ -34,7 +34,7 @@ jobs:
           yes | "${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
 
       - name: Setup Gradle 9.3.1
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5.0.2
         with:
           gradle-version: '9.3.1'
 
@@ -122,7 +122,7 @@ jobs:
           (cd release-dist && sha256sum "HisabMate-${REL_TAG}-release.apk" "HisabMate-${REL_TAG}-release.aab" > SHA256SUMS.txt)
 
       - name: Upload Verified Release Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: hisabmate-${{ steps.release_config.outputs.release_tag }}-release
           path: release-dist/*
