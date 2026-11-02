@@ -87,7 +87,7 @@ jobs:
             exit 1
           fi
 
-          TEMP_KS="${RUNNER_TEMP}/hisabmate-production-upload.p12"
+          TEMP_KS="${RUNNER_TEMP}/hisabmate-production-upload.jks"
           printf '%s' "$UPLOAD_KEYSTORE_BASE64" | base64 --decode > "$TEMP_KS"
           test -s "$TEMP_KS"
           keytool -list -keystore "$TEMP_KS" -storepass "$STORE_PASSWORD" -alias upload >/dev/null
