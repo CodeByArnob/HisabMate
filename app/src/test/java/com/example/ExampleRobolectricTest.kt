@@ -108,6 +108,29 @@ class ExampleRobolectricTest {
     }
 
     @Test
+    fun `deleting an account with ledger history is rejected atomically`() = runBlocking {
+        repository.ensureSeeded()
+        val dao = database.hisabDao()
+        val transactionsBefore = dao.getAllTransactionsOnce()
+        val referencedAccount = dao.getAllAccountsOnce().first { account ->
+            !account.isPrimary && transactionsBefore.any { tx ->
+                tx.accountId == account.id || tx.toAccountId == account.id
+            }
+        }
+
+        var rejected = false
+        try {
+            repository.deleteAccount(referencedAccount.id)
+        } catch (_: IllegalArgumentException) {
+            rejected = true
+        }
+
+        assertTrue("Deleting a referenced account must be rejected", rejected)
+        assertNotNull("The account must remain after a rejected delete", dao.getAccountById(referencedAccount.id))
+        assertEquals(transactionsBefore.size, dao.getAllTransactionsOnce().size)
+    }
+
+    @Test
     fun `editing or deleting an old transaction reverses using captured FX rate`() = runBlocking {
         repository.ensureSeeded()
         val source = database.hisabDao().getAccountById(1)!!
