@@ -76,15 +76,22 @@ jobs:
         run: |
           TEMP_KS="${RUNNER_TEMP}/ci-upload-key.jks"
           rm -f "$TEMP_KS"
-          if [ -n "$UPLOAD_KEYSTORE_BASE64" ] && [ -n "$STORE_PASSWORD" ] && [ -n "$KEY_PASSWORD" ]; then
-            echo "Using configured GitHub Actions production upload keystore secret."
-            echo "$UPLOAD_KEYSTORE_BASE64" | base64 -d > "$TEMP_KS"
-            if [ -n "$KEY_ALIAS" ] && [ "$KEY_ALIAS" != "upload" ]; then
-              keytool -changealias -keystore "$TEMP_KS" -storepass "$STORE_PASSWORD" -alias "$KEY_ALIAS" -destalias "upload" -keypass "$KEY_PASSWORD" || true
+          set -euo pipefail
+          if [ -n "$UPLOAD_KEYSTORE_BASE64" ] || [ -n "$STORE_PASSWORD" ] || [ -n "$KEY_PASSWORD" ]; then
+            if [ -z "$UPLOAD_KEYSTORE_BASE64" ] || [ -z "$STORE_PASSWORD" ] || [ -z "$KEY_PASSWORD" ]; then
+              echo "::error::Signing secrets are partially configured. Set all required secrets or leave all unset for verification-only signing."
+              exit 1
             fi
+            if [ -n "$KEY_ALIAS" ] && [ "$KEY_ALIAS" != "upload" ]; then
+              echo "::error::The configured keystore alias must be 'upload' to match app/build.gradle.kts."
+              exit 1
+            fi
+            printf '%s' "$UPLOAD_KEYSTORE_BASE64" | base64 --decode > "$TEMP_KS"
+            keytool -list -keystore "$TEMP_KS" -storepass "$STORE_PASSWORD" -alias upload >/dev/null
             export KEYSTORE_PATH="$TEMP_KS"
+            echo "Using the configured persistent upload keystore for CI verification."
           else
-            echo "Production signing secrets not configured; generating ephemeral CI keystore in RUNNER_TEMP to verify :app:assembleRelease and :app:bundleRelease tasks."
+            echo "No production signing secrets configured; using an ephemeral key for verification only. No release artifact is published by this workflow."
             keytool -genkeypair -v \
               -keystore "$TEMP_KS" \
               -storetype PKCS12 \
