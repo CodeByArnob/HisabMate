@@ -26,6 +26,17 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v7.0.1
 
+      - name: Validate website scripts and resilient icon fallbacks
+        run: |
+          set -euo pipefail
+          node --check website/script.js
+          icon_count="$(grep -o 'class="feature-motion-icon"' website/index.html | wc -l | tr -d ' ')"
+          test "$icon_count" -eq 3
+          if grep -q 'lottie-web' website/index.html; then
+            echo "Unexpected remote Lottie dependency remains in the website."
+            exit 1
+          fi
+
       - name: Assemble Website & Genuine Visual Assets
         run: |
           mkdir -p _site/assets/screenshots
