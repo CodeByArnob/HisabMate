@@ -9,7 +9,7 @@ on:
       version_tag:
         description: 'Release tag (e.g. v1.0.3)'
         required: true
-        default: 'v1.0.3'
+        default: 'v1.0.6'
 
 permissions:
   contents: write
@@ -18,6 +18,7 @@ jobs:
   release-artifacts:
     name: Build, Sign & Attach Release APK + AAB
     runs-on: ubuntu-latest
+    timeout-minutes: 45
 
     steps:
       - name: Checkout Repository
@@ -50,83 +51,79 @@ jobs:
       - name: Run Unit, Robolectric & Lint Verification Suite
         run: gradle :app:testDebugUnitTest :app:lintDebug --stacktrace
 
-      - name: Build & Verify Release APK and Android App Bundle (AAB)
-        id: build_release
+      - name: Validate Release Version and Require Persistent Signing Secrets
+        id: release_config
+        shell: bash
         env:
           UPLOAD_KEYSTORE_BASE64: ${{ secrets.UPLOAD_KEYSTORE_BASE64 }}
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           INPUT_TAG: ${{ github.event.inputs.version_tag }}
         run: |
+          set -euo pipefail
+
           if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
             REL_TAG="${GITHUB_REF_NAME}"
-          elif [ -n "${INPUT_TAG}" ]; then
-            REL_TAG="${INPUT_TAG}"
           else
-            REL_TAG="v1.0.3"
+            REL_TAG="${INPUT_TAG:-}"
           fi
-          echo "release_tag=${REL_TAG}" >> "$GITHUB_OUTPUT"
+          if [[ ! "${REL_TAG}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::A valid release tag such as v1.0.7 is required."
+            exit 1
+          fi
 
-          TEMP_KS="${RUNNER_TEMP}/release-upload-key.jks"
-          rm -f "$TEMP_KS"
+          APP_VERSION="$(sed -nE 's/^[[:space:]]*versionName[[:space:]]*=[[:space:]]*"([^"]+)".*/\1/p' app/build.gradle.kts | head -n 1)"
+          if [[ -z "${APP_VERSION}" || "v${APP_VERSION}" != "${REL_TAG}" ]]; then
+            echo "::error::Release tag ${REL_TAG} does not match app versionName ${APP_VERSION:-<missing>}."
+            exit 1
+          fi
 
-          if [ -n "$UPLOAD_KEYSTORE_BASE64" ] && [ -n "$STORE_PASSWORD" ] && [ -n "$KEY_PASSWORD" ]; then
-            echo "signing_status=SIGNED_WITH_REPOSITORY_SECRETS" >> "$GITHUB_OUTPUT"
-            echo "$UPLOAD_KEYSTORE_BASE64" | base64 -d > "$TEMP_KS"
-            if [ -n "$KEY_ALIAS" ] && [ "$KEY_ALIAS" != "upload" ]; then
-              keytool -changealias -keystore "$TEMP_KS" -storepass "$STORE_PASSWORD" -alias "$KEY_ALIAS" -destalias "upload" -keypass "$KEY_PASSWORD" || true
-            fi
-            export KEYSTORE_PATH="$TEMP_KS"
-          else
-            echo "signing_status=EPHEMERAL_RELEASE_KEY_SECRETS_NOT_CONFIGURED" >> "$GITHUB_OUTPUT"
+          if [[ -z "${UPLOAD_KEYSTORE_BASE64}" || -z "${STORE_PASSWORD}" || -z "${KEY_PASSWORD}" ]]; then
             {
-              echo "### ⚠️ Production Signing Secrets Not Configured in Repository Settings"
-              echo "The repository secrets \`UPLOAD_KEYSTORE_BASE64\`, \`STORE_PASSWORD\`, \`KEY_ALIAS\`, and \`KEY_PASSWORD\` were not detected."
-              echo "An ephemeral RSA-2048 release key was generated in \`RUNNER_TEMP\` so \`:app:assembleRelease\` and \`:app:bundleRelease\` produce installable release artifacts without exposing or committing any credentials."
-              echo ""
-              echo "#### How to Configure Production Google Play Signing Secrets:"
-              echo "1. Encode your upload keystore: \`base64 -w 0 my-upload-key.jks\`"
-              echo "2. Open **Settings → Secrets and variables → Actions** in GitHub."
-              echo "3. Add \`UPLOAD_KEYSTORE_BASE64\`, \`STORE_PASSWORD\`, \`KEY_ALIAS\` (e.g., \`upload\`), and \`KEY_PASSWORD\`."
+              echo "### Release blocked: persistent signing secrets are missing"
+              echo "Configure UPLOAD_KEYSTORE_BASE64, STORE_PASSWORD and KEY_PASSWORD in repository Actions secrets."
+              echo "The release workflow intentionally refuses to publish APKs signed with a temporary key."
             } >> "$GITHUB_STEP_SUMMARY"
-
-            keytool -genkeypair -v \
-              -keystore "$TEMP_KS" \
-              -storetype PKCS12 \
-              -alias upload \
-              -keyalg RSA \
-              -keysize 2048 \
-              -validity 10000 \
-              -storepass "HisabMateRelease2026!" \
-              -keypass "HisabMateRelease2026!" \
-              -dname "CN=HisabMate Open Source Release, OU=Mobile Engineering, O=CodeByArnob, L=Dhaka, S=Dhaka, C=BD"
-            export KEYSTORE_PATH="$TEMP_KS"
-            export STORE_PASSWORD="HisabMateRelease2026!"
-            export KEY_PASSWORD="HisabMateRelease2026!"
+            echo "::error::Persistent production signing secrets are required. No temporary release key will be generated."
+            exit 1
           fi
 
-          gradle :app:assembleRelease :app:lintVitalRelease --stacktrace
-          rm -f "$TEMP_KS"
+          TEMP_KS="${RUNNER_TEMP}/hisabmate-production-upload.p12"
+          trap 'rm -f "$TEMP_KS"' EXIT
+          printf '%s' "$UPLOAD_KEYSTORE_BASE64" | base64 --decode > "$TEMP_KS"
+          test -s "$TEMP_KS"
+          keytool -list -keystore "$TEMP_KS" -storepass "$STORE_PASSWORD" -alias upload >/dev/null
+          echo "KEYSTORE_PATH=$TEMP_KS" >> "$GITHUB_ENV"
+          echo "STORE_PASSWORD=$STORE_PASSWORD" >> "$GITHUB_ENV"
+          echo "KEY_PASSWORD=$KEY_PASSWORD" >> "$GITHUB_ENV"
+          echo "release_tag=$REL_TAG" >> "$GITHUB_OUTPUT"
 
+      - name: Run Tests, Lint and Build Signed Release APK + AAB
+        shell: bash
+        run: |
+          set -euo pipefail
+          gradle :app:testDebugUnitTest :app:lintDebug :app:lintVitalRelease :app:assembleRelease :app:bundleRelease --stacktrace
+
+          REL_TAG="${{ steps.release_config.outputs.release_tag }}"
           mkdir -p release-dist
           cp app/build/outputs/apk/release/*.apk "release-dist/HisabMate-${REL_TAG}-release.apk"
+          cp app/build/outputs/bundle/release/*.aab "release-dist/HisabMate-${REL_TAG}-release.aab"
 
-          APKSIGNER=$(find "${ANDROID_HOME}/build-tools" -name "apksigner" | sort -V | tail -n 1)
-          AAPT2=$(find "${ANDROID_HOME}/build-tools" -name "aapt2" | sort -V | tail -n 1)
-          "$APKSIGNER" verify --verbose --print-certs "release-dist/HisabMate-${REL_TAG}-release.apk"
-          "$AAPT2" dump badging "release-dist/HisabMate-${REL_TAG}-release.apk" | head -n 20
+          APKSIGNER="$(find "${ANDROID_HOME}/build-tools" -name apksigner | sort -V | tail -n 1)"
+          "$APKSIGNER" verify --verbose --print-certs "release-dist/HisabMate-${REL_TAG}-release.apk" > release-dist/SIGNING-CERTIFICATE.txt
+          jarsigner -verify "release-dist/HisabMate-${REL_TAG}-release.aab"
+          (cd release-dist && sha256sum "HisabMate-${REL_TAG}-release.apk" "HisabMate-${REL_TAG}-release.aab" > SHA256SUMS.txt)
 
-      - name: Upload Release Workflow Artifacts
+      - name: Upload Verified Release Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: hisabmate-${{ steps.build_release.outputs.release_tag }}-release-apk
-          path: release-dist/HisabMate-${{ steps.build_release.outputs.release_tag }}-release.apk
+          name: hisabmate-${{ steps.release_config.outputs.release_tag }}-release
+          path: release-dist/*
 
       - name: Attach Release APK to GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-          REL_TAG: ${{ steps.build_release.outputs.release_tag }}
+          REL_TAG: ${{ steps.release_config.outputs.release_tag }}
         run: |
           if gh release view "${REL_TAG}" >/dev/null 2>&1; then
             gh release upload "${REL_TAG}" \
