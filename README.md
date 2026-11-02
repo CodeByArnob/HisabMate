@@ -372,6 +372,18 @@ Contributions, bug reports and focused improvements are welcome.
 
 For substantial changes, open an issue first to discuss the proposed approach.
 
+### Pull request checklist
+
+Before requesting review, confirm that your contribution:
+
+- [ ] Explains the user-facing problem or documentation gap.
+- [ ] Keeps the change focused and consistent with the existing project conventions.
+- [ ] Includes screenshots or sample output when they help explain a UI or behavior change.
+- [ ] Records the tests, lint checks or manual verification actually performed.
+- [ ] Updates relevant documentation when commands, setup steps or user workflows change.
+
+Do not mark a check as complete unless you have performed that verification.
+
 ---
 
 ## License
